@@ -12,7 +12,7 @@ Cloudflare Pages 主要托管静态网站，不能直接运行 Django 后端和 
 GitHub 代码仓库
         |
         v
-支持 Python 的后端平台或云服务器
+Render 托管 Django + PostgreSQL
         |
         v
 Cloudflare DNS/CDN
@@ -40,6 +40,33 @@ dns24.hichina.com
 如果要接入 Cloudflare，需要在 Cloudflare 添加 `qnyzhuayu.cn` 后，把阿里云域名控制台里的 DNS 服务器从上面两个 hichina 地址，替换成 Cloudflare 分配给你的两个 nameserver。Cloudflare 每个账号/站点分配的 nameserver 不一样，必须以 Cloudflare 页面显示的为准。
 
 如果暂时不切换到 Cloudflare，也可以直接在阿里云 DNS 里添加 A/CNAME 记录，让域名先指向后端服务器。
+
+## 没有云服务器时的推荐部署方式
+
+使用 Render 托管后端：
+
+1. 先把项目推送到 GitHub。
+2. 登录 Render，选择 New Blueprint。
+3. 选择 GitHub 中的本项目仓库。
+4. Render 会读取项目根目录的 `render.yaml`。
+5. 它会创建：
+   - Django Web Service：`qnyzhuayu`
+   - PostgreSQL 数据库：`qnyzhuayu-db`
+6. 部署成功后，在 Render 的 Custom Domains 中添加：
+   - `qnyzhuayu.cn`
+   - `www.qnyzhuayu.cn`
+7. Render 会给出需要配置的 DNS 目标。
+8. 再回到 Cloudflare DNS 添加对应 A/CNAME 记录。
+
+项目已经准备好 Render 文件：
+
+```text
+render.yaml
+build.sh
+Procfile
+```
+
+注意：`render.yaml` 当前使用 `starter` 计划。最终费用和可用计划以 Render 页面显示为准。
 
 如果后端平台给的是域名：
 

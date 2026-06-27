@@ -93,6 +93,11 @@ API 入口包括：
 ## 部署前准备
 
 部署前配置请看 [DEPLOYMENT_PREP.md](DEPLOYMENT_PREP.md)。
+没有云服务器时，推荐使用 Render 托管 Django 和 PostgreSQL，再用 Cloudflare 管理 `qnyzhuayu.cn`。项目已经包含 Render 需要的：
+
+- `render.yaml`
+- `build.sh`
+- `Procfile`
 
 常用检查命令：
 

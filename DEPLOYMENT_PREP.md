@@ -41,6 +41,25 @@ DJANGO_SECURE_HSTS_SECONDS=31536000
 DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True
 ```
 
+## 没有云服务器时
+
+推荐使用 Render：
+
+1. 将项目推送到 GitHub。
+2. 在 Render 中选择 New Blueprint。
+3. 连接 GitHub 仓库。
+4. Render 会读取 `render.yaml`，创建 Django Web Service 和 PostgreSQL。
+5. 部署成功后，在 Render Custom Domains 添加 `qnyzhuayu.cn` 和 `www.qnyzhuayu.cn`。
+6. 根据 Render 提示，把 DNS 记录添加到 Cloudflare。
+
+项目已包含：
+
+- `render.yaml`
+- `build.sh`
+- `Procfile`
+
+`render.yaml` 当前使用 `starter` 计划，最终费用以 Render 控制台显示为准。
+
 ## 部署前构建命令
 
 ```powershell
