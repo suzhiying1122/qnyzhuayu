@@ -1,5 +1,5 @@
 INSERT INTO forum_posts (title, body, author, tag, status, approved_at)
-SELECT '大家平时想在论坛里交流哪些话题？', '这里不限定内容方向，学习生活、社团日常、资源互助、兴趣分享、活动建议都可以发。也欢迎把你觉得有意思的话题开成帖子，让更多社员参与进来。', '社团秘书', '交流', 'approved', datetime('now')
+SELECT '大家平时想在论坛里交流哪些话题？', '这里不限制内容方向，学习生活、社团日常、资源互助、兴趣分享、活动建议都可以发。也欢迎把你觉得有意思的话题开成帖子，让更多社员参与进来。', '社团秘书', '交流', 'approved', datetime('now')
 WHERE NOT EXISTS (SELECT 1 FROM forum_posts);
 
 INSERT INTO forum_posts (title, body, author, tag, status, approved_at)
@@ -17,7 +17,7 @@ WHERE title = '大家平时想在论坛里交流哪些话题？'
   AND NOT EXISTS (SELECT 1 FROM forum_comments);
 
 INSERT INTO forum_comments (post_id, parent_id, author, body)
-SELECT p.id, c.id, '社团秘书', '这个方向很好，后续可以把资料帖置顶成长期交流帖。'
+SELECT p.id, c.id, '社团秘书', '这个方向很好，后续可以把资料帖置顶成为长期交流帖。'
 FROM forum_posts p
 JOIN forum_comments c ON c.post_id = p.id
 WHERE p.title = '大家平时想在论坛里交流哪些话题？'
