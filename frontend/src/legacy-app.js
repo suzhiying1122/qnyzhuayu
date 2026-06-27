@@ -1536,6 +1536,9 @@ function renderPostDetail() {
           <span>楼主</span>
         </aside>
         <div class="floor-content">
+          <div class="floor-stage-mark" aria-hidden="true">
+            <span>HUAYU DRAMA CLUB</span>
+          </div>
           <div class="tag-row">
             <span class="tag">${escapeHtml(post.tag || "讨论")}</span>
             ${renderAttachmentCount(post)}
@@ -1556,6 +1559,7 @@ function renderPostDetail() {
         <div class="comment-thread-list">${commentsHtml}</div>
       </section>
     </article>
+    ${renderDetailStageFooter()}
   `;
   bindViewTargetButtons(elements.postDetailContent);
   bindPostDetailForms();
@@ -1586,6 +1590,7 @@ function renderActivityDetail() {
       <div class="detail-body">${escapeHtml(activity.summary)}</div>
       ${renderAttachmentList(activity, "full")}
     </article>
+    ${renderDetailStageFooter()}
   `;
   bindViewTargetButtons(elements.activityDetailContent);
 }
@@ -1627,9 +1632,20 @@ function renderLetterDetail() {
       ${replyHtml}
       ${replyForm}
     </article>
+    ${renderDetailStageFooter()}
   `;
   bindViewTargetButtons(elements.letterDetailContent);
   bindLetterDetailForm();
+}
+
+function renderDetailStageFooter() {
+  return `
+    <div class="detail-stage-footer" aria-label="华煜话剧社阅读页装饰">
+      <span></span>
+      <strong>华煜话剧社</strong>
+      <span></span>
+    </div>
+  `;
 }
 
 function renderDetailMissing(backView, message) {
