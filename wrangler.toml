@@ -1,0 +1,8 @@
+name = "qnyzhuayu"
+pages_build_output_dir = "frontend/dist"
+compatibility_date = "2026-06-27"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qnyzhuayu-db"
+database_id = "replace-with-cloudflare-d1-database-id"

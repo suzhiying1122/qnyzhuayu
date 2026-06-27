@@ -1,0 +1,13 @@
+{
+  "name": "qnyzhuayu-cloudflare",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "pages:deploy": "npm run build && wrangler pages deploy frontend/dist --project-name qnyzhuayu",
+    "d1:schema": "wrangler d1 execute qnyzhuayu-db --file=schema.sql",
+    "d1:seed": "wrangler d1 execute qnyzhuayu-db --file=seed-d1.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

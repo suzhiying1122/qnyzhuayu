@@ -11,14 +11,14 @@
 - 信箱：`http://127.0.0.1:8000/mailbox/`
 - 管理界面：`http://127.0.0.1:8000/admin-panel/`
 
-`127.0.0.1` 是本机地址，只能在当前电脑访问。别人访问和搜索收录需要部署到公网服务器并绑定域名。
+`127.0.0.1` 是本机地址，只能在当前电脑访问。公网版本走 Cloudflare Pages + Functions + D1。
 
 正式域名：
 
 - `https://qnyzhuayu.cn/`
 - `https://www.qnyzhuayu.cn/`
 
-当前代码已允许这两个域名访问 Django。域名要真正打开网站，还需要在 Cloudflare DNS 中把它们指向后端服务器或后端部署平台。
+域名已切换到 Cloudflare nameserver。上线后通过 Cloudflare Pages 的 Custom domains 绑定这两个域名。
 
 本机域名测试：
 
@@ -92,12 +92,14 @@ API 入口包括：
 
 ## 部署前准备
 
-部署前配置请看 [DEPLOYMENT_PREP.md](DEPLOYMENT_PREP.md)。
-没有云服务器时，推荐使用 Render 托管 Django 和 PostgreSQL，再用 Cloudflare 管理 `qnyzhuayu.cn`。项目已经包含 Render 需要的：
+部署配置请看 [CLOUDFLARE_DEPLOY.md](CLOUDFLARE_DEPLOY.md)。
+当前选择 Cloudflare 原生方案，不使用 Render，不需要云服务器。项目已经包含 Cloudflare 需要的：
 
-- `render.yaml`
-- `build.sh`
-- `Procfile`
+- `functions/`
+- `schema.sql`
+- `seed-d1.sql`
+- `wrangler.toml`
+- `package.json`
 
 常用检查命令：
 
@@ -108,10 +110,10 @@ python manage.py collectstatic --noinput
 python manage.py check --deploy
 ```
 
-上线后还需要：
+Cloudflare 上线后还需要：
 
-- 购买或提供域名
-- 准备公网服务器或部署平台
-- 配置 HTTPS
+- 创建 D1 数据库 `qnyzhuayu-db`
+- 绑定 D1 到 Pages Functions，绑定名为 `DB`
+- 执行 `schema.sql` 和 `seed-d1.sql`
+- 在 Pages Custom domains 添加 `qnyzhuayu.cn` 和 `www.qnyzhuayu.cn`
 - 在百度站长平台 / Google Search Console 提交 `sitemap.xml`
-- 如果需要真实短信验证码，接入短信服务商

@@ -10,6 +10,7 @@
 - 后台美化：django-simpleui
 - 前端：Vue 3 + Vite
 - 静态文件：WhiteNoise
+- Cloudflare 上线方案：Pages + Functions + D1
 - 前台入口：Django 通过 `club.views.home` 优先服务 `frontend/dist/index.html`
 - 前端源码：`frontend/src/`
 - 前端构建产物：`frontend/dist/`
@@ -30,6 +31,10 @@
 - `requirements.txt`：Python 依赖
 - `.env.example`：生产环境变量示例
 - `DEPLOYMENT_PREP.md`：部署前准备说明
+- `functions/`：Cloudflare Pages Functions API
+- `schema.sql`：Cloudflare D1 数据表
+- `seed-d1.sql`：Cloudflare D1 初始数据
+- `wrangler.toml`：Cloudflare Pages 配置
 - `.gitignore`：忽略虚拟环境、数据库、node_modules 等本地文件
 
 ## 本地运行
@@ -120,14 +125,16 @@ HUAYU-ADMIN-2026
 - 论坛和活动支持从列表点击标题进入详情页。
 - 论坛详情页支持留言和针对留言继续回复。
 - 论坛、活动、信箱、留言、联系表单已接入 Django 数据库和 API。
-- 管理员可在前台审核帖子、审核活动、回复公开信件，也可在 Django 后台管理真实数据。
-- Django 后台已经安装 SimpleUI，并设置为中文界面。
+- Cloudflare 上线版本已提供同路径 Functions API，并使用 D1 保存公开数据。
+- 管理员可在前台审核帖子、审核活动、回复公开信件。
+- Django 后台已经安装 SimpleUI，并设置为中文界面；但 Cloudflare 无法运行 Django 后台。
 - 已配置 `robots.txt`、`sitemap.xml`、环境变量、静态文件收集目录和基础生产安全项。
 
 ## 当前限制
 
 - 前台账号和个人资料仍主要保存在浏览器 localStorage 中。
 - 前台账号体系和 Django 后台账号体系目前还不是同一套数据库用户。
+- Cloudflare 上线版本不提供 Django `/admin/` 后台。
 - 注册验证码目前是前端演示逻辑，不是真实短信服务。
 - 手机号唯一注册目前也是前端本地校验，不是服务端强约束。
 - 图片、视频、文档上传目前适合演示，不适合作为正式生产存储方案。
