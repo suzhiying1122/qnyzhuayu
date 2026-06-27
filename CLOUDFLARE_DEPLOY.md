@@ -39,6 +39,13 @@ dns24.hichina.com
 
 如果要接入 Cloudflare，需要在 Cloudflare 添加 `qnyzhuayu.cn` 后，把阿里云域名控制台里的 DNS 服务器从上面两个 hichina 地址，替换成 Cloudflare 分配给你的两个 nameserver。Cloudflare 每个账号/站点分配的 nameserver 不一样，必须以 Cloudflare 页面显示的为准。
 
+本域名当前 Cloudflare 分配的 nameserver 是：
+
+```text
+jacob.ns.cloudflare.com
+nola.ns.cloudflare.com
+```
+
 如果暂时不切换到 Cloudflare，也可以直接在阿里云 DNS 里添加 A/CNAME 记录，让域名先指向后端服务器。
 
 ## 没有云服务器时的推荐部署方式
