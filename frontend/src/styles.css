@@ -1497,10 +1497,31 @@ body.detail-open {
 }
 
 .detail-page-shell {
+  position: relative;
   display: grid;
   gap: 1.25rem;
-  width: min(1180px, 100%);
+  width: min(980px, 100%);
   margin: 0 auto;
+  padding-bottom: 4.2rem;
+}
+
+.detail-page-shell::after {
+  content: "";
+  display: block;
+  width: min(34rem, 82%);
+  height: 4.2rem;
+  justify-self: center;
+  margin-top: 0.35rem;
+  border-radius: 999px 999px 0 0;
+  background:
+    radial-gradient(circle at 16% 74%, rgba(255, 226, 168, 0.9) 0 0.28rem, transparent 0.32rem),
+    radial-gradient(circle at 32% 76%, rgba(255, 226, 168, 0.78) 0 0.22rem, transparent 0.28rem),
+    radial-gradient(circle at 50% 78%, rgba(255, 226, 168, 0.96) 0 0.32rem, transparent 0.38rem),
+    radial-gradient(circle at 68% 76%, rgba(255, 226, 168, 0.78) 0 0.22rem, transparent 0.28rem),
+    radial-gradient(circle at 84% 74%, rgba(255, 226, 168, 0.9) 0 0.28rem, transparent 0.32rem),
+    linear-gradient(90deg, transparent, rgba(166, 31, 51, 0.28), transparent),
+    linear-gradient(180deg, rgba(255, 247, 233, 0), rgba(166, 31, 51, 0.12));
+  opacity: 0.9;
 }
 
 .detail-page-hero {
@@ -1556,6 +1577,8 @@ body.detail-open {
 
 .tieba-thread,
 .detail-readable-card {
+  width: min(880px, 100%);
+  margin-inline: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
@@ -1710,6 +1733,20 @@ body.detail-open {
   box-shadow: 0 36px 90px rgba(0, 0, 0, 0.46);
 }
 
+.detail-panel::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: block;
+  height: 1.8rem;
+  margin-top: -1.2rem;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(90, 15, 24, 0.18), transparent 18% 82%, rgba(90, 15, 24, 0.18)),
+    linear-gradient(180deg, rgba(255, 250, 240, 0), rgba(255, 238, 211, 0.96));
+}
+
 .detail-panel::before {
   content: "";
   position: sticky;
@@ -1729,7 +1766,7 @@ body.detail-open {
 }
 
 .detail-content {
-  padding: 0 1.35rem 1.35rem;
+  padding: 0 2rem 1.35rem;
 }
 
 .detail-article {
@@ -2056,18 +2093,26 @@ body.detail-open {
   }
 
   .detail-page-hero {
+    justify-items: center;
     min-height: auto;
-    padding: 1.15rem;
+    padding: 1.25rem 1rem 1.55rem;
+    text-align: center;
   }
 
   .detail-page-hero h2 {
-    font-size: 2.2rem;
+    max-width: 11ch;
+    margin-inline: auto;
+    font-size: 2.12rem;
+  }
+
+  .detail-page-hero .back-button {
+    justify-self: start;
   }
 
   .thread-replies,
   .floor-content,
   .detail-readable-card {
-    padding: 0.85rem;
+    padding: 1.05rem;
   }
 
   .inline-reply-form {
@@ -2089,12 +2134,23 @@ body.detail-open {
   }
 
   .detail-content {
-    padding: 0 0.75rem 0.75rem;
+    padding: 0 1rem 0.95rem;
+  }
+
+  .detail-page-shell {
+    width: min(440px, 100%);
+    gap: 1rem;
+    padding-bottom: 4.6rem;
   }
 
   .detail-article {
     margin-top: -1.45rem;
     padding: 1rem;
+  }
+
+  .tieba-thread,
+  .detail-readable-card {
+    width: min(100%, 420px);
   }
 
   .detail-article h2 {
