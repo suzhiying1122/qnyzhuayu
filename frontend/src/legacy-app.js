@@ -2,6 +2,7 @@
 const LEGACY_STORAGE_KEY = "huayu-drama-club-state-v1";
 const ADMIN_KEY_SESSION = "huayu-admin-key-unlocked";
 const DEFAULT_ADMIN_CONTENT_KEY = "huayu2026";
+const LEGACY_ADMIN_CONTENT_KEYS = new Set(["HUAYU-ADMIN-2026"]);
 const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 const MAX_TOTAL_ATTACHMENTS_SIZE = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
@@ -392,6 +393,9 @@ function ensureAdminUser(targetState) {
 
 function normalizeLoadedState(targetState) {
   targetState.adminKey = targetState.adminKey || DEFAULT_ADMIN_CONTENT_KEY;
+  if (LEGACY_ADMIN_CONTENT_KEYS.has(targetState.adminKey)) {
+    targetState.adminKey = DEFAULT_ADMIN_CONTENT_KEY;
+  }
   targetState.users.forEach(ensureUserProfile);
   targetState.posts.forEach((post) => {
     post.attachments = normalizeAttachments(post);
