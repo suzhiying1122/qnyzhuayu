@@ -1057,6 +1057,11 @@ select:focus {
   cursor: pointer;
 }
 
+.activity-card[data-activity-id],
+.letter-card[data-letter-id] {
+  cursor: pointer;
+}
+
 .thread-card:hover,
 .thread-card.is-active {
   border-color: rgba(166, 31, 51, 0.44);

@@ -702,9 +702,7 @@ function renderForum() {
   elements.threadList.querySelectorAll("[data-post-id]").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("[data-open-post]")) return;
-      state.activePostId = card.dataset.postId;
-      saveState();
-      renderForum();
+      openDetailView("post", card.dataset.postId);
     });
   });
 }
@@ -823,6 +821,13 @@ function renderActivities() {
   elements.activityList.querySelectorAll("[data-open-activity]").forEach((button) => {
     button.addEventListener("click", () => openDetailView("activity", button.dataset.openActivity));
   });
+
+  elements.activityList.querySelectorAll("[data-activity-id]").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-activity]")) return;
+      openDetailView("activity", card.dataset.activityId);
+    });
+  });
 }
 
 function renderActivityCard(activity) {
@@ -830,7 +835,7 @@ function renderActivityCard(activity) {
   const typeText = isPreview ? "活动预告" : "活动简报";
   const attachmentText = renderAttachmentCount(activity) || `<span>暂无附件</span>`;
   return `
-    <article class="activity-card">
+    <article class="activity-card" data-activity-id="${activity.id}">
       <div class="tag-row">
         <span class="type-pill ${isPreview ? "preview" : ""}">${typeText}</span>
         <span>${formatDate(activity.date)}</span>
@@ -905,6 +910,13 @@ function renderMailbox() {
     button.addEventListener("click", () => openDetailView("letter", button.dataset.openLetter));
   });
 
+  elements.letterList.querySelectorAll("[data-letter-id]").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-letter], button, input, textarea, select, a")) return;
+      openDetailView("letter", card.dataset.letterId);
+    });
+  });
+
   elements.letterList.querySelectorAll("[data-reply-form]").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -933,7 +945,7 @@ function renderLetterCard(letter) {
     : `<div class="empty-state">等待社团回复。</div>`;
 
   return `
-    <article class="letter-card">
+    <article class="letter-card" data-letter-id="${letter.id}">
       <div class="tag-row">
         <span class="reply-pill">公开信件</span>
         <span>${escapeHtml(letter.author)} · ${formatDateTime(letter.createdAt)}</span>
