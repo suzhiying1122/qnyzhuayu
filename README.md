@@ -1,4 +1,4 @@
-# 华煜话剧社网站
+﻿# 华煜话剧社网站
 
 这是华煜话剧社的 Django + Vue 网站项目，包含前台社团网站、Django SimpleUI 后台、论坛、活动档案、社团信箱和联系表单。
 
@@ -38,7 +38,7 @@ http://qnyzhuayu.cn:8000/
 - Django 后台用户名：`社团秘书`
 - Django 后台密码：`huayu2026`
 - 邮箱：`3155943296@qq.com`
-- 前台内容修改密钥：`HUAYU-ADMIN-2026`
+- 前台内容修改密钥：`huayu2026`
 
 ## 技术栈
 
@@ -117,3 +117,4 @@ Cloudflare 上线后还需要：
 - 执行 `schema.sql` 和 `seed-d1.sql`
 - 在 Pages Custom domains 添加 `qnyzhuayu.cn` 和 `www.qnyzhuayu.cn`
 - 在百度站长平台 / Google Search Console 提交 `sitemap.xml`
+

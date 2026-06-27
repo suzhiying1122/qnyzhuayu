@@ -1,4 +1,4 @@
-# agnet.md
+﻿# agnet.md
 
 ## 项目说明
 
@@ -114,7 +114,7 @@ Django 后台超级管理员：
 前台内容修改密钥：
 
 ```text
-HUAYU-ADMIN-2026
+huayu2026
 ```
 
 ## 当前功能状态
@@ -162,3 +162,4 @@ npm run build
 
 - `http://127.0.0.1:8000/`
 - `http://127.0.0.1:8000/admin/`
+

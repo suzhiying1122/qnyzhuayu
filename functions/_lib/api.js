@@ -1,4 +1,4 @@
-export function json(data, status = 200) {
+﻿export function json(data, status = 200) {
   return Response.json(data, {
     status,
     headers: {
@@ -135,6 +135,7 @@ export async function getSiteState(env) {
 }
 
 export function requireAdmin(payload, env) {
-  const expected = env.ADMIN_KEY || "HUAYU-ADMIN-2026";
+  const expected = env.ADMIN_KEY || "huayu2026";
   return payload?.admin_key === expected;
 }
+

@@ -1,7 +1,7 @@
-const STORAGE_KEY = "huayu-drama-club-state-v2";
+﻿const STORAGE_KEY = "huayu-drama-club-state-v2";
 const LEGACY_STORAGE_KEY = "huayu-drama-club-state-v1";
 const ADMIN_KEY_SESSION = "huayu-admin-key-unlocked";
-const DEFAULT_ADMIN_CONTENT_KEY = "HUAYU-ADMIN-2026";
+const DEFAULT_ADMIN_CONTENT_KEY = "huayu2026";
 const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 const MAX_TOTAL_ATTACHMENTS_SIZE = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
@@ -1980,3 +1980,4 @@ function showToast(message) {
     elements.toast.classList.add("hidden");
   }, 2600);
 }
+

@@ -1,4 +1,4 @@
-# qnyzhuayu.cn Cloudflare 部署说明
+﻿# qnyzhuayu.cn Cloudflare 部署说明
 
 ## 当前方案
 
@@ -100,7 +100,7 @@ seed-d1.sql
 在 Cloudflare Pages 项目的 Settings -> Environment variables 中添加：
 
 ```text
-ADMIN_KEY=HUAYU-ADMIN-2026
+ADMIN_KEY=huayu2026
 ```
 
 ## 自定义域名
@@ -142,3 +142,4 @@ cd frontend
 npm install
 npm run build
 ```
+

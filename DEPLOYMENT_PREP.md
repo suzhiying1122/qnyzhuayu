@@ -1,4 +1,4 @@
-# 华煜话剧社 Cloudflare 部署准备
+﻿# 华煜话剧社 Cloudflare 部署准备
 
 ## 本地链接
 
@@ -62,7 +62,7 @@ seed-d1.sql
 Cloudflare Pages 项目里添加：
 
 ```text
-ADMIN_KEY=HUAYU-ADMIN-2026
+ADMIN_KEY=huayu2026
 ```
 
 ## 本地构建检查
@@ -78,3 +78,4 @@ cd frontend
 npm install
 npm run build
 ```
+
