@@ -1,0 +1,430 @@
+﻿<template>
+
+    <header class="site-header" aria-label="站点导航">
+      <button class="brand" data-view-target="home" type="button" aria-label="返回华煜话剧社首页">
+        <span class="brand-mark">
+          <img src="/assets/huayu-logo.png" alt="" />
+        </span>
+        <span>华煜话剧社</span>
+      </button>
+      <nav class="top-nav" aria-label="主导航">
+        <button class="nav-link" data-view-target="forum" type="button">论坛</button>
+        <button class="nav-link" data-view-target="activities" type="button">活动</button>
+        <button class="nav-link" data-view-target="mailbox" type="button">信箱</button>
+        <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" type="button">管理</button>
+      </nav>
+      <div class="account-area">
+        <button class="account-name" id="accountName" type="button">未登录</button>
+        <button class="outline-button" id="authOpenButton" type="button">登录 / 注册</button>
+        <button class="ghost-button hidden" id="logoutButton" type="button">退出</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
+        <img class="hero-image" src="/assets/stage-hero.png" alt="暖色灯光下的剧场舞台" />
+        <div class="hero-shade"></div>
+        <div class="stage-ribbon ribbon-one"></div>
+        <div class="stage-ribbon ribbon-two"></div>
+        <div class="hero-content">
+          <div class="hero-logo-card" aria-label="华煜话剧社社团标志">
+            <img src="/assets/huayu-logo.png" alt="华煜话剧社 logo" />
+          </div>
+          <p class="eyebrow">在排练场里相遇，在舞台上发光</p>
+          <h1 id="heroTitle">华煜话剧社</h1>
+          <p class="hero-copy">排练想法、活动记录和公开来信，在一个属于剧场的线上空间里展开。</p>
+          <div class="hero-actions">
+            <button class="primary-button" data-view-target="forum" type="button">进入论坛</button>
+            <button class="secondary-button" data-view-target="mailbox" type="button">投递信件</button>
+          </div>
+        </div>
+        <div class="quick-stats" aria-label="社团站点概览">
+          <div>
+            <strong id="postCount">0</strong>
+            <span>公开帖子</span>
+          </div>
+          <div>
+            <strong id="activityCount">0</strong>
+            <span>公开活动</span>
+          </div>
+          <div>
+            <strong id="publicLetterCount">0</strong>
+            <span>公开信件</span>
+          </div>
+        </div>
+
+        <div class="module-gates" aria-label="功能入口">
+          <button class="module-gate gate-forum" data-view-target="forum" type="button">
+            <span class="gate-label">Forum</span>
+            <strong>论坛</strong>
+            <small>社员交流，话题不限</small>
+          </button>
+          <button class="module-gate gate-activities" data-view-target="activities" type="button">
+            <span class="gate-label">Events</span>
+            <strong>活动</strong>
+            <small>简报、预告和社团档案</small>
+          </button>
+          <button class="module-gate gate-mailbox" data-view-target="mailbox" type="button">
+            <span class="gate-label">Mailbox</span>
+            <strong>信箱</strong>
+            <small>给社团的一封来信</small>
+          </button>
+          <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" type="button">
+            <span class="gate-label">Admin</span>
+            <strong>管理后台</strong>
+            <small>审核发布与密钥保护</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="view module-screen forum-screen" id="forumScreen" data-view="forum" aria-labelledby="forumTitle">
+        <div class="module-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Forum</p>
+            <h2 id="forumTitle">社团论坛</h2>
+            <p>这里是社员自由交流的平台，学习、生活、兴趣、社团日常都可以聊；公开前会先由管理员审核。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="forumPostMetric">0</strong> 公开帖</span>
+            <span><strong id="forumCommentMetric">0</strong> 公开留言</span>
+          </div>
+        </div>
+
+        <div class="forum-layout module-canvas">
+          <form class="compose-panel forum-compose" id="postForm">
+            <h3>提交论坛内容</h3>
+            <label>
+              标题
+              <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
+            </label>
+            <label>
+              内容
+              <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
+            </label>
+            <label>
+              标签
+              <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
+            </label>
+            <label>
+              附件
+              <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+              <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
+            </label>
+            <button class="primary-button" type="submit">提交审核</button>
+          </form>
+
+          <div class="thread-list-wrap">
+            <div class="list-title">
+              <h3>公开交流</h3>
+              <span id="currentUserHint">注册账号后可参与讨论</span>
+            </div>
+            <div class="thread-list" id="threadList"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="view module-screen forum-detail-screen" id="postDetailScreen" data-view="postDetail" aria-labelledby="postDetailTitle">
+        <div class="detail-page-shell" id="postDetailContent"></div>
+      </section>
+
+      <section class="view module-screen activities-screen" id="activitiesScreen" data-view="activities" aria-labelledby="activitiesTitle">
+        <div class="module-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Events</p>
+            <h2 id="activitiesTitle">活动档案馆</h2>
+            <p>把已经发生的演出留下，也把即将到来的现场点亮；新活动会先进入管理员审核。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="briefingMetric">0</strong> 简报</span>
+            <span><strong id="previewMetric">0</strong> 预告</span>
+          </div>
+        </div>
+
+        <div class="activity-grid module-canvas">
+          <form class="compose-panel activity-compose" id="activityForm">
+            <h3>提交活动审核</h3>
+            <label>
+              类型
+              <select id="activityType" required>
+                <option value="briefing">活动简报</option>
+                <option value="preview">活动预告</option>
+              </select>
+            </label>
+            <label>
+              标题
+              <input id="activityTitle" type="text" maxlength="52" placeholder="例如：《雷雨》片段展演复盘" required />
+            </label>
+            <label>
+              日期
+              <input id="activityDate" type="date" required />
+            </label>
+            <label>
+              摘要
+              <textarea id="activitySummary" rows="5" maxlength="520" placeholder="简要记录活动内容、亮点或报名信息" required></textarea>
+            </label>
+            <label>
+              附件
+              <input id="activityFile" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+              <small class="field-note">简报、预告海报、排练照片、视频和文档都可以一起提交。</small>
+            </label>
+            <button class="primary-button" type="submit">提交审核</button>
+          </form>
+
+          <div class="activity-board">
+            <div class="filter-row" aria-label="活动筛选">
+              <button class="filter-button is-active" data-activity-filter="all" type="button">全部</button>
+              <button class="filter-button" data-activity-filter="briefing" type="button">简报</button>
+              <button class="filter-button" data-activity-filter="preview" type="button">预告</button>
+            </div>
+            <div class="activity-list" id="activityList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view module-screen activity-detail-screen" id="activityDetailScreen" data-view="activityDetail" aria-labelledby="activityDetailTitle">
+        <div class="detail-page-shell" id="activityDetailContent"></div>
+      </section>
+
+      <section class="view module-screen mailbox-screen" id="mailboxScreen" data-view="mailbox" aria-labelledby="mailboxTitle">
+        <div class="module-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Mailbox</p>
+            <h2 id="mailboxTitle">社团信箱</h2>
+            <p>公开来信会贴上回声墙，私密来信只交给社团内部阅读。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="visibleLetterMetric">0</strong> 公开</span>
+            <span><strong id="privateLetterMetric">0</strong> 私密</span>
+          </div>
+        </div>
+
+        <div class="mailbox-layout module-canvas">
+          <form class="compose-panel letter-compose" id="letterForm">
+            <h3>投递信件</h3>
+            <label>
+              主题
+              <input id="letterSubject" type="text" maxlength="48" placeholder="例如：关于招新面试的小建议" required />
+            </label>
+            <label>
+              内容
+              <textarea id="letterBody" rows="7" maxlength="760" placeholder="写给华煜话剧社的话" required></textarea>
+            </label>
+            <fieldset class="choice-group">
+              <legend>公开方式</legend>
+              <label>
+                <input type="radio" name="letterVisibility" value="public" checked />
+                公开
+              </label>
+              <label>
+                <input type="radio" name="letterVisibility" value="private" />
+                不公开
+              </label>
+            </fieldset>
+            <label>
+              附件
+              <input id="letterAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+              <small class="field-note">可附上图片、视频、文档或日报材料。</small>
+            </label>
+            <button class="primary-button" type="submit">投递</button>
+          </form>
+
+          <div class="letter-board">
+            <div class="list-title">
+              <h3>公开信件与回复</h3>
+              <span id="mailboxAdminHint"></span>
+            </div>
+            <div class="letter-list" id="letterList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view module-screen letter-detail-screen" id="letterDetailScreen" data-view="letterDetail" aria-labelledby="letterDetailTitle">
+        <div class="detail-page-shell" id="letterDetailContent"></div>
+      </section>
+
+      <section class="view module-screen profile-screen" id="profileScreen" data-view="profile" aria-labelledby="profileTitle">
+        <div class="module-hero profile-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Profile</p>
+            <h2 id="profileTitle">个人主页</h2>
+            <p>管理你的社员资料、头像、个人介绍和账号安全；管理员也可以在这里更新内容修改密钥。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="profilePostMetric">0</strong> 公开帖</span>
+            <span><strong id="profileActivityMetric">0</strong> 活动提交</span>
+          </div>
+        </div>
+
+        <div class="profile-layout module-canvas">
+          <aside class="profile-summary-card">
+            <div class="profile-avatar-preview" id="profileAvatarPreview" aria-hidden="true">华</div>
+            <div>
+              <p class="section-kicker">Member Card</p>
+              <h3 id="profileDisplayTitle">未登录</h3>
+              <p id="profileRoleText">登录后完善你的社员资料</p>
+            </div>
+            <div class="profile-intro-box" id="profileIntroText">这里会显示你的个人介绍。</div>
+          </aside>
+
+          <div class="profile-workbench">
+            <form class="profile-panel" id="profileForm">
+              <h3>编辑个人资料</h3>
+              <label>
+                姓名
+                <input id="profileNameInput" type="text" maxlength="24" placeholder="填写你希望展示的姓名" required />
+              </label>
+              <label>
+                头像
+                <input id="profileAvatarInput" type="file" accept="image/*" />
+                <small class="field-note">建议使用正方形图片，单张不超过 2.5MB。</small>
+              </label>
+              <label>
+                社团职务
+                <input id="profileClubRoleInput" type="text" maxlength="32" placeholder="例如：演员 / 编剧 / 灯光 / 社团秘书" />
+              </label>
+              <label>
+                个人介绍
+                <textarea id="profileIntroInput" rows="4" maxlength="260" placeholder="写一点关于你和话剧社的故事"></textarea>
+              </label>
+              <button class="primary-button" type="submit">保存个人资料</button>
+            </form>
+
+            <form class="profile-panel" id="passwordForm">
+              <h3>修改密码</h3>
+              <label>
+                当前密码
+                <input id="currentPassword" type="password" autocomplete="current-password" required />
+              </label>
+              <label>
+                新密码
+                <input id="newPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
+              </label>
+              <label>
+                确认新密码
+                <input id="confirmPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
+              </label>
+              <button class="primary-button" type="submit">更新密码</button>
+            </form>
+
+            <form class="profile-panel admin-secret-panel hidden" id="adminKeyForm">
+              <h3>管理员密钥</h3>
+              <p>密钥用于解锁审批、驳回、回复和内容发布操作。修改后需要用新密钥重新解锁。</p>
+              <label>
+                当前密钥
+                <input id="currentAdminKey" type="password" autocomplete="off" required />
+              </label>
+              <label>
+                新密钥
+                <input id="newAdminKey" type="password" minlength="6" maxlength="40" autocomplete="off" required />
+              </label>
+              <label>
+                确认新密钥
+                <input id="confirmAdminKey" type="password" minlength="6" maxlength="40" autocomplete="off" required />
+              </label>
+              <button class="primary-button" type="submit">修改密钥</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="view module-screen admin-screen" id="adminScreen" data-view="admin" aria-labelledby="adminTitle">
+        <div class="module-hero admin-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Admin</p>
+            <h2 id="adminTitle">管理员后台</h2>
+            <p>使用社团秘书账号登录，并输入内容修改密钥后，才能审核和发布公共内容。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="pendingPostMetric">0</strong> 待审论坛</span>
+            <span><strong id="pendingActivityMetric">0</strong> 待审活动</span>
+          </div>
+        </div>
+
+        <div class="admin-layout module-canvas">
+          <aside class="admin-key-panel">
+            <h3>内容修改密钥</h3>
+            <p>管理员账号：社团秘书 / huayu2026</p>
+            <label>
+              密钥
+              <input id="adminKeyInput" type="password" autocomplete="off" placeholder="输入管理员密钥" />
+            </label>
+            <button class="primary-button" id="adminUnlockButton" type="button">解锁审批权限</button>
+            <div class="admin-key-status" id="adminKeyStatus" aria-live="polite"></div>
+          </aside>
+
+          <div class="admin-review-grid" id="adminReviewArea">
+            <section class="review-board">
+              <div class="list-title">
+                <h3>论坛帖子待审</h3>
+                <span id="pendingPostHint"></span>
+              </div>
+              <div class="review-list" id="pendingPostList"></div>
+            </section>
+
+            <section class="review-board review-board-wide">
+              <div class="list-title">
+                <h3>活动档案待审</h3>
+                <span id="pendingActivityHint"></span>
+              </div>
+              <div class="review-list review-list-two" id="pendingActivityList"></div>
+            </section>
+
+            <section class="review-board review-board-wide account-management-board">
+              <div class="list-title">
+                <h3>账号管理</h3>
+                <span id="accountAdminHint"></span>
+              </div>
+              <div class="account-list" id="accountAdminList"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="modal-panel">
+        <button class="modal-close" id="authCloseButton" type="button" aria-label="关闭">×</button>
+        <h2 id="authTitle">登录 / 注册</h2>
+        <div class="auth-tabs" role="tablist" aria-label="账号操作">
+          <button class="auth-tab is-active" data-auth-mode="login" type="button">登录</button>
+          <button class="auth-tab" data-auth-mode="register" type="button">注册</button>
+        </div>
+        <form id="authForm">
+          <label>
+            用户名
+            <input id="authUsername" type="text" minlength="2" maxlength="18" autocomplete="username" required />
+          </label>
+          <label>
+            密码
+            <input id="authPassword" type="password" minlength="4" maxlength="30" autocomplete="current-password" required />
+          </label>
+          <div class="register-only hidden" id="registerFields">
+            <label>
+              手机号
+              <input id="authPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="用于注册验证，每个手机号只能注册一个账号" />
+            </label>
+            <div class="verification-row">
+              <label>
+                验证码
+                <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="请输入验证码" />
+              </label>
+              <button class="secondary-button" id="sendCodeButton" type="button">发送验证码</button>
+            </div>
+            <p class="verification-note" id="verificationNote">验证码会以站内弹窗形式展示，作为短信流程演示。</p>
+          </div>
+          <p class="form-message" id="authMessage" aria-live="polite"></p>
+          <button class="primary-button full-width" id="authSubmitButton" type="submit">登录</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+</template>
+
+
