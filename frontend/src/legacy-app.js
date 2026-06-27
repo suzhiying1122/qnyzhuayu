@@ -289,7 +289,7 @@ async function apiRequest(url, options = {}) {
 
 async function syncStateFromApi() {
   try {
-    const data = await apiRequest("/api/site-state/");
+    const data = await apiRequest("/api/site-state");
     state.posts = Array.isArray(data.posts) ? data.posts : state.posts;
     state.pendingPosts = Array.isArray(data.pendingPosts) ? data.pendingPosts : state.pendingPosts;
     state.activities = Array.isArray(data.activities) ? data.activities : state.activities;
@@ -747,7 +747,7 @@ async function handlePostSubmit(event) {
   }
 
   try {
-    const data = await apiRequest("/api/forum/posts/", {
+    const data = await apiRequest("/api/forum/posts", {
       method: "POST",
       body: JSON.stringify({
         title,
@@ -780,7 +780,7 @@ async function handleActivitySubmit(event) {
   }
 
   try {
-    const data = await apiRequest("/api/activities/", {
+    const data = await apiRequest("/api/activities", {
       method: "POST",
       body: JSON.stringify({
         type: elements.activityType.value,
@@ -861,7 +861,7 @@ async function handleLetterSubmit(event) {
   }
 
   try {
-    const data = await apiRequest("/api/letters/", {
+    const data = await apiRequest("/api/letters", {
       method: "POST",
       body: JSON.stringify({
         subject: elements.letterSubject.value.trim(),
@@ -913,7 +913,7 @@ function renderMailbox() {
       const replyBody = form.querySelector("textarea").value.trim();
       if (!letter || !replyBody) return;
       try {
-        const data = await apiRequest(`/api/admin/letters/${letter.id}/reply/`, {
+        const data = await apiRequest(`/api/admin/letters/${letter.id}/reply`, {
           method: "POST",
           body: JSON.stringify({ admin_key: getAdminContentKey(), reply: replyBody }),
         });
@@ -1279,7 +1279,7 @@ function deleteUserAccount(id) {
 async function approvePost(id) {
   if (!requireAdminKey()) return;
   try {
-    const data = await apiRequest(`/api/admin/posts/${id}/approve/`, {
+    const data = await apiRequest(`/api/admin/posts/${id}/approve`, {
       method: "POST",
       body: JSON.stringify({ admin_key: getAdminContentKey() }),
     });
@@ -1321,7 +1321,7 @@ function approveComment(id) {
 async function approveActivity(id) {
   if (!requireAdminKey()) return;
   try {
-    const data = await apiRequest(`/api/admin/activities/${id}/approve/`, {
+    const data = await apiRequest(`/api/admin/activities/${id}/approve`, {
       method: "POST",
       body: JSON.stringify({ admin_key: getAdminContentKey() }),
     });
@@ -1337,7 +1337,7 @@ async function approveActivity(id) {
 async function rejectPending(type, id) {
   if (!requireAdminKey()) return;
   try {
-    await apiRequest(`/api/admin/${type}/${id}/reject/`, {
+    await apiRequest(`/api/admin/${type}/${id}/reject`, {
       method: "POST",
       body: JSON.stringify({ admin_key: getAdminContentKey() }),
     });
@@ -1662,7 +1662,7 @@ function bindLetterDetailForm() {
     const replyBody = form.querySelector("textarea").value.trim();
     if (!letter || !replyBody) return;
     try {
-      const data = await apiRequest(`/api/admin/letters/${letter.id}/reply/`, {
+      const data = await apiRequest(`/api/admin/letters/${letter.id}/reply`, {
         method: "POST",
         body: JSON.stringify({ admin_key: getAdminContentKey(), reply: replyBody }),
       });
@@ -1679,7 +1679,7 @@ async function addCommentToPost(postId, body, parentId = "") {
   const post = state.posts.find((item) => item.id === postId);
   if (!post) return;
   try {
-    const data = await apiRequest("/api/forum/comments/", {
+    const data = await apiRequest("/api/forum/comments", {
       method: "POST",
       body: JSON.stringify({
         post_id: postId,
