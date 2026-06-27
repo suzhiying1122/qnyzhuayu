@@ -28,6 +28,8 @@ qnyzhuayu.cn
 3. 后端平台部署成功后，拿到后端访问地址或服务器 IP
 4. 在 Cloudflare DNS 添加记录：
 
+当前 DNS 查询结果显示：`qnyzhuayu.cn` 还没有 A/CNAME 记录，`www.qnyzhuayu.cn` 也还没有解析。因此域名目前还没有指向网站。
+
 如果后端平台给的是域名：
 
 ```text
@@ -54,6 +56,21 @@ Name: www
 Target: qnyzhuayu.cn
 Proxy: Proxied
 ```
+
+如果只是先在本机测试域名，可以用项目里的脚本：
+
+```powershell
+右键 设置本地域名-qnyzhuayu.ps1
+选择“以管理员身份运行”
+```
+
+然后在本机访问：
+
+```text
+http://qnyzhuayu.cn:8000/
+```
+
+这个本机映射只对当前电脑有效，不会让别人访问到网站。
 
 ## Django 环境变量
 
