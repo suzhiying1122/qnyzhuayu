@@ -57,14 +57,6 @@ schema.sql
 seed-d1.sql
 ```
 
-## 环境变量
-
-Cloudflare Pages 项目里添加：
-
-```text
-ADMIN_KEY=huayu2026
-```
-
 ## 本地构建检查
 
 ```powershell

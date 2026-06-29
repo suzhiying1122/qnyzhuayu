@@ -1,10 +1,6 @@
-import { error, json, readJson, requireAdmin } from "../../../../_lib/api.js";
+import { error, json } from "../../../../_lib/api.js";
 
 export async function onRequestPost({ request, env, params }) {
-  const payload = await readJson(request);
-  if (!payload) return error("请求体必须是合法 JSON");
-  if (!requireAdmin(payload, env)) return error("管理员密钥不正确", 403);
-
   const tableMap = {
     post: "forum_posts",
     activity: "club_activities",

@@ -736,7 +736,7 @@ select:disabled {
 
 .admin-layout {
   display: grid;
-  grid-template-columns: minmax(17rem, 0.45fr) minmax(26rem, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.1rem;
   align-items: start;
 }
@@ -769,7 +769,6 @@ select:disabled {
 .activity-board,
 .letter-board,
 .thread-detail,
-.admin-key-panel,
 .review-board,
 .profile-summary-card,
 .profile-panel {
@@ -778,7 +777,6 @@ select:disabled {
 
 .compose-panel,
 .thread-detail,
-.admin-key-panel,
 .profile-summary-card,
 .profile-panel {
   border: 1px solid var(--line);
@@ -788,8 +786,7 @@ select:disabled {
   box-shadow: var(--shadow);
 }
 
-.compose-panel,
-.admin-key-panel {
+.compose-panel {
   position: sticky;
   top: 5.6rem;
   display: grid;
@@ -800,7 +797,6 @@ select:disabled {
 .forum-compose,
 .activity-compose,
 .letter-compose,
-.admin-key-panel,
 .profile-panel {
   border-top: 5px solid var(--red);
 }
@@ -821,17 +817,6 @@ select:disabled {
 
 .profile-panel:nth-child(2) {
   border-top-color: var(--gold);
-}
-
-.admin-secret-panel {
-  grid-column: 1 / -1;
-  border-top-color: var(--red-deep);
-}
-
-.admin-secret-panel p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.65;
 }
 
 .profile-summary-card {
@@ -930,16 +915,9 @@ select:disabled {
 .compose-panel h3,
 .list-title h3,
 .thread-detail h3,
-.admin-key-panel h3,
 .profile-panel h3 {
   margin: 0;
   font-size: 1.15rem;
-}
-
-.admin-key-panel p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.65;
 }
 
 label,
@@ -1464,23 +1442,6 @@ select:focus {
   color: var(--red-deep);
   background: #fff3e3;
   border-color: #e4b596;
-}
-
-.admin-key-status {
-  min-height: 2.6rem;
-  padding: 0.7rem;
-  border: 1px dashed #dcbf9b;
-  border-radius: 6px;
-  color: var(--muted);
-  background: rgba(255, 247, 233, 0.56);
-  line-height: 1.5;
-}
-
-.admin-key-status.is-ok {
-  border-style: solid;
-  border-color: rgba(35, 107, 97, 0.32);
-  color: #174f43;
-  background: rgba(35, 107, 97, 0.08);
 }
 
 .empty-state {
@@ -2076,7 +2037,6 @@ body.detail-open {
   }
 
   .compose-panel,
-  .admin-key-panel,
   .profile-summary-card {
     position: static;
   }

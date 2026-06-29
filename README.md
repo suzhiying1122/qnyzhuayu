@@ -38,7 +38,6 @@ http://qnyzhuayu.cn:8000/
 - Django 后台用户名：`社团秘书`
 - Django 后台密码：`huayu2026`
 - 邮箱：`3155943296@qq.com`
-- 前台内容修改密钥：`huayu2026`
 
 ## 技术栈
 

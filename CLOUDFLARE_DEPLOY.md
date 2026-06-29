@@ -22,7 +22,7 @@ qnyzhuayu.cn
 
 不再需要 Render，也不需要云服务器。
 
-注意：Cloudflare 不能运行 Django 后台 `/admin/`。上线后公共功能会使用 Pages Functions + D1；管理操作使用网站内置管理员界面和内容修改密钥。
+注意：Cloudflare 不能运行 Django 后台 `/admin/`。上线后公共功能会使用 Pages Functions + D1；管理操作使用网站内置管理员界面。
 
 ## Nameserver
 
@@ -94,14 +94,6 @@ seed-d1.sql
 ```
 
 先执行 `schema.sql`，再执行 `seed-d1.sql`。
-
-## 环境变量
-
-在 Cloudflare Pages 项目的 Settings -> Environment variables 中添加：
-
-```text
-ADMIN_KEY=huayu2026
-```
 
 ## 自定义域名
 

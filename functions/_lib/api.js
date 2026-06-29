@@ -133,9 +133,3 @@ export async function getSiteState(env) {
     letters: letters.results.map(serializeLetter),
   };
 }
-
-export function requireAdmin(payload, env) {
-  const expected = env.ADMIN_KEY || "huayu2026";
-  return payload?.admin_key === expected;
-}
-

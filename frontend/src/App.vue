@@ -72,7 +72,7 @@
           <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" type="button">
             <span class="gate-label">Admin</span>
             <strong>管理后台</strong>
-            <small>审核发布与密钥保护</small>
+            <small>审核发布与账号管理</small>
           </button>
         </div>
       </section>
@@ -252,7 +252,7 @@
           <div>
             <p class="section-kicker">Profile</p>
             <h2 id="profileTitle">个人主页</h2>
-            <p>管理你的社员资料、头像、个人介绍和账号安全；管理员也可以在这里更新内容修改密钥。</p>
+            <p>管理你的社员资料、头像、个人介绍和账号安全。</p>
           </div>
           <div class="module-stats">
             <span><strong id="profilePostMetric">0</strong> 公开帖</span>
@@ -311,23 +311,6 @@
               <button class="primary-button" type="submit">更新密码</button>
             </form>
 
-            <form class="profile-panel admin-secret-panel hidden" id="adminKeyForm">
-              <h3>管理员密钥</h3>
-              <p>密钥用于解锁审批、驳回、回复和内容发布操作。修改后需要用新密钥重新解锁。</p>
-              <label>
-                当前密钥
-                <input id="currentAdminKey" type="password" autocomplete="off" required />
-              </label>
-              <label>
-                新密钥
-                <input id="newAdminKey" type="password" minlength="6" maxlength="40" autocomplete="off" required />
-              </label>
-              <label>
-                确认新密钥
-                <input id="confirmAdminKey" type="password" minlength="6" maxlength="40" autocomplete="off" required />
-              </label>
-              <button class="primary-button" type="submit">修改密钥</button>
-            </form>
           </div>
         </div>
       </section>
@@ -338,7 +321,7 @@
           <div>
             <p class="section-kicker">Admin</p>
             <h2 id="adminTitle">管理员后台</h2>
-            <p>使用社团秘书账号登录，并输入内容修改密钥后，才能审核和发布公共内容。</p>
+            <p>使用社团秘书账号登录后，可以审核论坛内容、发布活动档案并管理注册账号。</p>
           </div>
           <div class="module-stats">
             <span><strong id="pendingPostMetric">0</strong> 待审论坛</span>
@@ -347,17 +330,6 @@
         </div>
 
         <div class="admin-layout module-canvas">
-          <aside class="admin-key-panel">
-            <h3>内容修改密钥</h3>
-            <p>管理员账号：社团秘书 / huayu2026</p>
-            <label>
-              密钥
-              <input id="adminKeyInput" type="password" autocomplete="off" placeholder="输入管理员密钥" />
-            </label>
-            <button class="primary-button" id="adminUnlockButton" type="button">解锁审批权限</button>
-            <div class="admin-key-status" id="adminKeyStatus" aria-live="polite"></div>
-          </aside>
-
           <div class="admin-review-grid" id="adminReviewArea">
             <section class="review-board">
               <div class="list-title">

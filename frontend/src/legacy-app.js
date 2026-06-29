@@ -1,8 +1,5 @@
 ﻿const STORAGE_KEY = "huayu-drama-club-state-v2";
 const LEGACY_STORAGE_KEY = "huayu-drama-club-state-v1";
-const ADMIN_KEY_SESSION = "huayu-admin-key-unlocked";
-const DEFAULT_ADMIN_CONTENT_KEY = "huayu2026";
-const LEGACY_ADMIN_CONTENT_KEYS = new Set(["HUAYU-ADMIN-2026"]);
 const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 const MAX_TOTAL_ATTACHMENTS_SIZE = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
@@ -40,7 +37,6 @@ const initialState = {
   activeActivityId: "activity-1",
   activeLetterId: "letter-1",
   activityFilter: "all",
-  adminKey: DEFAULT_ADMIN_CONTENT_KEY,
   posts: [
     {
       id: "post-1",
@@ -229,10 +225,6 @@ const elements = {
   currentPassword: document.querySelector("#currentPassword"),
   newPassword: document.querySelector("#newPassword"),
   confirmPassword: document.querySelector("#confirmPassword"),
-  adminKeyForm: document.querySelector("#adminKeyForm"),
-  currentAdminKey: document.querySelector("#currentAdminKey"),
-  newAdminKey: document.querySelector("#newAdminKey"),
-  confirmAdminKey: document.querySelector("#confirmAdminKey"),
   postCount: document.querySelector("#postCount"),
   activityCount: document.querySelector("#activityCount"),
   publicLetterCount: document.querySelector("#publicLetterCount"),
@@ -244,9 +236,6 @@ const elements = {
   privateLetterMetric: document.querySelector("#privateLetterMetric"),
   pendingPostMetric: document.querySelector("#pendingPostMetric"),
   pendingActivityMetric: document.querySelector("#pendingActivityMetric"),
-  adminKeyInput: document.querySelector("#adminKeyInput"),
-  adminUnlockButton: document.querySelector("#adminUnlockButton"),
-  adminKeyStatus: document.querySelector("#adminKeyStatus"),
   pendingPostHint: document.querySelector("#pendingPostHint"),
   pendingActivityHint: document.querySelector("#pendingActivityHint"),
   pendingPostList: document.querySelector("#pendingPostList"),
@@ -338,7 +327,6 @@ function bindEvents() {
 
   elements.logoutButton.addEventListener("click", () => {
     state.currentUserId = null;
-    sessionStorage.removeItem(ADMIN_KEY_SESSION);
     saveState();
     showToast("已退出当前账号");
     render();
@@ -351,8 +339,6 @@ function bindEvents() {
   elements.letterForm.addEventListener("submit", handleLetterSubmit);
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
-  elements.adminKeyForm.addEventListener("submit", handleAdminKeySubmit);
-  elements.adminUnlockButton.addEventListener("click", handleAdminUnlock);
 }
 
 function loadState() {
@@ -366,7 +352,6 @@ function loadState() {
       activePostId: saved.activePostId || "post-1",
       activeActivityId: saved.activeActivityId || "activity-1",
       activeLetterId: saved.activeLetterId || "letter-1",
-      adminKey: saved.adminKey || DEFAULT_ADMIN_CONTENT_KEY,
       pendingPosts: Array.isArray(saved.pendingPosts) ? saved.pendingPosts : [],
       pendingComments: Array.isArray(saved.pendingComments) ? saved.pendingComments : [],
       pendingActivities: Array.isArray(saved.pendingActivities) ? saved.pendingActivities : [],
@@ -392,10 +377,6 @@ function ensureAdminUser(targetState) {
 }
 
 function normalizeLoadedState(targetState) {
-  targetState.adminKey = targetState.adminKey || DEFAULT_ADMIN_CONTENT_KEY;
-  if (LEGACY_ADMIN_CONTENT_KEYS.has(targetState.adminKey)) {
-    targetState.adminKey = DEFAULT_ADMIN_CONTENT_KEY;
-  }
   targetState.users.forEach(ensureUserProfile);
   targetState.posts.forEach((post) => {
     post.attachments = normalizeAttachments(post);
@@ -514,10 +495,6 @@ function currentUser() {
 
 function isAdmin() {
   return currentUser()?.role === "admin";
-}
-
-function hasAdminKey() {
-  return sessionStorage.getItem(ADMIN_KEY_SESSION) === "true";
 }
 
 function createId(prefix) {
@@ -897,9 +874,7 @@ function renderMailbox() {
     field.disabled = !user;
   });
   elements.mailboxAdminHint.textContent = isAdmin()
-    ? hasAdminKey()
-      ? "管理员可回复公开信件"
-      : "输入密钥后可回复公开信件"
+    ? "管理员可回复公开信件"
     : "";
 
   const publicLetters = state.letters
@@ -924,14 +899,14 @@ function renderMailbox() {
   elements.letterList.querySelectorAll("[data-reply-form]").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!requireAdminKey()) return;
+      if (!requireAdminAccess()) return;
       const letter = state.letters.find((item) => item.id === form.dataset.replyForm);
       const replyBody = form.querySelector("textarea").value.trim();
       if (!letter || !replyBody) return;
       try {
         const data = await apiRequest(`/api/admin/letters/${letter.id}/reply`, {
           method: "POST",
-          body: JSON.stringify({ admin_key: getAdminContentKey(), reply: replyBody }),
+          body: JSON.stringify({ reply: replyBody }),
         });
         Object.assign(letter, data.result);
         showToast("社团回复已发布");
@@ -983,7 +958,6 @@ function renderProfile() {
     elements.passwordForm.querySelectorAll("input, button").forEach((field) => {
       field.disabled = true;
     });
-    elements.adminKeyForm.classList.add("hidden");
     return;
   }
 
@@ -1004,7 +978,6 @@ function renderProfile() {
   elements.passwordForm.querySelectorAll("input, button").forEach((field) => {
     field.disabled = false;
   });
-  elements.adminKeyForm.classList.toggle("hidden", !admin);
 }
 
 async function handleProfileSubmit(event) {
@@ -1076,68 +1049,8 @@ function handlePasswordSubmit(event) {
   renderAccount();
 }
 
-function handleAdminKeySubmit(event) {
-  event.preventDefault();
-  if (!isAdmin()) {
-    openAuthModal();
-    showToast("请先使用管理员账号登录");
-    return;
-  }
-
-  const currentKey = elements.currentAdminKey.value.trim();
-  const newKey = elements.newAdminKey.value.trim();
-  const confirmKey = elements.confirmAdminKey.value.trim();
-  if (currentKey !== getAdminContentKey()) {
-    showToast("当前密钥不正确");
-    return;
-  }
-  if (newKey.length < 6) {
-    showToast("新密钥至少需要 6 位");
-    return;
-  }
-  if (newKey !== confirmKey) {
-    showToast("两次输入的新密钥不一致");
-    return;
-  }
-
-  state.adminKey = newKey;
-  sessionStorage.removeItem(ADMIN_KEY_SESSION);
-  saveState();
-  elements.adminKeyForm.reset();
-  showToast("管理员密钥已更新，请用新密钥重新解锁");
-  render();
-}
-
-function handleAdminUnlock() {
-  if (!isAdmin()) {
-    openAuthModal();
-    showToast("请先使用管理员账号登录");
-    return;
-  }
-  const key = elements.adminKeyInput.value.trim();
-  if (key !== getAdminContentKey()) {
-    elements.adminKeyStatus.textContent = "密钥不正确";
-    elements.adminKeyStatus.classList.remove("is-ok");
-    showToast("密钥不正确");
-    return;
-  }
-  sessionStorage.setItem(ADMIN_KEY_SESSION, "true");
-  elements.adminKeyInput.value = "";
-  showToast("审批权限已解锁");
-  render();
-}
-
 function renderAdmin() {
   const admin = isAdmin();
-  const unlocked = hasAdminKey();
-  elements.adminKeyInput.disabled = !admin;
-  elements.adminUnlockButton.disabled = !admin;
-  elements.adminKeyStatus.textContent = admin
-    ? unlocked
-      ? "已解锁：可以审核、驳回和回复。"
-      : "请输入当前内容修改密钥解锁审批。"
-    : "请使用社团秘书账号登录。";
-  elements.adminKeyStatus.classList.toggle("is-ok", admin && unlocked);
 
   elements.pendingPostHint.textContent = `${state.pendingPosts.length} 条待处理`;
   elements.pendingActivityHint.textContent = `${state.pendingActivities.length} 条待处理`;
@@ -1147,13 +1060,13 @@ function renderAdmin() {
 
   elements.pendingPostList.innerHTML = admin
     ? state.pendingPosts.length
-      ? state.pendingPosts.map((item) => renderPendingPost(item, unlocked)).join("")
+      ? state.pendingPosts.map(renderPendingPost).join("")
       : `<div class="empty-state">暂无待审核帖子。</div>`
     : `<div class="empty-state">管理员登录后可查看待审内容。</div>`;
 
   elements.pendingActivityList.innerHTML = admin
     ? state.pendingActivities.length
-      ? state.pendingActivities.map((item) => renderPendingActivity(item, unlocked)).join("")
+      ? state.pendingActivities.map(renderPendingActivity).join("")
       : `<div class="empty-state">暂无待审核活动。</div>`
     : `<div class="empty-state">管理员登录后可查看待审内容。</div>`;
 
@@ -1161,7 +1074,7 @@ function renderAdmin() {
     ? state.users
         .slice()
         .sort((a, b) => new Date(b.lastUsedAt || b.createdAt) - new Date(a.lastUsedAt || a.createdAt))
-        .map((user) => renderAccountAdminRow(user, unlocked))
+        .map(renderAccountAdminRow)
         .join("")
     : `<div class="empty-state">管理员登录后可查看账号列表。</div>`;
 
@@ -1182,7 +1095,7 @@ function renderAdmin() {
   });
 }
 
-function renderPendingPost(item, unlocked) {
+function renderPendingPost(item) {
   return `
     <article class="review-card">
       <div class="tag-row">
@@ -1193,14 +1106,14 @@ function renderPendingPost(item, unlocked) {
       <p>${escapeHtml(item.body)}</p>
       ${renderAttachmentList(item, "compact")}
       <div class="review-actions">
-        <button class="approve-button" data-approve-post="${item.id}" type="button" ${unlocked ? "" : "disabled"}>通过发布</button>
-        <button class="reject-button" data-reject-post="${item.id}" type="button" ${unlocked ? "" : "disabled"}>驳回</button>
+        <button class="approve-button" data-approve-post="${item.id}" type="button">通过发布</button>
+        <button class="reject-button" data-reject-post="${item.id}" type="button">驳回</button>
       </div>
     </article>
   `;
 }
 
-function renderPendingComment(item, unlocked) {
+function renderPendingComment(item) {
   return `
     <article class="review-card">
       <div class="tag-row">
@@ -1210,14 +1123,14 @@ function renderPendingComment(item, unlocked) {
       <h4>${escapeHtml(item.postTitle)}</h4>
       <p>${escapeHtml(item.body)}</p>
       <div class="review-actions">
-        <button class="approve-button" data-approve-comment="${item.id}" type="button" ${unlocked ? "" : "disabled"}>通过发布</button>
-        <button class="reject-button" data-reject-comment="${item.id}" type="button" ${unlocked ? "" : "disabled"}>驳回</button>
+        <button class="approve-button" data-approve-comment="${item.id}" type="button">通过发布</button>
+        <button class="reject-button" data-reject-comment="${item.id}" type="button">驳回</button>
       </div>
     </article>
   `;
 }
 
-function renderPendingActivity(item, unlocked) {
+function renderPendingActivity(item) {
   const isPreview = item.type === "preview";
   const typeText = isPreview ? "活动预告" : "活动简报";
   return `
@@ -1230,14 +1143,14 @@ function renderPendingActivity(item, unlocked) {
       <p>${escapeHtml(item.summary)}</p>
       ${renderAttachmentList(item, "compact")}
       <div class="review-actions">
-        <button class="approve-button" data-approve-activity="${item.id}" type="button" ${unlocked ? "" : "disabled"}>通过发布</button>
-        <button class="reject-button" data-reject-activity="${item.id}" type="button" ${unlocked ? "" : "disabled"}>驳回</button>
+        <button class="approve-button" data-approve-activity="${item.id}" type="button">通过发布</button>
+        <button class="reject-button" data-reject-activity="${item.id}" type="button">驳回</button>
       </div>
     </article>
   `;
 }
 
-function renderAccountAdminRow(user, unlocked) {
+function renderAccountAdminRow(user) {
   const isProtected = user.role === "admin" || user.id === state.currentUserId;
   return `
     <article class="account-row">
@@ -1255,29 +1168,24 @@ function renderAccountAdminRow(user, unlocked) {
           <dd>${formatDateTime(user.lastUsedAt || user.createdAt)}</dd>
         </div>
       </dl>
-      <button class="reject-button" data-delete-user="${user.id}" type="button" ${unlocked && !isProtected ? "" : "disabled"}>
+      <button class="reject-button" data-delete-user="${user.id}" type="button" ${!isProtected ? "" : "disabled"}>
         ${isProtected ? "不可注销" : "注销账号"}
       </button>
     </article>
   `;
 }
 
-function requireAdminKey() {
+function requireAdminAccess() {
   if (!isAdmin()) {
     openAuthModal();
     showToast("请先使用管理员账号登录");
-    return false;
-  }
-  if (!hasAdminKey()) {
-    setView("admin");
-    showToast("请输入内容修改密钥");
     return false;
   }
   return true;
 }
 
 function deleteUserAccount(id) {
-  if (!requireAdminKey()) return;
+  if (!requireAdminAccess()) return;
   const target = state.users.find((user) => user.id === id);
   if (!target) return;
   if (target.role === "admin" || target.id === state.currentUserId) {
@@ -1293,11 +1201,11 @@ function deleteUserAccount(id) {
 }
 
 async function approvePost(id) {
-  if (!requireAdminKey()) return;
+  if (!requireAdminAccess()) return;
   try {
     const data = await apiRequest(`/api/admin/posts/${id}/approve`, {
       method: "POST",
-      body: JSON.stringify({ admin_key: getAdminContentKey() }),
+      body: JSON.stringify({}),
     });
     state.pendingPosts = state.pendingPosts.filter((item) => item.id !== id);
     state.posts.unshift(data.result);
@@ -1310,7 +1218,7 @@ async function approvePost(id) {
 }
 
 function approveComment(id) {
-  if (!requireAdminKey()) return;
+  if (!requireAdminAccess()) return;
   const index = state.pendingComments.findIndex((item) => item.id === id);
   if (index < 0) return;
   const pending = state.pendingComments.splice(index, 1)[0];
@@ -1335,11 +1243,11 @@ function approveComment(id) {
 }
 
 async function approveActivity(id) {
-  if (!requireAdminKey()) return;
+  if (!requireAdminAccess()) return;
   try {
     const data = await apiRequest(`/api/admin/activities/${id}/approve`, {
       method: "POST",
-      body: JSON.stringify({ admin_key: getAdminContentKey() }),
+      body: JSON.stringify({}),
     });
     state.pendingActivities = state.pendingActivities.filter((item) => item.id !== id);
     state.activities.unshift(data.result);
@@ -1351,11 +1259,11 @@ async function approveActivity(id) {
 }
 
 async function rejectPending(type, id) {
-  if (!requireAdminKey()) return;
+  if (!requireAdminAccess()) return;
   try {
     await apiRequest(`/api/admin/${type}/${id}/reject`, {
       method: "POST",
-      body: JSON.stringify({ admin_key: getAdminContentKey() }),
+      body: JSON.stringify({}),
     });
     if (type === "post") state.pendingPosts = state.pendingPosts.filter((item) => item.id !== id);
     if (type === "activity") state.pendingActivities = state.pendingActivities.filter((item) => item.id !== id);
@@ -1451,7 +1359,6 @@ function handleAuth(event) {
   }
   state.currentUserId = user.id;
   user.lastUsedAt = new Date().toISOString();
-  if (user.role !== "admin") sessionStorage.removeItem(ADMIN_KEY_SESSION);
   saveState();
   closeAuthModal();
   showToast(`欢迎回来，${getUserDisplayName(user)}`);
@@ -1605,14 +1512,14 @@ function renderLetterDetail() {
     elements.letterDetailContent.innerHTML = renderDetailMissing("mailbox", "信件不存在或未选择公开。");
     return;
   }
-  const canReply = isAdmin() && hasAdminKey();
+  const canReply = isAdmin();
   const replyHtml = letter.reply
     ? `<div class="club-reply"><strong>社团回复：</strong>${escapeHtml(letter.reply)}<span>${letter.repliedAt ? ` · ${formatDateTime(letter.repliedAt)}` : ""}</span></div>`
     : `<div class="empty-state">等待社团回复。</div>`;
   const replyForm = isAdmin()
     ? `
       <form class="reply-form letter-reply-form" id="letterDetailReplyForm">
-        <textarea rows="4" maxlength="420" placeholder="${canReply ? "填写社团回复" : "输入管理员密钥后可回复"}" ${canReply ? "" : "disabled"}>${escapeHtml(letter.reply)}</textarea>
+        <textarea rows="4" maxlength="420" placeholder="${canReply ? "填写社团回复" : "管理员登录后可回复"}" ${canReply ? "" : "disabled"}>${escapeHtml(letter.reply)}</textarea>
         <button class="primary-button" type="submit" ${canReply ? "" : "disabled"}>发布回复</button>
       </form>
     `
@@ -1689,14 +1596,14 @@ function bindLetterDetailForm() {
   const form = elements.letterDetailContent.querySelector("#letterDetailReplyForm");
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!requireAdminKey()) return;
+    if (!requireAdminAccess()) return;
     const letter = state.letters.find((item) => item.id === state.activeLetterId);
     const replyBody = form.querySelector("textarea").value.trim();
     if (!letter || !replyBody) return;
     try {
       const data = await apiRequest(`/api/admin/letters/${letter.id}/reply`, {
         method: "POST",
-        body: JSON.stringify({ admin_key: getAdminContentKey(), reply: replyBody }),
+        body: JSON.stringify({ reply: replyBody }),
       });
       Object.assign(letter, data.result);
       showToast("社团回复已发布");
@@ -1907,10 +1814,6 @@ function findCommentById(comments = [], id) {
     if (match) return match;
   }
   return null;
-}
-
-function getAdminContentKey() {
-  return state.adminKey || DEFAULT_ADMIN_CONTENT_KEY;
 }
 
 function inferAttachmentType(name = "", data = "") {
