@@ -815,9 +815,16 @@ function renderActivities() {
     button.addEventListener("click", () => openDetailView("activity", button.dataset.openActivity));
   });
 
+  elements.activityList.querySelectorAll("[data-delete-activity]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteActivity(button.dataset.deleteActivity);
+    });
+  });
+
   elements.activityList.querySelectorAll("[data-activity-id]").forEach((card) => {
     card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-open-activity]")) return;
+      if (event.target.closest("[data-open-activity], [data-delete-activity], button, input, textarea, select, a")) return;
       openDetailView("activity", card.dataset.activityId);
     });
   });
@@ -841,6 +848,7 @@ function renderActivityCard(activity) {
         <span>${escapeHtml(activity.author || "华煜话剧社")}</span>
         ${attachmentText}
       </footer>
+      ${isAdmin() ? `<div class="post-admin-actions"><button class="reject-button" data-delete-activity="${activity.id}" type="button">删除活动</button></div>` : ""}
     </article>
   `;
 }
@@ -901,9 +909,16 @@ function renderMailbox() {
     button.addEventListener("click", () => openDetailView("letter", button.dataset.openLetter));
   });
 
+  elements.letterList.querySelectorAll("[data-delete-letter]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteLetter(button.dataset.deleteLetter);
+    });
+  });
+
   elements.letterList.querySelectorAll("[data-letter-id]").forEach((card) => {
     card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-open-letter], button, input, textarea, select, a")) return;
+      if (event.target.closest("[data-open-letter], [data-delete-letter], button, input, textarea, select, a")) return;
       openDetailView("letter", card.dataset.letterId);
     });
   });
@@ -951,6 +966,7 @@ function renderLetterCard(letter) {
         <span>${renderAttachmentCount(letter) || "无附件"}</span>
         <span>${letter.reply ? "已回复" : "待回复"}</span>
       </footer>
+      ${isAdmin() ? `<div class="post-admin-actions"><button class="reject-button" data-delete-letter="${letter.id}" type="button">删除信件</button></div>` : ""}
     </article>
   `;
 }
@@ -1238,6 +1254,64 @@ async function deletePost(id) {
   }
   saveState();
   showToast("帖子已删除");
+  render();
+}
+
+async function deleteActivity(id) {
+  if (!requireAdminAccess()) return;
+  const activity = state.activities.find((item) => item.id === id);
+  if (!activity) return;
+  const ok = window.confirm(`确定删除活动“${activity.title}”吗？删除后这条简报或预告会从活动档案馆移除。`);
+  if (!ok) return;
+
+  try {
+    await apiRequest(`/api/admin/activities/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+
+  state.activities = state.activities.filter((item) => item.id !== id);
+  if (state.activeActivityId === id) {
+    state.activeActivityId = state.activities[0]?.id || "";
+    if (state.activeView === "activityDetail") {
+      state.activeView = "activities";
+      updateHash("activities");
+    }
+  }
+  saveState();
+  showToast("活动已删除");
+  render();
+}
+
+async function deleteLetter(id) {
+  if (!requireAdminAccess()) return;
+  const letter = state.letters.find((item) => item.id === id);
+  if (!letter) return;
+  const ok = window.confirm(`确定删除信件“${letter.subject}”吗？删除后公开信件和社团回复都会消失。`);
+  if (!ok) return;
+
+  try {
+    await apiRequest(`/api/admin/letters/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+
+  state.letters = state.letters.filter((item) => item.id !== id);
+  if (state.activeLetterId === id) {
+    state.activeLetterId = state.letters.find((item) => item.visibility === "public")?.id || "";
+    if (state.activeView === "letterDetail") {
+      state.activeView = "mailbox";
+      updateHash("mailbox");
+    }
+  }
+  saveState();
+  showToast("信件已删除");
   render();
 }
 
@@ -1543,6 +1617,7 @@ function renderActivityDetail() {
             <h2 id="activityDetailTitle">${escapeHtml(activity.title)}</h2>
             <p>${typeText} · ${formatDate(activity.date)} · ${escapeHtml(activity.author || "华煜话剧社")}</p>
           </div>
+          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-activity="${activity.id}" type="button">删除活动</button>` : ""}
         </header>
         <div class="reader-scroll">
           <article class="message-card host-message">
@@ -1567,6 +1642,9 @@ function renderActivityDetail() {
   `;
   bindViewTargetButtons(elements.activityDetailContent);
   bindDetailSidebar(elements.activityDetailContent);
+  elements.activityDetailContent.querySelectorAll("[data-delete-activity]").forEach((button) => {
+    button.addEventListener("click", () => deleteActivity(button.dataset.deleteActivity));
+  });
 }
 
 function renderLetterDetail() {
@@ -1598,6 +1676,7 @@ function renderLetterDetail() {
             <h2 id="letterDetailTitle">${escapeHtml(letter.subject)}</h2>
             <p>${escapeHtml(letter.author)} · ${formatDateTime(letter.createdAt)}</p>
           </div>
+          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-letter="${letter.id}" type="button">删除信件</button>` : ""}
         </header>
         <div class="reader-scroll">
           <article class="message-card host-message">
@@ -1632,6 +1711,9 @@ function renderLetterDetail() {
   bindViewTargetButtons(elements.letterDetailContent);
   bindLetterDetailForm();
   bindDetailSidebar(elements.letterDetailContent);
+  elements.letterDetailContent.querySelectorAll("[data-delete-letter]").forEach((button) => {
+    button.addEventListener("click", () => deleteLetter(button.dataset.deleteLetter));
+  });
 }
 
 function renderDetailSidebar(kind) {

@@ -3080,24 +3080,28 @@ body.detail-open {
   }
 
   .reader-topbar .back-button {
-    width: 2.6rem;
-    min-height: 2.6rem;
-    overflow: hidden;
-    padding: 0;
+    width: auto;
+    min-height: 2.4rem;
+    overflow: visible;
+    padding: 0 0.3rem 0 0;
     border: 0;
-    color: transparent;
+    color: #171717;
     background: transparent;
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   .reader-topbar .back-button::before {
-    content: "<";
-    display: grid;
-    place-items: center;
+    content: "‹";
+    display: inline-block;
+    margin-right: 0.12rem;
     color: #111;
     font-family: Arial, sans-serif;
-    font-size: 2.15rem;
+    font-size: 2rem;
     font-weight: 300;
-    line-height: 1;
+    line-height: 0.8;
+    vertical-align: -0.14rem;
   }
 
   .reader-topbar .section-kicker {
@@ -3129,8 +3133,18 @@ body.detail-open {
 
   .reader-scroll {
     display: block;
-    padding: 1.2rem 1.08rem 6.4rem;
+    padding: 1.2rem 1.08rem 7.6rem;
     background: transparent;
+  }
+
+  .post-admin-actions {
+    justify-content: flex-start;
+    padding-top: 0.45rem;
+  }
+
+  .post-admin-actions .reject-button {
+    min-height: 2.25rem;
+    padding: 0 0.85rem;
   }
 
   .message-card {
