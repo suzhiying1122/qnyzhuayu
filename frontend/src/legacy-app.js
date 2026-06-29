@@ -680,9 +680,16 @@ function renderForum() {
     });
   });
 
+  elements.threadList.querySelectorAll("[data-delete-post]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deletePost(button.dataset.deletePost);
+    });
+  });
+
   elements.threadList.querySelectorAll("[data-post-id]").forEach((card) => {
     card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-open-post]")) return;
+      if (event.target.closest("[data-open-post], [data-delete-post], button, a, input, textarea, select")) return;
       openDetailView("post", card.dataset.postId);
     });
   });
@@ -706,6 +713,11 @@ function renderPostCard(post) {
         <span>${escapeHtml(post.author)}</span>
         <span>${formatDateTime(post.approvedAt || post.createdAt)}</span>
       </div>
+      ${
+        isAdmin()
+          ? `<div class="post-admin-actions"><button class="reject-button" data-delete-post="${post.id}" type="button">删除帖子</button></div>`
+          : ""
+      }
     </article>
   `;
 }
@@ -1200,6 +1212,35 @@ function deleteUserAccount(id) {
   render();
 }
 
+async function deletePost(id) {
+  if (!requireAdminAccess()) return;
+  const post = state.posts.find((item) => item.id === id);
+  if (!post) return;
+  const ok = window.confirm(`确定删除帖子“${post.title}”吗？删除后帖子和下面的留言都会消失。`);
+  if (!ok) return;
+
+  try {
+    await apiRequest(`/api/admin/posts/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+
+  state.posts = state.posts.filter((item) => item.id !== id);
+  if (state.activePostId === id) {
+    state.activePostId = state.posts[0]?.id || "";
+    if (state.activeView === "postDetail") {
+      state.activeView = "forum";
+      updateHash("forum");
+    }
+  }
+  saveState();
+  showToast("帖子已删除");
+  render();
+}
+
 async function approvePost(id) {
   if (!requireAdminAccess()) return;
   try {
@@ -1441,6 +1482,7 @@ function renderPostDetail() {
             <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
             <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${countCommentThreads(comments)} 条留言</p>
           </div>
+          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
         </header>
         <div class="reader-scroll">
           <article class="message-card host-message">
@@ -1477,6 +1519,9 @@ function renderPostDetail() {
   bindViewTargetButtons(elements.postDetailContent);
   bindPostDetailForms();
   bindDetailSidebar(elements.postDetailContent);
+  elements.postDetailContent.querySelectorAll("[data-delete-post]").forEach((button) => {
+    button.addEventListener("click", () => deletePost(button.dataset.deletePost));
+  });
 }
 
 function renderActivityDetail() {

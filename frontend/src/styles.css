@@ -1473,6 +1473,19 @@ select:focus {
   gap: 0.55rem;
 }
 
+.post-admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding-top: 0.2rem;
+}
+
+.detail-delete-button {
+  justify-self: end;
+  align-self: center;
+  white-space: nowrap;
+}
+
 .approve-button {
   color: #fff7e9;
   background: var(--jade);
@@ -3097,6 +3110,15 @@ body.detail-open {
     font-size: clamp(1.82rem, 8vw, 2.38rem);
     font-weight: 800;
     line-height: 1.28;
+  }
+
+  .reader-topbar .detail-delete-button {
+    grid-column: 2;
+    justify-self: start;
+    min-height: 2.2rem;
+    margin-top: 0.28rem;
+    padding: 0 0.78rem;
+    font-size: 0.88rem;
   }
 
   .reader-topbar p:not(.section-kicker) {
