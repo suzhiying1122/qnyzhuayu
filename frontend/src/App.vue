@@ -22,7 +22,7 @@
 
     <main id="top">
       <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
-        <img class="hero-image" src="/assets/stage-hero.png" alt="暖色灯光下的剧场舞台" />
+        <img class="hero-image" src="/assets/bg-main-stage.png" alt="红色幕布与暖色追光下的华煜话剧社舞台" />
         <div class="hero-shade"></div>
         <div class="stage-ribbon ribbon-one"></div>
         <div class="stage-ribbon ribbon-two"></div>

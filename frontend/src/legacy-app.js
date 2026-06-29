@@ -1431,49 +1431,52 @@ function renderPostDetail() {
   const user = currentUser();
 
   elements.postDetailContent.innerHTML = `
-    <div class="detail-page-hero">
-      <button class="back-button" data-view-target="forum" type="button">返回论坛</button>
-      <div>
-        <p class="section-kicker">Thread</p>
-        <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
-        <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${countCommentThreads(comments)} 条留言</p>
-      </div>
-    </div>
-    <article class="tieba-thread">
-      <div class="thread-floor floor-host">
-        <aside class="floor-author">
-          <div class="floor-avatar">${escapeHtml((post.author || "华").slice(0, 1))}</div>
-          <strong>${escapeHtml(post.author || "匿名社员")}</strong>
-          <span>楼主</span>
-        </aside>
-        <div class="floor-content">
-          <div class="floor-stage-mark" aria-hidden="true">
-            <span>HUAYU DRAMA CLUB</span>
+    <div class="wechat-detail-layout forum-chat-layout">
+      ${renderDetailSidebar("forum")}
+      <section class="wechat-reader">
+        <header class="reader-topbar">
+          <button class="back-button" data-view-target="forum" type="button">返回论坛</button>
+          <div>
+            <p class="section-kicker">Huayu Forum</p>
+            <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
+            <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${countCommentThreads(comments)} 条留言</p>
           </div>
-          <div class="tag-row">
-            <span class="tag">${escapeHtml(post.tag || "讨论")}</span>
-            ${renderAttachmentCount(post)}
-          </div>
-          <div class="detail-body">${escapeHtml(post.body)}</div>
-          ${renderAttachmentList(post, "full")}
+        </header>
+        <div class="reader-scroll">
+          <article class="message-card host-message">
+            <aside class="message-author">
+              <div class="floor-avatar">${escapeHtml((post.author || "华").slice(0, 1))}</div>
+              <strong>${escapeHtml(post.author || "匿名社员")}</strong>
+              <span>楼主</span>
+            </aside>
+            <div class="message-body">
+              <div class="tag-row">
+                <span class="tag">${escapeHtml(post.tag || "交流")}</span>
+                ${renderAttachmentCount(post)}
+              </div>
+              <div class="detail-body">${escapeHtml(post.body)}</div>
+              ${renderAttachmentList(post, "full")}
+            </div>
+          </article>
+          <section class="reader-comments">
+            <div class="list-title">
+              <h3>全部留言</h3>
+              <span>点击任意留言下方输入框即可回复</span>
+            </div>
+            <div class="comment-thread-list">${commentsHtml}</div>
+          </section>
+          ${renderDetailStageFooter()}
         </div>
-      </div>
-      <section class="thread-replies">
-        <div class="list-title">
-          <h3>全部留言</h3>
-          <span>实时发布，可对任意留言继续回复</span>
-        </div>
-        <form class="comment-form primary-comment-form" data-comment-form data-post-id="${post.id}">
-          <textarea name="commentBody" rows="4" maxlength="420" placeholder="${user ? "回复楼主，内容会立即显示" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
-          <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布留言</button>
+        <form class="comment-form reader-composer" data-comment-form data-post-id="${post.id}">
+          <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
+          <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布</button>
         </form>
-        <div class="comment-thread-list">${commentsHtml}</div>
       </section>
-    </article>
-    ${renderDetailStageFooter()}
+    </div>
   `;
   bindViewTargetButtons(elements.postDetailContent);
   bindPostDetailForms();
+  bindDetailSidebar(elements.postDetailContent);
 }
 
 function renderActivityDetail() {
@@ -1485,25 +1488,40 @@ function renderActivityDetail() {
   const isPreview = activity.type === "preview";
   const typeText = isPreview ? "活动预告" : "活动简报";
   elements.activityDetailContent.innerHTML = `
-    <div class="detail-page-hero">
-      <button class="back-button" data-view-target="activities" type="button">返回活动</button>
-      <div>
-        <p class="section-kicker">Activity</p>
-        <h2 id="activityDetailTitle">${escapeHtml(activity.title)}</h2>
-        <p>${typeText} · ${formatDate(activity.date)} · ${escapeHtml(activity.author || "华煜话剧社")}</p>
-      </div>
+    <div class="wechat-detail-layout activity-chat-layout">
+      ${renderDetailSidebar("activities")}
+      <section class="wechat-reader">
+        <header class="reader-topbar">
+          <button class="back-button" data-view-target="activities" type="button">返回活动</button>
+          <div>
+            <p class="section-kicker">Huayu Events</p>
+            <h2 id="activityDetailTitle">${escapeHtml(activity.title)}</h2>
+            <p>${typeText} · ${formatDate(activity.date)} · ${escapeHtml(activity.author || "华煜话剧社")}</p>
+          </div>
+        </header>
+        <div class="reader-scroll">
+          <article class="message-card host-message">
+            <aside class="message-author">
+              <div class="floor-avatar">${isPreview ? "预" : "简"}</div>
+              <strong>${escapeHtml(activity.author || "华煜话剧社")}</strong>
+              <span>${typeText}</span>
+            </aside>
+            <div class="message-body">
+              <div class="tag-row">
+                <span class="type-pill ${isPreview ? "preview" : ""}">${typeText}</span>
+                ${renderAttachmentCount(activity)}
+              </div>
+              <div class="detail-body">${escapeHtml(activity.summary)}</div>
+              ${renderAttachmentList(activity, "full")}
+            </div>
+          </article>
+          ${renderDetailStageFooter()}
+        </div>
+      </section>
     </div>
-    <article class="detail-readable-card">
-      <div class="tag-row">
-        <span class="type-pill ${isPreview ? "preview" : ""}">${typeText}</span>
-        ${renderAttachmentCount(activity)}
-      </div>
-      <div class="detail-body">${escapeHtml(activity.summary)}</div>
-      ${renderAttachmentList(activity, "full")}
-    </article>
-    ${renderDetailStageFooter()}
   `;
   bindViewTargetButtons(elements.activityDetailContent);
+  bindDetailSidebar(elements.activityDetailContent);
 }
 
 function renderLetterDetail() {
@@ -1525,28 +1543,143 @@ function renderLetterDetail() {
     `
     : "";
   elements.letterDetailContent.innerHTML = `
-    <div class="detail-page-hero">
-      <button class="back-button" data-view-target="mailbox" type="button">返回信箱</button>
-      <div>
-        <p class="section-kicker">Letter</p>
-        <h2 id="letterDetailTitle">${escapeHtml(letter.subject)}</h2>
-        <p>${escapeHtml(letter.author)} · ${formatDateTime(letter.createdAt)}</p>
-      </div>
+    <div class="wechat-detail-layout mailbox-chat-layout">
+      ${renderDetailSidebar("mailbox")}
+      <section class="wechat-reader">
+        <header class="reader-topbar">
+          <button class="back-button" data-view-target="mailbox" type="button">返回信箱</button>
+          <div>
+            <p class="section-kicker">Huayu Mailbox</p>
+            <h2 id="letterDetailTitle">${escapeHtml(letter.subject)}</h2>
+            <p>${escapeHtml(letter.author)} · ${formatDateTime(letter.createdAt)}</p>
+          </div>
+        </header>
+        <div class="reader-scroll">
+          <article class="message-card host-message">
+            <aside class="message-author">
+              <div class="floor-avatar">${escapeHtml((letter.author || "信").slice(0, 1))}</div>
+              <strong>${escapeHtml(letter.author || "匿名来信")}</strong>
+              <span>来信人</span>
+            </aside>
+            <div class="message-body">
+              <div class="tag-row">
+                <span class="reply-pill">公开信件</span>
+                ${renderAttachmentCount(letter)}
+              </div>
+              <div class="detail-body">${escapeHtml(letter.body)}</div>
+              ${renderAttachmentList(letter, "full")}
+            </div>
+          </article>
+          <article class="message-card club-message">
+            <aside class="message-author">
+              <div class="floor-avatar">华</div>
+              <strong>华煜话剧社</strong>
+              <span>社团回复</span>
+            </aside>
+            <div class="message-body">${replyHtml}</div>
+          </article>
+          ${renderDetailStageFooter()}
+        </div>
+        ${replyForm ? `<div class="reader-admin-composer">${replyForm}</div>` : ""}
+      </section>
     </div>
-    <article class="detail-readable-card">
-      <div class="tag-row">
-        <span class="reply-pill">公开信件</span>
-        ${renderAttachmentCount(letter)}
-      </div>
-      <div class="detail-body">${escapeHtml(letter.body)}</div>
-      ${renderAttachmentList(letter, "full")}
-      ${replyHtml}
-      ${replyForm}
-    </article>
-    ${renderDetailStageFooter()}
   `;
   bindViewTargetButtons(elements.letterDetailContent);
   bindLetterDetailForm();
+  bindDetailSidebar(elements.letterDetailContent);
+}
+
+function renderDetailSidebar(kind) {
+  const config = {
+    forum: {
+      title: "社团论坛",
+      search: "搜索帖子",
+      items: state.posts,
+      activeId: state.activePostId,
+      dataName: "post",
+      viewTarget: "forum",
+      empty: "暂无公开帖子",
+      titleGetter: (item) => item.title,
+      metaGetter: (item) => `${item.author || "匿名社员"} · ${countCommentThreads(item.comments || [])} 条留言`,
+      excerptGetter: (item) => getExcerpt(item.body, 34),
+    },
+    activities: {
+      title: "活动档案",
+      search: "搜索活动",
+      items: state.activities,
+      activeId: state.activeActivityId,
+      dataName: "activity",
+      viewTarget: "activities",
+      empty: "暂无活动",
+      titleGetter: (item) => item.title,
+      metaGetter: (item) => `${item.type === "preview" ? "预告" : "简报"} · ${formatDate(item.date)}`,
+      excerptGetter: (item) => getExcerpt(item.summary, 34),
+    },
+    mailbox: {
+      title: "公开信箱",
+      search: "搜索来信",
+      items: state.letters.filter((item) => item.visibility === "public"),
+      activeId: state.activeLetterId,
+      dataName: "letter",
+      viewTarget: "mailbox",
+      empty: "暂无公开信件",
+      titleGetter: (item) => item.subject,
+      metaGetter: (item) => `${item.author || "匿名来信"} · ${item.reply ? "已回复" : "待回复"}`,
+      excerptGetter: (item) => getExcerpt(item.body, 34),
+    },
+  }[kind];
+
+  const itemsHtml = config.items.length
+    ? config.items
+        .map(
+          (item) => `
+            <button class="reader-list-item ${item.id === config.activeId ? "is-active" : ""}" type="button" data-sidebar-${config.dataName}="${item.id}">
+              <span class="reader-list-avatar">${escapeHtml((config.titleGetter(item) || "华").slice(0, 1))}</span>
+              <span>
+                <strong>${escapeHtml(config.titleGetter(item))}</strong>
+                <small>${escapeHtml(config.metaGetter(item))}</small>
+                <em>${escapeHtml(config.excerptGetter(item))}</em>
+              </span>
+            </button>
+          `,
+        )
+        .join("")
+    : `<div class="empty-state">${config.empty}</div>`;
+
+  return `
+    <aside class="reader-sidebar">
+      <div class="reader-sidebar-head">
+        <button class="back-button" data-view-target="${config.viewTarget}" type="button">返回</button>
+        <strong>${config.title}</strong>
+      </div>
+      <div class="reader-search">${config.search}</div>
+      <div class="reader-list">${itemsHtml}</div>
+    </aside>
+  `;
+}
+
+function bindDetailSidebar(scope) {
+  scope.querySelectorAll("[data-sidebar-post]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activePostId = button.dataset.sidebarPost;
+      renderPostDetail();
+      saveState();
+    });
+  });
+  scope.querySelectorAll("[data-sidebar-activity]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeActivityId = button.dataset.sidebarActivity;
+      renderActivityDetail();
+      saveState();
+    });
+  });
+  scope.querySelectorAll("[data-sidebar-letter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeLetterId = button.dataset.sidebarLetter;
+      renderLetterDetail();
+      saveState();
+    });
+  });
 }
 
 function renderDetailStageFooter() {
@@ -1654,11 +1787,16 @@ function renderCommentThread(comment, postId, level = 1) {
     : "";
   return `
     <article class="comment-card comment-depth-${Math.min(level, 5)}">
-      <div class="meta-row">
-        <strong>${escapeHtml(comment.author || "匿名社员")}</strong>
-        <span>${formatDateTime(comment.createdAt)}</span>
+      <div class="comment-main">
+        <div class="comment-avatar">${escapeHtml((comment.author || "匿").slice(0, 1))}</div>
+        <div>
+          <div class="meta-row">
+            <strong>${escapeHtml(comment.author || "匿名社员")}</strong>
+            <span>${formatDateTime(comment.createdAt)}</span>
+          </div>
+          <p>${escapeHtml(comment.body)}</p>
+        </div>
       </div>
-      <p>${escapeHtml(comment.body)}</p>
       <form class="comment-form inline-reply-form" data-comment-form data-post-id="${postId}" data-parent-id="${comment.id}">
         <textarea name="commentBody" rows="2" maxlength="360" placeholder="${user ? `回复 ${escapeAttribute(comment.author || "这条留言")}` : "登录后可以回复"}" ${user ? "" : "disabled"} required></textarea>
         <button class="secondary-button" type="submit" ${user ? "" : "disabled"}>回复</button>
