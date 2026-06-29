@@ -3352,6 +3352,334 @@ body.detail-open {
     margin: 2.2rem 0 0;
     color: #b8a26d;
   }
+
+  body {
+    overflow-x: hidden;
+    background:
+      linear-gradient(180deg, rgba(255, 249, 238, 0.88), rgba(245, 225, 198, 0.92)),
+      url("/assets/mobile-stage-bg.png") center top / cover fixed,
+      #f4dcc0;
+  }
+
+  body::before {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 230, 170, 0.42), transparent 28rem),
+      linear-gradient(90deg, rgba(166, 31, 51, 0.08) 1px, transparent 1px);
+    background-size: auto, 72px 72px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.38), transparent 62%);
+  }
+
+  .module-screen,
+  .forum-screen,
+  .activities-screen,
+  .mailbox-screen,
+  .admin-screen,
+  .profile-screen {
+    background:
+      linear-gradient(180deg, rgba(255, 249, 238, 0.86), rgba(246, 225, 196, 0.9)),
+      url("/assets/mobile-stage-bg.png") center top / cover fixed,
+      #f4dcc0;
+  }
+
+  .module-hero {
+    overflow: hidden;
+    border: 1px solid rgba(231, 196, 140, 0.58);
+    border-radius: 18px;
+    color: #fff8e9;
+    background:
+      linear-gradient(135deg, rgba(85, 13, 25, 0.82), rgba(166, 31, 51, 0.62)),
+      url("/assets/mobile-card-bg.png") center / cover;
+    box-shadow: 0 16px 40px rgba(83, 16, 23, 0.18);
+  }
+
+  .module-hero h2 {
+    color: #fff8e9;
+    font-size: 2.25rem;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.22);
+  }
+
+  .module-hero p:not(.section-kicker) {
+    color: rgba(255, 248, 232, 0.88);
+  }
+
+  .module-stats span {
+    border-color: rgba(255, 238, 202, 0.38);
+    color: #fff8e9;
+    background: rgba(255, 248, 232, 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .compose-panel {
+    border: 1px solid rgba(225, 190, 135, 0.55);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 254, 249, 0.96), rgba(255, 246, 231, 0.94));
+    box-shadow: 0 14px 34px rgba(92, 30, 21, 0.1);
+  }
+
+  .list-title h3 {
+    color: #3b1816;
+    font-size: 1.22rem;
+    font-weight: 900;
+  }
+
+  .thread-card,
+  .activity-card,
+  .letter-card {
+    border: 1px solid rgba(231, 196, 140, 0.62);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 254, 249, 0.94), rgba(255, 248, 235, 0.96));
+    box-shadow: 0 15px 36px rgba(92, 30, 21, 0.11);
+  }
+
+  .thread-card::before {
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 232, 0.18), rgba(98, 10, 26, 0.2)),
+      url("/assets/mobile-card-bg.png");
+  }
+
+  .activity-card::before {
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 232, 0.16), rgba(28, 91, 78, 0.2)),
+      url("/assets/mobile-card-bg.png");
+  }
+
+  .letter-card::before {
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 232, 0.16), rgba(41, 51, 104, 0.18)),
+      url("/assets/mobile-card-bg.png");
+  }
+
+  .thread-card h4,
+  .activity-card h3,
+  .letter-card h3 {
+    color: #25110f;
+    font-weight: 900;
+  }
+
+  .tag,
+  .type-pill,
+  .reply-pill {
+    box-shadow: 0 8px 18px rgba(96, 18, 30, 0.08);
+  }
+
+  body[data-view="postDetail"],
+  body[data-view="activityDetail"],
+  body[data-view="letterDetail"],
+  .forum-detail-screen,
+  .activity-detail-screen,
+  .letter-detail-screen {
+    background:
+      linear-gradient(180deg, rgba(255, 249, 238, 0.82), rgba(246, 225, 196, 0.9)),
+      url("/assets/mobile-stage-bg.png") center top / cover,
+      #f4dcc0;
+  }
+
+  .reader-topbar {
+    grid-template-columns: 1fr;
+    gap: 0.28rem;
+    padding: 0.72rem 1rem;
+    border-bottom: 1px solid rgba(222, 187, 132, 0.56);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 246, 0.9), rgba(255, 243, 224, 0.82)),
+      url("/assets/mobile-card-bg.png") center top / cover;
+    box-shadow: 0 10px 28px rgba(92, 30, 21, 0.08);
+  }
+
+  .reader-topbar .back-button::before {
+    content: "\2039";
+  }
+
+  .reader-topbar .back-button {
+    justify-self: start;
+    min-height: 2rem;
+    padding-right: 0;
+  }
+
+  .reader-topbar h2 {
+    color: #2a1210;
+    font-size: clamp(1.62rem, 7vw, 2.12rem);
+    font-weight: 900;
+    max-width: min(calc(100vw - 2rem), 340px);
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    white-space: normal;
+  }
+
+  .wechat-reader,
+  .reader-topbar,
+  .reader-topbar > div,
+  .reader-scroll,
+  .message-card,
+  .message-body,
+  .reader-comments,
+  .comment-main,
+  .comment-main > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .wechat-reader,
+  .reader-topbar,
+  .reader-scroll {
+    width: 100vw;
+  }
+
+  .message-card,
+  .reader-comments {
+    width: calc(100vw - 2.8rem);
+    margin-inline: 0;
+  }
+
+  .wechat-reader,
+  .reader-scroll,
+  .message-body,
+  .reader-comments {
+    overflow-x: hidden;
+  }
+
+  .message-card,
+  .reader-comments {
+    overflow: hidden;
+    border: 1px solid rgba(225, 190, 135, 0.66);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 254, 249, 0.88), rgba(255, 248, 235, 0.96)),
+      url("/assets/mobile-card-bg.png") center top / cover;
+    box-shadow: 0 18px 42px rgba(86, 32, 16, 0.12);
+  }
+
+  .detail-body {
+    display: block;
+    width: calc(100vw - 5rem);
+    max-width: 100%;
+    color: #241412;
+    font-size: 1.13rem;
+    line-height: 1.98;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+
+  .comment-card p,
+  .comment-card .meta-row,
+  .reader-topbar p {
+    width: calc(100vw - 6.2rem);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .reader-comments .list-title h3 {
+    color: #301713;
+    font-weight: 900;
+  }
+
+  .inline-reply-form textarea,
+  .reader-composer textarea {
+    border: 1px solid rgba(222, 187, 132, 0.36);
+    border-radius: 12px;
+    background: rgba(255, 253, 248, 0.92);
+  }
+
+  .reader-composer,
+  .reader-admin-composer {
+    border-top: 1px solid rgba(222, 187, 132, 0.48);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 246, 0.9), rgba(255, 245, 229, 0.98)),
+      url("/assets/mobile-card-bg.png") center bottom / cover;
+    box-shadow: 0 -12px 30px rgba(92, 30, 21, 0.1);
+    backdrop-filter: blur(18px);
+  }
+
+  .reader-composer .primary-button {
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(166, 31, 51, 0.18);
+  }
+
+  .site-header {
+    color: #fff8e9;
+    background:
+      linear-gradient(180deg, rgba(52, 8, 14, 0.9), rgba(96, 14, 29, 0.78)),
+      url("/assets/mobile-card-bg.png") center top / cover;
+    box-shadow: 0 12px 28px rgba(68, 12, 18, 0.16);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand {
+    color: #fff8e9;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.24);
+  }
+
+  .brand-mark {
+    border-color: rgba(255, 226, 168, 0.7);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  }
+
+  .top-nav {
+    gap: 0.38rem;
+  }
+
+  .nav-link {
+    border: 1px solid rgba(255, 235, 198, 0.24);
+    color: #fff8e9;
+    background: rgba(255, 248, 232, 0.12);
+  }
+
+  .nav-link.is-active {
+    color: #fff8e9;
+    background: #b71d37;
+    box-shadow: 0 8px 18px rgba(42, 5, 12, 0.18);
+  }
+
+  .account-name,
+  .outline-button,
+  .ghost-button {
+    color: #fff8e9;
+    border-color: rgba(255, 235, 198, 0.28);
+    background: rgba(255, 248, 232, 0.1);
+  }
+
+  .account-name::before {
+    box-shadow: 0 0 0 3px rgba(216, 168, 82, 0.2);
+  }
+
+  .home-view {
+    background:
+      linear-gradient(180deg, rgba(54, 8, 14, 0.18), rgba(54, 8, 14, 0.48)),
+      url("/assets/mobile-stage-bg.png") center top / cover,
+      var(--red-ink);
+  }
+
+  .hero-content {
+    width: min(100% - 1.55rem, 440px);
+    min-height: 620px;
+    padding-top: 4.3rem;
+  }
+
+  .hero-content h1 {
+    max-width: 100%;
+    font-size: clamp(2.85rem, 12.8vw, 3.35rem);
+    line-height: 1.02;
+    white-space: nowrap;
+  }
+
+  .hero-copy {
+    max-width: 24rem;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-actions button {
+    min-width: 0;
+  }
+
+  .module-gates {
+    width: min(100% - 1.55rem, 440px);
+  }
 }
 
 @media (max-width: 430px) {
