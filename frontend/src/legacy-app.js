@@ -176,8 +176,8 @@ const initialState = {
   writingEvents: [
     {
       id: "writing-event-main",
-      title: "华煜剧场征文",
-      prompt: "固定征文活动：写下你和舞台、排练、校园生活、角色或观众席之间的故事。形式不限，散文、随笔、剧评、小剧本片段都可以。",
+      title: "长期投稿活动",
+      prompt: "固定投稿入口：社员可提交文章、剧评、活动记录、剧本片段或社团建议。内容提交后会显示在征文板块，管理员可进行整理和删除。",
       deadline: "2026-09-30",
       fixed: true,
       author: "社团秘书",
@@ -185,8 +185,8 @@ const initialState = {
     },
     {
       id: "writing-event-2",
-      title: "第一次站在追光里",
-      prompt: "围绕第一次排练、第一次上台、第一次看见灯亮起的瞬间，记录那一刻的紧张、惊喜或改变。",
+      title: "招新主题征文",
+      prompt: "投稿范围包括招新说明、部门介绍、排练记录、活动经验和报名建议。文章可附图片、视频或文档，便于后续展示和整理。",
       deadline: "2026-08-20",
       fixed: false,
       author: "社团秘书",
@@ -197,8 +197,8 @@ const initialState = {
     {
       id: "essay-1",
       eventId: "writing-event-main",
-      title: "幕布升起之前",
-      body: "真正让我喜欢上话剧社的，不只是最后那束追光，而是大家在排练室里一遍遍试错的夜晚。有人帮忙记走位，有人整理道具，有人把一句台词读到终于找到呼吸。幕布升起之前，舞台已经在每个人心里亮过一次。",
+      title: "征文板块使用说明",
+      body: "这个板块用于发布征文活动和收集文章。左侧选择活动，右侧查看对应文章。登录后可以新增活动，也可以在当前活动下提交文章和附件。",
       author: "社团秘书",
       createdAt: "2026-06-19T12:30:00.000Z",
       attachments: [],
@@ -206,8 +206,8 @@ const initialState = {
     {
       id: "essay-2",
       eventId: "writing-event-2",
-      title: "追光落在肩膀上",
-      body: "第一次站在光里时，我突然意识到舞台不是一个人的勇敢，而是一群人在黑暗里托住彼此。那束光很亮，可我更记得灯光外面那些点头、手势和无声的鼓励。",
+      title: "招新投稿示例",
+      body: "可以介绍社团部门、排练流程、活动安排、成员经验或报名建议。建议按小标题分段，方便新成员快速查找信息。",
       author: "南楼观众",
       createdAt: "2026-06-23T18:40:00.000Z",
       attachments: [],
@@ -1119,9 +1119,9 @@ function renderWriting() {
     ? state.writingEvents.map(renderWritingEventCard).join("")
     : `<div class="empty-state">暂无征文活动。</div>`;
 
-  elements.writingShelfTitle.textContent = activeEvent ? activeEvent.title : "征文书架";
+  elements.writingShelfTitle.textContent = activeEvent ? activeEvent.title : "文章列表";
   elements.writingShelfHint.textContent = activeEvent
-    ? `${essays.length} 篇文章，点击一本书阅读`
+    ? `${essays.length} 篇文章，点击条目阅读`
     : "先选择一个征文活动";
   elements.writingEventIntro.innerHTML = activeEvent
     ? `
@@ -1135,7 +1135,7 @@ function renderWriting() {
 
   elements.writingShelf.innerHTML = essays.length
     ? essays.map(renderEssayBook).join("")
-    : `<div class="empty-state writing-empty-state">这个活动还没有文章，来放上第一本书。</div>`;
+    : `<div class="empty-state writing-empty-state">这个活动还没有文章，可以登录后提交。</div>`;
 
   elements.writingEventList.querySelectorAll("[data-writing-event]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1280,7 +1280,7 @@ async function handleEssaySubmit(event) {
   state.activeEssayId = essay.id;
   elements.essayForm.reset();
   saveState();
-  showToast("文章已放上征文书架");
+  showToast("文章已提交到征文板块");
   render();
 }
 
@@ -2190,7 +2190,7 @@ function renderDetailSidebar(kind) {
       excerptGetter: (item) => getExcerpt(item.body, 34),
     },
     writing: {
-      title: "征文书架",
+      title: "征文",
       search: "搜索文章",
       items: state.essays,
       activeId: state.activeEssayId,

@@ -73,7 +73,7 @@
           <button class="module-gate gate-writing" data-view-target="writing" type="button">
             <span class="gate-label">Writing</span>
             <strong>征文</strong>
-            <small>把舞台故事放进书架</small>
+            <small>征文活动与文章投稿</small>
           </button>
           <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" type="button">
             <span class="gate-label">Admin</span>
@@ -256,9 +256,9 @@
         <div class="module-hero writing-hero">
           <button class="back-button" data-view-target="home" type="button">返回首页</button>
           <div>
-            <p class="section-kicker">Writing Shelf</p>
-            <h2 id="writingTitle">征文书架</h2>
-            <p>左侧选择征文活动，右侧像抽书一样翻看文章；社员可以添加新的征文主题，也可以把自己的文字放进书架。</p>
+            <p class="section-kicker">投稿中心</p>
+            <h2 id="writingTitle">征文投稿</h2>
+            <p>这里用于发布征文通知和收集文章。社员可按活动提交内容，管理员可查看、整理和删除不合适的文章。</p>
           </div>
           <div class="module-stats">
             <span><strong id="writingEventMetric">0</strong> 征文活动</span>
@@ -277,11 +277,11 @@
               <h3>添加征文活动</h3>
               <label>
                 活动名称
-                <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：舞台初见征文" required />
+                <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：招新主题征文" required />
               </label>
               <label>
                 征文说明
-                <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="写下主题、字数、投稿方向或活动说明" required></textarea>
+                <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="填写主题、字数要求、投稿范围、截止时间说明" required></textarea>
               </label>
               <label>
                 截止时间
@@ -293,8 +293,8 @@
 
           <section class="writing-library" aria-label="征文书架">
             <div class="list-title">
-              <h3 id="writingShelfTitle">征文书架</h3>
-              <span id="writingShelfHint">点击一本书查看文章</span>
+              <h3 id="writingShelfTitle">文章列表</h3>
+              <span id="writingShelfHint">点击条目查看文章</span>
             </div>
             <div class="writing-event-intro" id="writingEventIntro"></div>
             <div class="writing-shelf" id="writingShelf"></div>
@@ -302,18 +302,18 @@
               <h3>添加文章</h3>
               <label>
                 文章标题
-                <input id="essayTitle" type="text" maxlength="52" placeholder="例如：第一次站在追光里" required />
+                <input id="essayTitle" type="text" maxlength="52" placeholder="例如：2026 招新征文投稿" required />
               </label>
               <label>
                 正文
-                <textarea id="essayBody" rows="7" maxlength="1800" placeholder="写下你的剧场、校园、社团或舞台故事" required></textarea>
+                <textarea id="essayBody" rows="7" maxlength="1800" placeholder="输入文章正文，可按段落填写" required></textarea>
               </label>
               <label>
                 附件
                 <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
                 <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
               </label>
-              <button class="primary-button" type="submit">放上书架</button>
+              <button class="primary-button" type="submit">提交文章</button>
             </form>
           </section>
         </div>
