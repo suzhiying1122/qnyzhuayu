@@ -367,6 +367,8 @@ async function syncStateFromApi() {
 }
 
 function bindEvents() {
+  bindInteractiveMotion();
+
   document.querySelectorAll("[data-view-target]").forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.viewTarget));
   });
@@ -415,6 +417,59 @@ function bindEvents() {
   elements.essayForm.addEventListener("submit", handleEssaySubmit);
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
+}
+
+function bindInteractiveMotion() {
+  const interactiveSelector = [
+    ".module-gate",
+    ".thread-card",
+    ".activity-card[data-activity-id]",
+    ".letter-card[data-letter-id]",
+    ".essay-book-open",
+  ].join(",");
+
+  const resetMotion = (target) => {
+    target.style.setProperty("--pointer-x", "50%");
+    target.style.setProperty("--pointer-y", "50%");
+    target.style.setProperty("--tilt-x", "0deg");
+    target.style.setProperty("--tilt-y", "0deg");
+  };
+
+  document.addEventListener("pointermove", (event) => {
+    const target = event.target.closest(interactiveSelector);
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const tiltX = ((50 - y) / 50) * 3.2;
+    const tiltY = ((x - 50) / 50) * 3.2;
+
+    target.style.setProperty("--pointer-x", `${Math.max(0, Math.min(100, x)).toFixed(1)}%`);
+    target.style.setProperty("--pointer-y", `${Math.max(0, Math.min(100, y)).toFixed(1)}%`);
+    target.style.setProperty("--tilt-x", `${tiltX.toFixed(2)}deg`);
+    target.style.setProperty("--tilt-y", `${tiltY.toFixed(2)}deg`);
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    const target = event.target.closest?.(interactiveSelector);
+    if (!target || target.contains(event.relatedTarget)) return;
+    resetMotion(target);
+  }, true);
+
+  document.addEventListener("pointerdown", (event) => {
+    const target = event.target.closest(interactiveSelector);
+    if (target) target.classList.add("is-pressing");
+  });
+
+  ["pointerup", "pointercancel"].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+      document.querySelectorAll(".is-pressing").forEach((target) => {
+        target.classList.remove("is-pressing");
+        resetMotion(target);
+      });
+    });
+  });
 }
 
 function loadState() {

@@ -68,6 +68,20 @@ body::before {
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 70%);
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(216, 168, 82, 0.16), transparent 16rem),
+    radial-gradient(circle at 78% 22%, rgba(166, 31, 51, 0.12), transparent 18rem),
+    radial-gradient(circle at 52% 86%, rgba(35, 107, 97, 0.1), transparent 15rem);
+  opacity: 0.72;
+  animation: ambientGlow 12s ease-in-out infinite alternate;
+}
+
 button,
 input,
 textarea,
@@ -337,6 +351,7 @@ select:disabled {
     linear-gradient(72deg, transparent 0 17%, rgba(255, 218, 154, 0.2) 17% 18%, transparent 18% 100%),
     linear-gradient(106deg, transparent 0 61%, rgba(255, 218, 154, 0.13) 61% 62%, transparent 62% 100%);
   mix-blend-mode: screen;
+  animation: stageSweep 9s ease-in-out infinite alternate;
 }
 
 .stage-ribbon {
@@ -487,6 +502,10 @@ select:disabled {
 }
 
 .module-gate {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
   position: relative;
   display: grid;
   align-content: end;
@@ -503,6 +522,12 @@ select:disabled {
   background-size: cover;
   box-shadow: var(--hard-shadow);
   backdrop-filter: blur(14px);
+  transform:
+    perspective(720px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(0);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, filter 220ms ease;
 }
 
 .module-gate::before {
@@ -510,9 +535,11 @@ select:disabled {
   position: absolute;
   inset: 0;
   background:
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255, 239, 198, 0.36), transparent 10.5rem),
     linear-gradient(180deg, rgba(15, 4, 7, 0.06), rgba(20, 4, 7, 0.68)),
     linear-gradient(135deg, transparent 0 34%, rgba(255, 226, 168, 0.28) 34% 35%, transparent 35% 100%),
     radial-gradient(circle at 18% 12%, rgba(255, 226, 168, 0.16), transparent 32%);
+  transition: opacity 220ms ease, background-position 220ms ease;
 }
 
 .module-gate::after {
@@ -524,9 +551,18 @@ select:disabled {
 }
 
 .module-gate:hover {
-  transform: translateY(-4px);
+  transform:
+    perspective(720px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(-4px);
   border-color: rgba(255, 226, 168, 0.78);
   box-shadow: 0 28px 60px rgba(23, 5, 8, 0.36);
+}
+
+.module-gate.is-pressing {
+  transform: perspective(720px) scale(0.985) translateY(1px);
+  filter: brightness(1.06);
 }
 
 .gate-label,
@@ -1190,6 +1226,10 @@ select:focus {
 }
 
 .essay-book-open {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
   position: relative;
   display: grid;
   grid-template-columns: 1.1rem minmax(0, 1fr);
@@ -1209,9 +1249,18 @@ select:focus {
 
 .essay-book-open:hover,
 .essay-book-open:focus-visible {
-  transform: translateY(-16px) rotate(-1.2deg);
+  transform:
+    perspective(760px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(-18px)
+    rotate(-1.2deg);
   box-shadow: 0 28px 52px rgba(52, 18, 13, 0.24);
   filter: saturate(1.08);
+}
+
+.essay-book-open.is-pressing {
+  transform: perspective(760px) scale(0.985) translateY(-8px);
 }
 
 .book-spine {
@@ -1228,6 +1277,7 @@ select:focus {
   min-width: 0;
   padding: 1rem 0.9rem 1.05rem;
   background:
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255, 241, 199, 0.24), transparent 5.5rem),
     linear-gradient(135deg, rgba(255, 226, 168, 0.12), transparent 42%),
     radial-gradient(circle at 78% 12%, rgba(255, 226, 168, 0.22), transparent 5rem);
 }
@@ -1330,6 +1380,28 @@ select:focus {
   }
 }
 
+@keyframes ambientGlow {
+  from {
+    opacity: 0.48;
+    transform: translate3d(-1rem, -0.5rem, 0) scale(1);
+  }
+  to {
+    opacity: 0.82;
+    transform: translate3d(1rem, 0.7rem, 0) scale(1.04);
+  }
+}
+
+@keyframes stageSweep {
+  from {
+    opacity: 0.42;
+    transform: translateX(-1.4rem);
+  }
+  to {
+    opacity: 0.82;
+    transform: translateX(1.4rem);
+  }
+}
+
 .review-list-two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1350,6 +1422,21 @@ select:focus {
   background: #fffdf7;
 }
 
+.thread-card,
+.activity-card,
+.letter-card {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform:
+    perspective(820px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(0);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, filter 220ms ease;
+}
+
 .thread-card {
   display: grid;
   gap: 0.66rem;
@@ -1368,6 +1455,27 @@ select:focus {
 .thread-card.is-active {
   border-color: rgba(166, 31, 51, 0.44);
   box-shadow: 0 14px 28px rgba(90, 15, 24, 0.12);
+}
+
+.thread-card:hover,
+.activity-card[data-activity-id]:hover,
+.letter-card[data-letter-id]:hover {
+  transform:
+    perspective(820px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    translateY(-5px);
+  border-color: rgba(166, 31, 51, 0.42);
+  box-shadow:
+    0 18px 38px rgba(90, 15, 24, 0.13),
+    inset 0 0 0 1px rgba(255, 226, 168, 0.24);
+}
+
+.thread-card.is-pressing,
+.activity-card.is-pressing,
+.letter-card.is-pressing {
+  transform: perspective(820px) scale(0.988) translateY(1px);
+  filter: brightness(1.02);
 }
 
 .thread-card.is-active {
@@ -4100,8 +4208,10 @@ body.detail-open {
     inset: 0;
     z-index: -1;
     background:
+      radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(255, 239, 201, 0.64), transparent 9rem),
       linear-gradient(180deg, rgba(255, 250, 241, 0.54), rgba(255, 250, 241, 0.9) 48%, rgba(255, 253, 247, 0.98)),
       radial-gradient(circle at 48% 70%, rgba(255, 252, 246, 0.92), transparent 17rem);
+    transition: background 180ms ease;
   }
 
   .thread-card::before {
@@ -4158,5 +4268,24 @@ body.detail-open {
   .activity-summary,
   .letter-body {
     padding: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .module-gate,
+  .thread-card,
+  .activity-card,
+  .letter-card,
+  .essay-book-open {
+    transform: none !important;
   }
 }
