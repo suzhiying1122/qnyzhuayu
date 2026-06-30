@@ -45,9 +45,11 @@ const initialState = {
       createdAt: "2026-06-01T10:00:00.000Z",
       friends: [],
       friendRequests: [],
+      chats: {},
     },
   ],
   currentUserId: null,
+  activeChatFriendId: "",
   activeView: "home",
   activePostId: "post-1",
   activeActivityId: "activity-1",
@@ -308,6 +310,14 @@ const elements = {
   friendRequestList: document.querySelector("#friendRequestList"),
   friendListHint: document.querySelector("#friendListHint"),
   friendList: document.querySelector("#friendList"),
+  privateChatEmpty: document.querySelector("#privateChatEmpty"),
+  privateChatRoom: document.querySelector("#privateChatRoom"),
+  chatFriendAvatar: document.querySelector("#chatFriendAvatar"),
+  chatFriendName: document.querySelector("#chatFriendName"),
+  chatFriendMeta: document.querySelector("#chatFriendMeta"),
+  chatMessages: document.querySelector("#chatMessages"),
+  chatForm: document.querySelector("#chatForm"),
+  chatInput: document.querySelector("#chatInput"),
   postCount: document.querySelector("#postCount"),
   activityCount: document.querySelector("#activityCount"),
   publicLetterCount: document.querySelector("#publicLetterCount"),
@@ -437,6 +447,7 @@ function bindEvents() {
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
   elements.friendSearchForm.addEventListener("submit", handleFriendSearchSubmit);
+  elements.chatForm.addEventListener("submit", handleChatSubmit);
 }
 
 function bindInteractiveMotion() {
@@ -505,6 +516,7 @@ function loadState() {
       activeLetterId: saved.activeLetterId || "letter-1",
       activeWritingEventId: saved.activeWritingEventId || "writing-event-main",
       activeEssayId: saved.activeEssayId || "essay-1",
+      activeChatFriendId: saved.activeChatFriendId || "",
       pendingPosts: Array.isArray(saved.pendingPosts) ? saved.pendingPosts : [],
       pendingComments: Array.isArray(saved.pendingComments) ? saved.pendingComments : [],
       pendingActivities: Array.isArray(saved.pendingActivities) ? saved.pendingActivities : [],
@@ -657,6 +669,7 @@ function ensureUserProfile(user) {
   user.phone = user.phone || "";
   user.friends = Array.isArray(user.friends) ? user.friends : [];
   user.friendRequests = Array.isArray(user.friendRequests) ? user.friendRequests : [];
+  user.chats = user.chats && typeof user.chats === "object" ? user.chats : {};
   user.firstUsedAt = user.firstUsedAt || user.createdAt || new Date().toISOString();
   user.lastUsedAt = user.lastUsedAt || user.firstUsedAt;
   user.createdAt = user.createdAt || user.firstUsedAt;
@@ -1550,6 +1563,10 @@ function renderFriends(user) {
   elements.friendRequestList.querySelectorAll("[data-ignore-friend]").forEach((button) => {
     button.addEventListener("click", () => respondFriendRequest(button.dataset.ignoreFriend, false));
   });
+  elements.friendList.querySelectorAll("[data-open-chat]").forEach((button) => {
+    button.addEventListener("click", () => openPrivateChat(button.dataset.openChat));
+  });
+  renderPrivateChat(user);
 }
 
 function renderFriendRequestRow(request) {
@@ -1576,6 +1593,9 @@ function renderFriendRow(friend) {
       <div>
         <strong>${escapeHtml(getUserDisplayName(friend))}</strong>
         <span>编号 ${escapeHtml(friend.accountNo)} · ${escapeHtml(friend.clubRole || "社员")}</span>
+      </div>
+      <div class="friend-actions">
+        <button class="secondary-button" data-open-chat="${friend.id}" type="button">私聊</button>
       </div>
     </article>
   `;
@@ -1630,6 +1650,80 @@ function respondFriendRequest(fromUserId, accepted) {
   }
   saveState();
   renderProfile();
+}
+
+function openPrivateChat(friendId) {
+  const user = currentUser();
+  if (!user || !user.friends.includes(friendId)) return;
+  state.activeChatFriendId = friendId;
+  saveState();
+  renderProfile();
+  elements.chatInput.focus();
+}
+
+function renderPrivateChat(user) {
+  const friend = state.users.find((item) => item.id === state.activeChatFriendId && user.friends.includes(item.id));
+  if (!friend) {
+    state.activeChatFriendId = "";
+    elements.privateChatEmpty.classList.remove("hidden");
+    elements.privateChatRoom.classList.add("hidden");
+    elements.chatMessages.innerHTML = "";
+    return;
+  }
+
+  ensureUserProfile(friend);
+  const messages = getChatMessages(user, friend.id);
+  elements.privateChatEmpty.classList.add("hidden");
+  elements.privateChatRoom.classList.remove("hidden");
+  elements.chatFriendAvatar.textContent = friend.avatarData ? "" : getUserInitial(friend);
+  elements.chatFriendAvatar.style.backgroundImage = friend.avatarData ? `url("${friend.avatarData}")` : "";
+  elements.chatFriendName.textContent = getUserDisplayName(friend);
+  elements.chatFriendMeta.textContent = `编号 ${friend.accountNo}`;
+  elements.chatMessages.innerHTML = messages.length
+    ? messages.map((message) => renderChatMessage(message, user.id)).join("")
+    : `<div class="empty-state">还没有消息，发一句开始聊天。</div>`;
+  elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+}
+
+function renderChatMessage(message, currentUserId) {
+  const fromMe = message.fromUserId === currentUserId;
+  return `
+    <article class="chat-bubble ${fromMe ? "from-me" : "from-friend"}">
+      <p>${escapeHtml(message.body)}</p>
+      <span>${formatDateTime(message.createdAt)}</span>
+    </article>
+  `;
+}
+
+function handleChatSubmit(event) {
+  event.preventDefault();
+  const user = currentUser();
+  const friend = state.users.find((item) => item.id === state.activeChatFriendId);
+  if (!user || !friend || !user.friends.includes(friend.id)) {
+    showToast("请先选择一位好友");
+    return;
+  }
+
+  const body = elements.chatInput.value.trim();
+  if (!body) return;
+  const message = {
+    id: createId("message"),
+    fromUserId: user.id,
+    toUserId: friend.id,
+    body,
+    createdAt: new Date().toISOString(),
+  };
+  ensureUserProfile(friend);
+  user.chats[friend.id] = [...getChatMessages(user, friend.id), message];
+  friend.chats[user.id] = [...getChatMessages(friend, user.id), message];
+  elements.chatForm.reset();
+  saveState();
+  renderProfile();
+}
+
+function getChatMessages(user, friendId) {
+  ensureUserProfile(user);
+  return Array.isArray(user.chats[friendId]) ? user.chats[friendId] : [];
 }
 
 function renderAdmin() {
@@ -1781,7 +1875,9 @@ function deleteUserAccount(id) {
   state.users.forEach((user) => {
     user.friends = (user.friends || []).filter((friendId) => friendId !== id);
     user.friendRequests = (user.friendRequests || []).filter((request) => request.fromUserId !== id);
+    if (user.chats) delete user.chats[id];
   });
+  if (state.activeChatFriendId === id) state.activeChatFriendId = "";
   saveState();
   showToast("账号已注销");
   render();

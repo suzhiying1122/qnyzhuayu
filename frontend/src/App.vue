@@ -413,6 +413,23 @@
                 </div>
                 <div class="friend-list" id="friendList"></div>
               </div>
+              <section class="private-chat" id="privateChatPanel" aria-label="好友私聊">
+                <div class="chat-empty" id="privateChatEmpty">选择一位好友开始私聊。</div>
+                <div class="chat-room hidden" id="privateChatRoom">
+                  <div class="chat-header">
+                    <div class="mini-avatar" id="chatFriendAvatar" aria-hidden="true">友</div>
+                    <div>
+                      <strong id="chatFriendName">好友</strong>
+                      <span id="chatFriendMeta">编号</span>
+                    </div>
+                  </div>
+                  <div class="chat-messages" id="chatMessages"></div>
+                  <form class="chat-compose" id="chatForm">
+                    <input id="chatInput" type="text" maxlength="300" placeholder="输入私聊内容" autocomplete="off" />
+                    <button class="primary-button" type="submit">发送</button>
+                  </form>
+                </div>
+              </section>
             </section>
 
           </div>
