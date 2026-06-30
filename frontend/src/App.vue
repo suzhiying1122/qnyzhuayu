@@ -15,6 +15,7 @@
         <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" type="button">管理</button>
       </nav>
       <div class="account-area">
+        <button class="account-avatar-button" id="accountAvatarButton" type="button" aria-label="打开个人主页">华</button>
         <button class="account-name" id="accountName" type="button">未登录</button>
         <button class="outline-button" id="authOpenButton" type="button">登录 / 注册</button>
         <button class="ghost-button hidden" id="logoutButton" type="button">退出</button>
@@ -344,6 +345,7 @@
               <p class="section-kicker">Member Card</p>
               <h3 id="profileDisplayTitle">未登录</h3>
               <p id="profileRoleText">登录后完善你的社员资料</p>
+              <p class="profile-number" id="profileAccountNo">编号：未登录</p>
             </div>
             <div class="profile-intro-box" id="profileIntroText">这里会显示你的个人介绍。</div>
           </aside>
@@ -387,6 +389,31 @@
               </label>
               <button class="primary-button" type="submit">更新密码</button>
             </form>
+
+            <section class="profile-panel friend-panel">
+              <h3>好友</h3>
+              <form class="friend-search-form" id="friendSearchForm">
+                <label>
+                  搜索编号或昵称
+                  <input id="friendSearchInput" type="text" maxlength="24" placeholder="输入对方编号或昵称" />
+                </label>
+                <button class="primary-button" type="submit">发送申请</button>
+              </form>
+              <div class="friend-section">
+                <div class="list-title compact-title">
+                  <h4>收到的申请</h4>
+                  <span id="friendRequestHint"></span>
+                </div>
+                <div class="friend-list" id="friendRequestList"></div>
+              </div>
+              <div class="friend-section">
+                <div class="list-title compact-title">
+                  <h4>我的好友</h4>
+                  <span id="friendListHint"></span>
+                </div>
+                <div class="friend-list" id="friendList"></div>
+              </div>
+            </section>
 
           </div>
         </div>
@@ -446,8 +473,8 @@
         </div>
         <form id="authForm">
           <label>
-            用户名
-            <input id="authUsername" type="text" minlength="2" maxlength="18" autocomplete="username" required />
+            <span id="authUsernameLabel">编号</span>
+            <input id="authUsername" type="text" minlength="2" maxlength="18" autocomplete="username" placeholder="请输入账号编号，例如 0000" required />
           </label>
           <label>
             密码

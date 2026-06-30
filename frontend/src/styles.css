@@ -218,6 +218,39 @@ select:disabled {
   min-width: 0;
 }
 
+.account-avatar-button,
+.mini-avatar {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    linear-gradient(135deg, rgba(255, 226, 168, 0.22), rgba(255, 247, 233, 0.08)),
+    rgba(255, 247, 233, 0.1);
+  background-position: center;
+  background-size: cover;
+  color: var(--gold-soft);
+  font-weight: 900;
+}
+
+.account-avatar-button {
+  width: 2.45rem;
+  height: 2.45rem;
+  border: 1px solid rgba(255, 226, 168, 0.5);
+  box-shadow:
+    0 0 0 3px rgba(255, 247, 233, 0.08),
+    0 10px 24px rgba(16, 4, 6, 0.28);
+}
+
+.account-avatar-button.is-logged-in {
+  border-color: rgba(255, 226, 168, 0.86);
+}
+
+.account-avatar-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--gold-soft);
+}
+
 .account-name {
   display: inline-flex;
   align-items: center;
@@ -255,7 +288,8 @@ select:disabled {
 .secondary-button,
 .back-button,
 .approve-button,
-.reject-button {
+.reject-button,
+.ghost-light-button {
   min-height: 2.65rem;
   border-radius: 6px;
   border: 1px solid transparent;
@@ -914,6 +948,75 @@ select:disabled {
 
 .profile-panel:nth-child(2) {
   border-top-color: var(--gold);
+}
+
+.friend-panel {
+  grid-column: 1 / -1;
+  border-top-color: var(--jade);
+}
+
+.friend-search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.friend-section {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.compact-title h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.friend-list {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.friend-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.72rem;
+  align-items: center;
+  padding: 0.72rem;
+  border: 1px solid rgba(229, 200, 165, 0.78);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 247, 0.86);
+}
+
+.friend-row strong,
+.friend-row span {
+  display: block;
+}
+
+.friend-row span {
+  margin-top: 0.16rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.friend-actions {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.mini-avatar {
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid rgba(166, 31, 51, 0.18);
+  color: var(--red);
+  background-color: #fff7e9;
+}
+
+.profile-number {
+  margin-top: 0.34rem;
+  color: var(--gold-soft);
+  font-weight: 900;
+  letter-spacing: 0;
 }
 
 .profile-summary-card {
@@ -1887,6 +1990,12 @@ select:focus {
   color: var(--red-deep);
   background: #fff3e3;
   border-color: #e4b596;
+}
+
+.ghost-light-button {
+  color: #5f3025;
+  background: rgba(255, 253, 247, 0.78);
+  border-color: rgba(128, 32, 49, 0.18);
 }
 
 .empty-state {
@@ -4287,5 +4396,97 @@ body.detail-open {
   .letter-card,
   .essay-book-open {
     transform: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.58rem 0.7rem 0.58rem 4.6rem;
+  }
+
+  .brand {
+    justify-self: start;
+    min-width: 0;
+  }
+
+  .brand span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .top-nav {
+    position: fixed;
+    left: 0.45rem;
+    top: 5.1rem;
+    z-index: 45;
+    display: grid;
+    gap: 0.45rem;
+    width: 3.5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    padding: 0.42rem;
+    border: 1px solid rgba(255, 226, 168, 0.26);
+    border-radius: 999px;
+    background:
+      linear-gradient(180deg, rgba(62, 11, 19, 0.92), rgba(31, 8, 12, 0.9)),
+      var(--red-ink);
+    box-shadow: 0 18px 42px rgba(32, 8, 10, 0.24);
+    backdrop-filter: blur(18px);
+  }
+
+  .nav-link {
+    width: 2.62rem;
+    min-height: 2.62rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.82rem;
+    line-height: 1.1;
+    white-space: normal;
+  }
+
+  .account-area {
+    justify-self: end;
+    gap: 0.35rem;
+  }
+
+  .account-avatar-button {
+    width: 2.3rem;
+    height: 2.3rem;
+  }
+
+  .account-name {
+    display: none;
+  }
+
+  .outline-button,
+  .ghost-button {
+    min-height: 2.3rem;
+    padding: 0 0.72rem;
+    font-size: 0.82rem;
+  }
+
+  .home-view,
+  .module-screen {
+    padding-left: 4.25rem;
+  }
+
+  body[data-view="postDetail"] .site-header,
+  body[data-view="activityDetail"] .site-header,
+  body[data-view="letterDetail"] .site-header {
+    display: grid;
+  }
+
+  .friend-search-form,
+  .friend-row {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-actions {
+    width: 100%;
+  }
+
+  .friend-actions button {
+    flex: 1;
   }
 }

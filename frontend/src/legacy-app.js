@@ -31,6 +31,7 @@ const initialState = {
   users: [
     {
       id: "user-admin",
+      accountNo: "0000",
       username: "社团秘书",
       password: "huayu2026",
       role: "admin",
@@ -42,6 +43,8 @@ const initialState = {
       firstUsedAt: "2026-06-01T10:00:00.000Z",
       lastUsedAt: "2026-06-01T10:00:00.000Z",
       createdAt: "2026-06-01T10:00:00.000Z",
+      friends: [],
+      friendRequests: [],
     },
   ],
   currentUserId: null,
@@ -225,11 +228,13 @@ let registerVerification = {
 };
 
 const elements = {
+  accountAvatarButton: document.querySelector("#accountAvatarButton"),
   accountName: document.querySelector("#accountName"),
   authOpenButton: document.querySelector("#authOpenButton"),
   authCloseButton: document.querySelector("#authCloseButton"),
   authModal: document.querySelector("#authModal"),
   authForm: document.querySelector("#authForm"),
+  authUsernameLabel: document.querySelector("#authUsernameLabel"),
   authUsername: document.querySelector("#authUsername"),
   authPassword: document.querySelector("#authPassword"),
   authPhone: document.querySelector("#authPhone"),
@@ -284,6 +289,7 @@ const elements = {
   profileAvatarPreview: document.querySelector("#profileAvatarPreview"),
   profileDisplayTitle: document.querySelector("#profileDisplayTitle"),
   profileRoleText: document.querySelector("#profileRoleText"),
+  profileAccountNo: document.querySelector("#profileAccountNo"),
   profileIntroText: document.querySelector("#profileIntroText"),
   profilePostMetric: document.querySelector("#profilePostMetric"),
   profileActivityMetric: document.querySelector("#profileActivityMetric"),
@@ -296,6 +302,12 @@ const elements = {
   currentPassword: document.querySelector("#currentPassword"),
   newPassword: document.querySelector("#newPassword"),
   confirmPassword: document.querySelector("#confirmPassword"),
+  friendSearchForm: document.querySelector("#friendSearchForm"),
+  friendSearchInput: document.querySelector("#friendSearchInput"),
+  friendRequestHint: document.querySelector("#friendRequestHint"),
+  friendRequestList: document.querySelector("#friendRequestList"),
+  friendListHint: document.querySelector("#friendListHint"),
+  friendList: document.querySelector("#friendList"),
   postCount: document.querySelector("#postCount"),
   activityCount: document.querySelector("#activityCount"),
   publicLetterCount: document.querySelector("#publicLetterCount"),
@@ -389,6 +401,13 @@ function bindEvents() {
   });
 
   elements.authOpenButton.addEventListener("click", openAuthModal);
+  elements.accountAvatarButton.addEventListener("click", () => {
+    if (currentUser()) {
+      setView("profile");
+      return;
+    }
+    openAuthModal();
+  });
   elements.accountName.addEventListener("click", () => {
     if (currentUser()) {
       setView("profile");
@@ -417,6 +436,7 @@ function bindEvents() {
   elements.essayForm.addEventListener("submit", handleEssaySubmit);
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
+  elements.friendSearchForm.addEventListener("submit", handleFriendSearchSubmit);
 }
 
 function bindInteractiveMotion() {
@@ -475,7 +495,7 @@ function bindInteractiveMotion() {
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY));
-    if (!saved || !Array.isArray(saved.posts)) return structuredClone(initialState);
+    if (!saved || !Array.isArray(saved.posts)) return prepareState(structuredClone(initialState));
     const merged = {
       ...structuredClone(initialState),
       ...saved,
@@ -493,13 +513,17 @@ function loadState() {
         : structuredClone(initialState.writingEvents),
       essays: Array.isArray(saved.essays) ? saved.essays : structuredClone(initialState.essays),
     };
-    ensureAdminUser(merged);
-    normalizeLoadedState(merged);
-    normalizeSeedForumContent(merged);
-    return merged;
+    return prepareState(merged);
   } catch {
-    return structuredClone(initialState);
+    return prepareState(structuredClone(initialState));
   }
+}
+
+function prepareState(targetState) {
+  ensureAdminUser(targetState);
+  normalizeLoadedState(targetState);
+  normalizeSeedForumContent(targetState);
+  return targetState;
 }
 
 function ensureAdminUser(targetState) {
@@ -507,6 +531,7 @@ function ensureAdminUser(targetState) {
   if (admin) {
     if (!admin.password) admin.password = "huayu2026";
     admin.role = "admin";
+    admin.accountNo = "0000";
     ensureUserProfile(admin);
     return;
   }
@@ -514,6 +539,7 @@ function ensureAdminUser(targetState) {
 }
 
 function normalizeLoadedState(targetState) {
+  assignMissingAccountNumbers(targetState);
   targetState.users.forEach(ensureUserProfile);
   targetState.posts.forEach((post) => {
     post.attachments = normalizeAttachments(post);
@@ -554,6 +580,29 @@ function normalizeLoadedState(targetState) {
     essay.createdAt = essay.createdAt || new Date().toISOString();
     essay.attachments = normalizeAttachments(essay);
   });
+}
+
+function assignMissingAccountNumbers(targetState) {
+  const used = new Set();
+  targetState.users.forEach((user) => {
+    if (user.username === "社团秘书" || user.role === "admin") {
+      user.accountNo = "0000";
+    }
+    if (user.accountNo) used.add(String(user.accountNo));
+  });
+
+  targetState.users.forEach((user) => {
+    if (!user.accountNo) {
+      user.accountNo = nextAccountNo(used);
+    }
+    used.add(String(user.accountNo));
+  });
+}
+
+function nextAccountNo(used = new Set(state?.users?.map((user) => String(user.accountNo)).filter(Boolean) || [])) {
+  let next = 1;
+  while (used.has(String(next).padStart(4, "0"))) next += 1;
+  return String(next).padStart(4, "0");
 }
 
 function mergeFixedWritingEvents(events) {
@@ -600,11 +649,14 @@ function migratePendingComments(targetState) {
 }
 
 function ensureUserProfile(user) {
+  user.accountNo = user.accountNo || "";
   user.profileName = user.profileName || user.username;
   user.avatarData = user.avatarData || "";
   user.intro = user.intro || "";
   user.clubRole = user.clubRole || (user.role === "admin" ? "管理员 / 社团秘书" : "社员");
   user.phone = user.phone || "";
+  user.friends = Array.isArray(user.friends) ? user.friends : [];
+  user.friendRequests = Array.isArray(user.friendRequests) ? user.friendRequests : [];
   user.firstUsedAt = user.firstUsedAt || user.createdAt || new Date().toISOString();
   user.lastUsedAt = user.lastUsedAt || user.firstUsedAt;
   user.createdAt = user.createdAt || user.firstUsedAt;
@@ -808,13 +860,17 @@ function renderView() {
 function renderAccount() {
   const user = currentUser();
   const admin = isAdmin();
-  elements.accountName.textContent = user ? getUserDisplayName(user) : "未登录";
+  if (user) ensureUserProfile(user);
+  elements.accountName.textContent = user ? `${getUserDisplayName(user)} · ${user.accountNo}` : "未登录";
   elements.accountName.classList.toggle("is-clickable", Boolean(user));
+  elements.accountAvatarButton.textContent = user?.avatarData ? "" : getUserInitial(user);
+  elements.accountAvatarButton.style.backgroundImage = user?.avatarData ? `url("${user.avatarData}")` : "";
+  elements.accountAvatarButton.classList.toggle("is-logged-in", Boolean(user));
   elements.authOpenButton.classList.toggle("hidden", Boolean(user));
   elements.logoutButton.classList.toggle("hidden", !user);
   elements.adminNavButton.classList.toggle("hidden", !admin);
   elements.adminHomeGate.classList.toggle("hidden", !admin);
-  elements.currentUserHint.textContent = user ? `${getUserDisplayName(user)} 可自由交流，公开前需审核` : "注册账号后可提交话题不限的内容";
+  elements.currentUserHint.textContent = user ? `${getUserDisplayName(user)}（编号 ${user.accountNo}）可自由交流，公开前需审核` : "注册账号后可提交话题不限的内容";
 }
 
 function renderStats() {
@@ -1355,6 +1411,7 @@ function renderProfile() {
   if (!user) {
     elements.profileDisplayTitle.textContent = "未登录";
     elements.profileRoleText.textContent = "登录后完善你的社员资料";
+    elements.profileAccountNo.textContent = "编号：未登录";
     elements.profileIntroText.textContent = "这里会显示你的个人介绍。";
     elements.profileAvatarPreview.textContent = "华";
     elements.profileAvatarPreview.style.backgroundImage = "";
@@ -1364,14 +1421,22 @@ function renderProfile() {
     elements.passwordForm.querySelectorAll("input, button").forEach((field) => {
       field.disabled = true;
     });
+    elements.friendSearchForm.querySelectorAll("input, button").forEach((field) => {
+      field.disabled = true;
+    });
+    elements.friendRequestHint.textContent = "";
+    elements.friendRequestList.innerHTML = `<div class="empty-state">登录后查看好友申请。</div>`;
+    elements.friendListHint.textContent = "";
+    elements.friendList.innerHTML = `<div class="empty-state">登录后添加好友。</div>`;
     return;
   }
 
   ensureUserProfile(user);
   const displayName = getUserDisplayName(user);
-  const initial = displayName.slice(0, 1) || "华";
+  const initial = getUserInitial(user);
   elements.profileDisplayTitle.textContent = displayName;
   elements.profileRoleText.textContent = user.clubRole || (admin ? "管理员 / 社团秘书" : "社员");
+  elements.profileAccountNo.textContent = `编号：${user.accountNo}`;
   elements.profileIntroText.textContent = user.intro || "还没有填写个人介绍。";
   elements.profileAvatarPreview.textContent = user.avatarData ? "" : initial;
   elements.profileAvatarPreview.style.backgroundImage = user.avatarData ? `url("${user.avatarData}")` : "";
@@ -1384,6 +1449,10 @@ function renderProfile() {
   elements.passwordForm.querySelectorAll("input, button").forEach((field) => {
     field.disabled = false;
   });
+  elements.friendSearchForm.querySelectorAll("input, button").forEach((field) => {
+    field.disabled = false;
+  });
+  renderFriends(user);
 }
 
 async function handleProfileSubmit(event) {
@@ -1453,6 +1522,114 @@ function handlePasswordSubmit(event) {
   elements.passwordForm.reset();
   showToast("密码已更新");
   renderAccount();
+}
+
+function renderFriends(user) {
+  const incoming = user.friendRequests
+    .map((request) => ({
+      ...request,
+      fromUser: state.users.find((item) => item.id === request.fromUserId),
+    }))
+    .filter((request) => request.fromUser);
+  const friends = user.friends
+    .map((friendId) => state.users.find((item) => item.id === friendId))
+    .filter(Boolean);
+
+  elements.friendRequestHint.textContent = `${incoming.length} 条待处理`;
+  elements.friendListHint.textContent = `${friends.length} 位好友`;
+  elements.friendRequestList.innerHTML = incoming.length
+    ? incoming.map(renderFriendRequestRow).join("")
+    : `<div class="empty-state">暂无新的好友申请。</div>`;
+  elements.friendList.innerHTML = friends.length
+    ? friends.map(renderFriendRow).join("")
+    : `<div class="empty-state">还没有好友，可以用编号或昵称搜索添加。</div>`;
+
+  elements.friendRequestList.querySelectorAll("[data-accept-friend]").forEach((button) => {
+    button.addEventListener("click", () => respondFriendRequest(button.dataset.acceptFriend, true));
+  });
+  elements.friendRequestList.querySelectorAll("[data-ignore-friend]").forEach((button) => {
+    button.addEventListener("click", () => respondFriendRequest(button.dataset.ignoreFriend, false));
+  });
+}
+
+function renderFriendRequestRow(request) {
+  const fromUser = request.fromUser;
+  return `
+    <article class="friend-row">
+      <div class="mini-avatar" style="${avatarStyle(fromUser)}">${fromUser.avatarData ? "" : escapeHtml(getUserInitial(fromUser))}</div>
+      <div>
+        <strong>${escapeHtml(getUserDisplayName(fromUser))}</strong>
+        <span>编号 ${escapeHtml(fromUser.accountNo)} · ${formatDateTime(request.createdAt)}</span>
+      </div>
+      <div class="friend-actions">
+        <button class="approve-button" data-accept-friend="${fromUser.id}" type="button">同意</button>
+        <button class="ghost-light-button" data-ignore-friend="${fromUser.id}" type="button">忽略</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderFriendRow(friend) {
+  return `
+    <article class="friend-row">
+      <div class="mini-avatar" style="${avatarStyle(friend)}">${friend.avatarData ? "" : escapeHtml(getUserInitial(friend))}</div>
+      <div>
+        <strong>${escapeHtml(getUserDisplayName(friend))}</strong>
+        <span>编号 ${escapeHtml(friend.accountNo)} · ${escapeHtml(friend.clubRole || "社员")}</span>
+      </div>
+    </article>
+  `;
+}
+
+function handleFriendSearchSubmit(event) {
+  event.preventDefault();
+  const user = currentUser();
+  if (!user) {
+    openAuthModal();
+    return;
+  }
+
+  const query = elements.friendSearchInput.value.trim();
+  if (!query) return;
+  const target = state.users.find((item) => item.id !== user.id && (String(item.accountNo) === query || getUserDisplayName(item) === query || item.username === query));
+  if (!target) {
+    showToast("没有找到这个编号或昵称");
+    return;
+  }
+  ensureUserProfile(target);
+  if (user.friends.includes(target.id)) {
+    showToast("你们已经是好友");
+    return;
+  }
+  if (target.friendRequests.some((request) => request.fromUserId === user.id)) {
+    showToast("好友申请已经发送，等待对方处理");
+    return;
+  }
+  target.friendRequests.unshift({
+    fromUserId: user.id,
+    createdAt: new Date().toISOString(),
+  });
+  elements.friendSearchForm.reset();
+  saveState();
+  showToast(`已向 ${getUserDisplayName(target)} 发送好友申请`);
+  renderProfile();
+}
+
+function respondFriendRequest(fromUserId, accepted) {
+  const user = currentUser();
+  if (!user) return;
+  const fromUser = state.users.find((item) => item.id === fromUserId);
+  user.friendRequests = user.friendRequests.filter((request) => request.fromUserId !== fromUserId);
+  if (accepted && fromUser) {
+    ensureUserProfile(fromUser);
+    if (!user.friends.includes(fromUser.id)) user.friends.push(fromUser.id);
+    if (!fromUser.friends.includes(user.id)) fromUser.friends.push(user.id);
+    showToast(`已添加 ${getUserDisplayName(fromUser)} 为好友`);
+  } else {
+    showToast("已忽略好友申请");
+  }
+  saveState();
+  renderProfile();
 }
 
 function renderAdmin() {
@@ -1562,7 +1739,7 @@ function renderAccountAdminRow(user) {
     <article class="account-row">
       <div>
         <strong>${escapeHtml(user.username)}</strong>
-        <span>${user.role === "admin" ? "设备管理员" : "注册账号"}</span>
+        <span>编号 ${escapeHtml(user.accountNo)} · ${user.role === "admin" ? "设备管理员" : "注册账号"}</span>
       </div>
       <dl>
         <div>
@@ -1601,6 +1778,10 @@ function deleteUserAccount(id) {
   const ok = window.confirm(`确定注销账号“${target.username}”吗？注销后该账号不能再登录。`);
   if (!ok) return;
   state.users = state.users.filter((user) => user.id !== id);
+  state.users.forEach((user) => {
+    user.friends = (user.friends || []).filter((friendId) => friendId !== id);
+    user.friendRequests = (user.friendRequests || []).filter((request) => request.fromUserId !== id);
+  });
   saveState();
   showToast("账号已注销");
   render();
@@ -1825,15 +2006,16 @@ function handleSendCode() {
 
 function handleAuth(event) {
   event.preventDefault();
-  const username = elements.authUsername.value.trim();
+  const accountInput = elements.authUsername.value.trim();
   const password = elements.authPassword.value;
-  if (!username || !password) return;
+  if (!accountInput || !password) return;
 
   if (authMode === "register") {
+    const username = accountInput;
     const phone = normalizePhone(elements.authPhone.value);
     const code = elements.authCode.value.trim();
     if (state.users.some((user) => user.username === username)) {
-      elements.authMessage.textContent = "这个用户名已经被注册";
+      elements.authMessage.textContent = "这个昵称已经被注册";
       return;
     }
     if (!isValidPhone(phone)) {
@@ -1853,8 +2035,10 @@ function handleAuth(event) {
       return;
     }
     const now = new Date().toISOString();
+    const accountNo = nextAccountNo();
     const newUser = {
       id: createId("user"),
+      accountNo,
       username,
       password,
       role: "member",
@@ -1866,20 +2050,22 @@ function handleAuth(event) {
       firstUsedAt: now,
       lastUsedAt: now,
       createdAt: now,
+      friends: [],
+      friendRequests: [],
     };
     state.users.push(newUser);
     state.currentUserId = newUser.id;
     registerVerification = { phone: "", code: "", expiresAt: 0 };
     saveState();
     closeAuthModal();
-    showToast(`欢迎加入，${getUserDisplayName(newUser)}`);
+    showToast(`注册成功，你的编号是 ${accountNo}`);
     render();
     return;
   }
 
-  const user = state.users.find((item) => item.username === username && item.password === password);
+  const user = state.users.find((item) => String(item.accountNo) === accountInput && item.password === password);
   if (!user) {
-    elements.authMessage.textContent = "用户名或密码不正确";
+    elements.authMessage.textContent = "编号或密码不正确";
     return;
   }
   state.currentUserId = user.id;
@@ -1893,6 +2079,7 @@ function handleAuth(event) {
 function openAuthModal() {
   elements.authModal.classList.remove("hidden");
   elements.authMessage.textContent = "";
+  renderAuthMode();
   elements.authUsername.focus();
 }
 
@@ -1909,6 +2096,9 @@ function renderAuthMode() {
   });
   const isRegister = authMode === "register";
   elements.registerFields.classList.toggle("hidden", !isRegister);
+  elements.authUsernameLabel.textContent = isRegister ? "昵称" : "编号";
+  elements.authUsername.placeholder = isRegister ? "设置昵称，登录后用于展示" : "请输入账号编号，例如 0000";
+  elements.authUsername.autocomplete = isRegister ? "nickname" : "username";
   elements.authPhone.required = isRegister;
   elements.authCode.required = isRegister;
   elements.authPhone.disabled = !isRegister;
@@ -2561,6 +2751,15 @@ function readFileAsDataUrl(file) {
 function getUserDisplayName(user) {
   if (!user) return "";
   return (user.profileName || user.username || "").trim();
+}
+
+function getUserInitial(user) {
+  const name = getUserDisplayName(user);
+  return name.slice(0, 1) || "华";
+}
+
+function avatarStyle(user) {
+  return user?.avatarData ? `background-image:url("${escapeHtml(user.avatarData)}")` : "";
 }
 
 function getExcerpt(value, maxLength) {
