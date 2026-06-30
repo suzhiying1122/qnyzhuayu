@@ -54,7 +54,28 @@ CREATE TABLE IF NOT EXISTS mail_letters (
   replied_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS writing_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  prompt TEXT NOT NULL,
+  deadline TEXT DEFAULT '',
+  author TEXT NOT NULL,
+  fixed INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS writing_essays (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  author TEXT NOT NULL,
+  attachments TEXT DEFAULT '[]',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_forum_posts_status ON forum_posts(status);
 CREATE INDEX IF NOT EXISTS idx_forum_comments_post_id ON forum_comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_club_activities_status ON club_activities(status);
 CREATE INDEX IF NOT EXISTS idx_mail_letters_visibility ON mail_letters(visibility);
+CREATE INDEX IF NOT EXISTS idx_writing_essays_event_id ON writing_essays(event_id);

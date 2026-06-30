@@ -4,12 +4,25 @@ const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 const MAX_TOTAL_ATTACHMENTS_SIZE = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
 const VERIFICATION_TTL_MS = 5 * 60 * 1000;
-const VALID_VIEWS = new Set(["home", "forum", "activities", "mailbox", "profile", "admin", "postDetail", "activityDetail", "letterDetail"]);
+const VALID_VIEWS = new Set([
+  "home",
+  "forum",
+  "activities",
+  "mailbox",
+  "writing",
+  "profile",
+  "admin",
+  "postDetail",
+  "activityDetail",
+  "letterDetail",
+  "essayDetail",
+]);
 const VIEW_ROUTES = {
   home: "/",
   forum: "/forum/",
   activities: "/activities/",
   mailbox: "/mailbox/",
+  writing: "/writing/",
   profile: "/profile/",
   admin: "/admin-panel/",
 };
@@ -36,6 +49,8 @@ const initialState = {
   activePostId: "post-1",
   activeActivityId: "activity-1",
   activeLetterId: "letter-1",
+  activeWritingEventId: "writing-event-main",
+  activeEssayId: "essay-1",
   activityFilter: "all",
   posts: [
     {
@@ -158,6 +173,46 @@ const initialState = {
       attachments: [],
     },
   ],
+  writingEvents: [
+    {
+      id: "writing-event-main",
+      title: "华煜剧场征文",
+      prompt: "固定征文活动：写下你和舞台、排练、校园生活、角色或观众席之间的故事。形式不限，散文、随笔、剧评、小剧本片段都可以。",
+      deadline: "2026-09-30",
+      fixed: true,
+      author: "社团秘书",
+      createdAt: "2026-06-18T09:00:00.000Z",
+    },
+    {
+      id: "writing-event-2",
+      title: "第一次站在追光里",
+      prompt: "围绕第一次排练、第一次上台、第一次看见灯亮起的瞬间，记录那一刻的紧张、惊喜或改变。",
+      deadline: "2026-08-20",
+      fixed: false,
+      author: "社团秘书",
+      createdAt: "2026-06-21T10:00:00.000Z",
+    },
+  ],
+  essays: [
+    {
+      id: "essay-1",
+      eventId: "writing-event-main",
+      title: "幕布升起之前",
+      body: "真正让我喜欢上话剧社的，不只是最后那束追光，而是大家在排练室里一遍遍试错的夜晚。有人帮忙记走位，有人整理道具，有人把一句台词读到终于找到呼吸。幕布升起之前，舞台已经在每个人心里亮过一次。",
+      author: "社团秘书",
+      createdAt: "2026-06-19T12:30:00.000Z",
+      attachments: [],
+    },
+    {
+      id: "essay-2",
+      eventId: "writing-event-2",
+      title: "追光落在肩膀上",
+      body: "第一次站在光里时，我突然意识到舞台不是一个人的勇敢，而是一群人在黑暗里托住彼此。那束光很亮，可我更记得灯光外面那些点头、手势和无声的鼓励。",
+      author: "南楼观众",
+      createdAt: "2026-06-23T18:40:00.000Z",
+      attachments: [],
+    },
+  ],
 };
 
 let state = loadState();
@@ -210,6 +265,22 @@ const elements = {
   letterAttachments: document.querySelector("#letterAttachments"),
   letterList: document.querySelector("#letterList"),
   mailboxAdminHint: document.querySelector("#mailboxAdminHint"),
+  writingEventMetric: document.querySelector("#writingEventMetric"),
+  essayMetric: document.querySelector("#essayMetric"),
+  writingEventList: document.querySelector("#writingEventList"),
+  writingEventIntro: document.querySelector("#writingEventIntro"),
+  writingShelfTitle: document.querySelector("#writingShelfTitle"),
+  writingShelfHint: document.querySelector("#writingShelfHint"),
+  writingShelf: document.querySelector("#writingShelf"),
+  writingEventForm: document.querySelector("#writingEventForm"),
+  writingEventTitle: document.querySelector("#writingEventTitle"),
+  writingEventPrompt: document.querySelector("#writingEventPrompt"),
+  writingEventDeadline: document.querySelector("#writingEventDeadline"),
+  essayForm: document.querySelector("#essayForm"),
+  essayTitle: document.querySelector("#essayTitle"),
+  essayBody: document.querySelector("#essayBody"),
+  essayAttachments: document.querySelector("#essayAttachments"),
+  essayDetailContent: document.querySelector("#essayDetailContent"),
   profileAvatarPreview: document.querySelector("#profileAvatarPreview"),
   profileDisplayTitle: document.querySelector("#profileDisplayTitle"),
   profileRoleText: document.querySelector("#profileRoleText"),
@@ -285,7 +356,10 @@ async function syncStateFromApi() {
     state.activities = Array.isArray(data.activities) ? data.activities : state.activities;
     state.pendingActivities = Array.isArray(data.pendingActivities) ? data.pendingActivities : state.pendingActivities;
     state.letters = Array.isArray(data.letters) ? data.letters : state.letters;
+    state.writingEvents = Array.isArray(data.writingEvents) ? mergeFixedWritingEvents(data.writingEvents) : state.writingEvents;
+    state.essays = Array.isArray(data.essays) ? data.essays : state.essays;
     ensureActivePost();
+    ensureActiveWriting();
     render();
   } catch (error) {
     showToast(`后端数据同步失败：${error.message}`);
@@ -337,6 +411,8 @@ function bindEvents() {
   elements.postForm.addEventListener("submit", handlePostSubmit);
   elements.activityForm.addEventListener("submit", handleActivitySubmit);
   elements.letterForm.addEventListener("submit", handleLetterSubmit);
+  elements.writingEventForm.addEventListener("submit", handleWritingEventSubmit);
+  elements.essayForm.addEventListener("submit", handleEssaySubmit);
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
 }
@@ -352,9 +428,15 @@ function loadState() {
       activePostId: saved.activePostId || "post-1",
       activeActivityId: saved.activeActivityId || "activity-1",
       activeLetterId: saved.activeLetterId || "letter-1",
+      activeWritingEventId: saved.activeWritingEventId || "writing-event-main",
+      activeEssayId: saved.activeEssayId || "essay-1",
       pendingPosts: Array.isArray(saved.pendingPosts) ? saved.pendingPosts : [],
       pendingComments: Array.isArray(saved.pendingComments) ? saved.pendingComments : [],
       pendingActivities: Array.isArray(saved.pendingActivities) ? saved.pendingActivities : [],
+      writingEvents: Array.isArray(saved.writingEvents)
+        ? mergeFixedWritingEvents(saved.writingEvents)
+        : structuredClone(initialState.writingEvents),
+      essays: Array.isArray(saved.essays) ? saved.essays : structuredClone(initialState.essays),
     };
     ensureAdminUser(merged);
     normalizeLoadedState(merged);
@@ -399,6 +481,35 @@ function normalizeLoadedState(targetState) {
   targetState.letters.forEach((letter) => {
     letter.attachments = normalizeAttachments(letter);
   });
+  targetState.writingEvents = mergeFixedWritingEvents(targetState.writingEvents);
+  targetState.writingEvents.forEach((event) => {
+    event.title = event.title || "未命名征文活动";
+    event.prompt = event.prompt || "暂无征文说明。";
+    event.deadline = event.deadline || "";
+    event.author = event.author || "社团秘书";
+    event.createdAt = event.createdAt || new Date().toISOString();
+    event.fixed = Boolean(event.fixed);
+  });
+  targetState.essays = Array.isArray(targetState.essays) ? targetState.essays : [];
+  targetState.essays.forEach((essay) => {
+    essay.eventId = essay.eventId || "writing-event-main";
+    essay.title = essay.title || "未命名文章";
+    essay.body = essay.body || "";
+    essay.author = essay.author || "匿名社员";
+    essay.createdAt = essay.createdAt || new Date().toISOString();
+    essay.attachments = normalizeAttachments(essay);
+  });
+}
+
+function mergeFixedWritingEvents(events) {
+  const incoming = Array.isArray(events) ? events.map((event) => ({ ...event })) : [];
+  const fixed = structuredClone(initialState.writingEvents[0]);
+  const existingFixedIndex = incoming.findIndex((event) => event.id === fixed.id);
+  if (existingFixedIndex >= 0) {
+    incoming[existingFixedIndex] = { ...fixed, ...incoming[existingFixedIndex], fixed: true };
+    return incoming;
+  }
+  return [fixed, ...incoming];
 }
 
 function normalizeCommentThread(comment) {
@@ -476,17 +587,20 @@ function saveState() {
 
 function render() {
   ensureActivePost();
+  ensureActiveWriting();
   renderView();
   renderAccount();
   renderStats();
   renderForum();
   renderActivities();
   renderMailbox();
+  renderWriting();
   renderProfile();
   renderAdmin();
   renderPostDetail();
   renderActivityDetail();
   renderLetterDetail();
+  renderEssayDetail();
 }
 
 function currentUser() {
@@ -519,6 +633,7 @@ function setView(viewName) {
   if (viewName === "postDetail") renderPostDetail();
   if (viewName === "activityDetail") renderActivityDetail();
   if (viewName === "letterDetail") renderLetterDetail();
+  if (viewName === "essayDetail") renderEssayDetail();
   updateHash(viewName);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -530,6 +645,7 @@ function applyHashView() {
     if (routeView.postId) state.activePostId = routeView.postId;
     if (routeView.activityId) state.activeActivityId = routeView.activityId;
     if (routeView.letterId) state.activeLetterId = routeView.letterId;
+    if (routeView.essayId) state.activeEssayId = routeView.essayId;
     return;
   }
 
@@ -549,6 +665,11 @@ function applyHashView() {
     state.activeView = "letterDetail";
     return;
   }
+  if (viewName.startsWith("essay/")) {
+    state.activeEssayId = viewName.slice(6);
+    state.activeView = "essayDetail";
+    return;
+  }
   if (VALID_VIEWS.has(viewName)) {
     state.activeView = viewName;
   }
@@ -565,6 +686,7 @@ function getPathForView(viewName) {
   if (viewName === "postDetail") return `/forum/${encodeURIComponent(state.activePostId || "")}/`;
   if (viewName === "activityDetail") return `/activities/${encodeURIComponent(state.activeActivityId || "")}/`;
   if (viewName === "letterDetail") return `/mailbox/${encodeURIComponent(state.activeLetterId || "")}/`;
+  if (viewName === "essayDetail") return `/writing/${encodeURIComponent(state.activeEssayId || "")}/`;
   return VIEW_ROUTES[viewName] || "/";
 }
 
@@ -579,6 +701,9 @@ function getViewFromPath(pathname) {
   }
   if (parts[0] === "mailbox") {
     return parts[1] ? { view: "letterDetail", letterId: parts[1] } : { view: "mailbox" };
+  }
+  if (parts[0] === "writing") {
+    return parts[1] ? { view: "essayDetail", essayId: parts[1] } : { view: "writing" };
   }
   if (parts[0] === "profile") return { view: "profile" };
   if (parts[0] === "admin-panel") return { view: "admin" };
@@ -605,6 +730,10 @@ function renderView() {
   if (state.activeView === "letterDetail" && !state.letters.some((letter) => letter.id === state.activeLetterId && letter.visibility === "public")) {
     state.activeView = "mailbox";
     updateHash("mailbox");
+  }
+  if (state.activeView === "essayDetail" && !state.essays.some((essay) => essay.id === state.activeEssayId)) {
+    state.activeView = "writing";
+    updateHash("writing");
   }
 
   document.body.dataset.view = state.activeView;
@@ -652,6 +781,8 @@ function renderStats() {
   elements.previewMetric.textContent = previewCount;
   elements.visibleLetterMetric.textContent = publicLetters.length;
   elements.privateLetterMetric.textContent = privateLetters.length;
+  elements.writingEventMetric.textContent = state.writingEvents.length;
+  elements.essayMetric.textContent = state.essays.length;
   elements.pendingPostMetric.textContent = state.pendingPosts.length;
   elements.pendingActivityMetric.textContent = state.pendingActivities.length;
   elements.profilePostMetric.textContent = userName ? state.posts.filter((post) => post.author === userName).length : 0;
@@ -969,6 +1100,198 @@ function renderLetterCard(letter) {
       ${isAdmin() ? `<div class="post-admin-actions"><button class="reject-button" data-delete-letter="${letter.id}" type="button">删除信件</button></div>` : ""}
     </article>
   `;
+}
+
+function renderWriting() {
+  ensureActiveWriting();
+  const user = currentUser();
+  const activeEvent = getActiveWritingEvent();
+  const essays = getEssaysForActiveWritingEvent();
+
+  elements.writingEventForm.querySelectorAll("input, textarea, button").forEach((field) => {
+    field.disabled = !user;
+  });
+  elements.essayForm.querySelectorAll("input, textarea, button").forEach((field) => {
+    field.disabled = !user || !activeEvent;
+  });
+
+  elements.writingEventList.innerHTML = state.writingEvents.length
+    ? state.writingEvents.map(renderWritingEventCard).join("")
+    : `<div class="empty-state">暂无征文活动。</div>`;
+
+  elements.writingShelfTitle.textContent = activeEvent ? activeEvent.title : "征文书架";
+  elements.writingShelfHint.textContent = activeEvent
+    ? `${essays.length} 篇文章，点击一本书阅读`
+    : "先选择一个征文活动";
+  elements.writingEventIntro.innerHTML = activeEvent
+    ? `
+      <div>
+        <span class="type-pill ${activeEvent.fixed ? "" : "preview"}">${activeEvent.fixed ? "固定征文" : "征文活动"}</span>
+        ${activeEvent.deadline ? `<span>截止 ${formatDate(activeEvent.deadline)}</span>` : `<span>长期开放</span>`}
+      </div>
+      <p>${escapeHtml(activeEvent.prompt)}</p>
+    `
+    : `<div class="empty-state">还没有可展示的征文活动。</div>`;
+
+  elements.writingShelf.innerHTML = essays.length
+    ? essays.map(renderEssayBook).join("")
+    : `<div class="empty-state writing-empty-state">这个活动还没有文章，来放上第一本书。</div>`;
+
+  elements.writingEventList.querySelectorAll("[data-writing-event]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeWritingEventId = button.dataset.writingEvent;
+      const nextEssay = getEssaysForActiveWritingEvent()[0];
+      state.activeEssayId = nextEssay?.id || "";
+      saveState();
+      renderWriting();
+    });
+  });
+
+  elements.writingShelf.querySelectorAll("[data-open-essay]").forEach((button) => {
+    button.addEventListener("click", () => openDetailView("essay", button.dataset.openEssay));
+  });
+
+  elements.writingShelf.querySelectorAll("[data-delete-essay]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      deleteEssay(button.dataset.deleteEssay);
+    });
+  });
+}
+
+function renderWritingEventCard(event) {
+  const count = state.essays.filter((essay) => essay.eventId === event.id).length;
+  return `
+    <button class="writing-event-card ${event.id === state.activeWritingEventId ? "is-active" : ""}" type="button" data-writing-event="${event.id}">
+      <span class="writing-event-mark">${event.fixed ? "定" : "征"}</span>
+      <span>
+        <strong>${escapeHtml(event.title)}</strong>
+        <small>${event.deadline ? `截止 ${formatDate(event.deadline)}` : "长期开放"} · ${count} 篇</small>
+        <em>${escapeHtml(getExcerpt(event.prompt, 36))}</em>
+      </span>
+    </button>
+  `;
+}
+
+function renderEssayBook(essay, index) {
+  const event = state.writingEvents.find((item) => item.id === essay.eventId);
+  const tone = index % 5;
+  return `
+    <article class="essay-book essay-book-tone-${tone}" style="--book-index:${index}" data-essay-id="${essay.id}">
+      <button class="essay-book-open" type="button" data-open-essay="${essay.id}" aria-label="阅读 ${escapeAttribute(essay.title)}">
+        <span class="book-spine"></span>
+        <span class="book-cover">
+          <span class="book-label">${escapeHtml(event?.title || "征文")}</span>
+          <strong>${escapeHtml(essay.title)}</strong>
+          <small>${escapeHtml(essay.author)} · ${formatDateTime(essay.createdAt)}</small>
+          <em>${escapeHtml(getExcerpt(essay.body, 52))}</em>
+        </span>
+      </button>
+      ${
+        isAdmin()
+          ? `<button class="reject-button essay-delete-button" data-delete-essay="${essay.id}" type="button">删除</button>`
+          : ""
+      }
+    </article>
+  `;
+}
+
+async function handleWritingEventSubmit(event) {
+  event.preventDefault();
+  if (!requireLogin()) return;
+
+  const title = elements.writingEventTitle.value.trim();
+  const prompt = elements.writingEventPrompt.value.trim();
+  const deadline = elements.writingEventDeadline.value;
+  if (!title || !prompt) return;
+
+  const payload = {
+    title,
+    prompt,
+    deadline,
+    author: getUserDisplayName(currentUser()),
+  };
+
+  let newEvent = null;
+  try {
+    const data = await apiRequest("/api/writing/events", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    newEvent = data.result;
+  } catch (error) {
+    newEvent = {
+      id: createId("writing-event"),
+      ...payload,
+      fixed: false,
+      createdAt: new Date().toISOString(),
+    };
+    showToast("线上接口暂不可用，已先保存到本机");
+  }
+
+  state.writingEvents.push(newEvent);
+  state.activeWritingEventId = newEvent.id;
+  elements.writingEventForm.reset();
+  saveState();
+  showToast("征文活动已添加");
+  render();
+}
+
+async function handleEssaySubmit(event) {
+  event.preventDefault();
+  if (!requireLogin()) return;
+  const activeEvent = getActiveWritingEvent();
+  if (!activeEvent) return;
+
+  let attachments = [];
+  try {
+    attachments = await readFilesAsAttachments(elements.essayAttachments.files);
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+
+  const payload = {
+    eventId: activeEvent.id,
+    title: elements.essayTitle.value.trim(),
+    body: elements.essayBody.value.trim(),
+    author: getUserDisplayName(currentUser()),
+    attachments,
+  };
+  if (!payload.title || !payload.body) return;
+
+  let essay = null;
+  try {
+    const data = await apiRequest("/api/writing/essays", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    essay = data.result;
+  } catch (error) {
+    essay = {
+      id: createId("essay"),
+      ...payload,
+      createdAt: new Date().toISOString(),
+    };
+    showToast("线上接口暂不可用，已先保存到本机");
+  }
+
+  state.essays.unshift(essay);
+  state.activeEssayId = essay.id;
+  elements.essayForm.reset();
+  saveState();
+  showToast("文章已放上征文书架");
+  render();
+}
+
+function getActiveWritingEvent() {
+  return state.writingEvents.find((event) => event.id === state.activeWritingEventId) || state.writingEvents[0] || null;
+}
+
+function getEssaysForActiveWritingEvent() {
+  return state.essays
+    .filter((essay) => essay.eventId === state.activeWritingEventId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
 function renderProfile() {
@@ -1315,6 +1638,38 @@ async function deleteLetter(id) {
   render();
 }
 
+async function deleteEssay(id) {
+  if (!requireAdminAccess()) return;
+  const essay = state.essays.find((item) => item.id === id);
+  if (!essay) return;
+  const ok = window.confirm(`确定删除征文“${essay.title}”吗？删除后这篇文章会从书架移除。`);
+  if (!ok) return;
+
+  try {
+    await apiRequest(`/api/admin/essays/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    if (!String(id).startsWith("essay-")) {
+      showToast(error.message);
+      return;
+    }
+  }
+
+  state.essays = state.essays.filter((item) => item.id !== id);
+  if (state.activeEssayId === id) {
+    const nextEssay = getEssaysForActiveWritingEvent()[0] || state.essays[0];
+    state.activeEssayId = nextEssay?.id || "";
+    if (state.activeView === "essayDetail") {
+      state.activeView = state.activeEssayId ? "essayDetail" : "writing";
+      updateHash(state.activeView);
+    }
+  }
+  saveState();
+  showToast("征文已删除");
+  render();
+}
+
 async function approvePost(id) {
   if (!requireAdminAccess()) return;
   try {
@@ -1521,15 +1876,33 @@ function ensureActivePost() {
   state.activePostId = state.posts[0]?.id || "";
 }
 
+function ensureActiveWriting() {
+  if (!Array.isArray(state.writingEvents)) state.writingEvents = structuredClone(initialState.writingEvents);
+  if (!Array.isArray(state.essays)) state.essays = structuredClone(initialState.essays);
+  if (!state.writingEvents.some((event) => event.id === state.activeWritingEventId)) {
+    state.activeWritingEventId = state.writingEvents[0]?.id || "";
+  }
+  if (!state.essays.some((essay) => essay.id === state.activeEssayId)) {
+    const firstEssay = getEssaysForActiveWritingEvent()[0] || state.essays[0];
+    state.activeEssayId = firstEssay?.id || "";
+  }
+}
+
 function openDetailView(kind, id) {
   const viewMap = {
     post: "postDetail",
     activity: "activityDetail",
     letter: "letterDetail",
+    essay: "essayDetail",
   };
   if (kind === "post") state.activePostId = id;
   if (kind === "activity") state.activeActivityId = id;
   if (kind === "letter") state.activeLetterId = id;
+  if (kind === "essay") {
+    state.activeEssayId = id;
+    const essay = state.essays.find((item) => item.id === id);
+    if (essay) state.activeWritingEventId = essay.eventId;
+  }
   setView(viewMap[kind]);
 }
 
@@ -1716,6 +2089,68 @@ function renderLetterDetail() {
   });
 }
 
+function renderEssayDetail() {
+  const essay = state.essays.find((item) => item.id === state.activeEssayId);
+  if (!essay) {
+    elements.essayDetailContent.innerHTML = renderDetailMissing("writing", "文章不存在或尚未放上书架。");
+    bindViewTargetButtons(elements.essayDetailContent);
+    return;
+  }
+  const event = state.writingEvents.find((item) => item.id === essay.eventId);
+  elements.essayDetailContent.innerHTML = `
+    <div class="wechat-detail-layout writing-chat-layout">
+      ${renderDetailSidebar("writing")}
+      <section class="wechat-reader essay-reader">
+        <header class="reader-topbar essay-reader-topbar">
+          <button class="back-button" data-view-target="writing" type="button">返回征文</button>
+          <div>
+            <p class="section-kicker">Huayu Writing</p>
+            <h2 id="essayDetailTitle">${escapeHtml(essay.title)}</h2>
+            <p>${escapeHtml(essay.author || "匿名社员")} · ${formatDateTime(essay.createdAt)} · ${escapeHtml(event?.title || "征文活动")}</p>
+          </div>
+          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-essay="${essay.id}" type="button">删除文章</button>` : ""}
+        </header>
+        <div class="reader-scroll essay-reader-scroll">
+          <article class="message-card host-message essay-paper-card">
+            <aside class="message-author">
+              <div class="floor-avatar">${escapeHtml((essay.author || "文").slice(0, 1))}</div>
+              <strong>${escapeHtml(essay.author || "匿名社员")}</strong>
+              <span>作者</span>
+            </aside>
+            <div class="message-body">
+              <div class="tag-row">
+                <span class="tag">征文</span>
+                ${event?.deadline ? `<span>截止 ${formatDate(event.deadline)}</span>` : `<span>长期开放</span>`}
+                ${renderAttachmentCount(essay)}
+              </div>
+              <div class="detail-body essay-detail-body">${escapeHtml(essay.body)}</div>
+              ${renderAttachmentList(essay, "full")}
+            </div>
+          </article>
+          ${event ? `
+            <article class="message-card writing-event-note">
+              <aside class="message-author">
+                <div class="floor-avatar">征</div>
+                <strong>${escapeHtml(event.title)}</strong>
+                <span>${event.fixed ? "固定活动" : "征文活动"}</span>
+              </aside>
+              <div class="message-body">
+                <div class="detail-body">${escapeHtml(event.prompt)}</div>
+              </div>
+            </article>
+          ` : ""}
+          ${renderDetailStageFooter()}
+        </div>
+      </section>
+    </div>
+  `;
+  bindViewTargetButtons(elements.essayDetailContent);
+  bindDetailSidebar(elements.essayDetailContent);
+  elements.essayDetailContent.querySelectorAll("[data-delete-essay]").forEach((button) => {
+    button.addEventListener("click", () => deleteEssay(button.dataset.deleteEssay));
+  });
+}
+
 function renderDetailSidebar(kind) {
   const config = {
     forum: {
@@ -1752,6 +2187,18 @@ function renderDetailSidebar(kind) {
       empty: "暂无公开信件",
       titleGetter: (item) => item.subject,
       metaGetter: (item) => `${item.author || "匿名来信"} · ${item.reply ? "已回复" : "待回复"}`,
+      excerptGetter: (item) => getExcerpt(item.body, 34),
+    },
+    writing: {
+      title: "征文书架",
+      search: "搜索文章",
+      items: state.essays,
+      activeId: state.activeEssayId,
+      dataName: "essay",
+      viewTarget: "writing",
+      empty: "暂无征文文章",
+      titleGetter: (item) => item.title,
+      metaGetter: (item) => `${item.author || "匿名社员"} · ${state.writingEvents.find((event) => event.id === item.eventId)?.title || "征文"}`,
       excerptGetter: (item) => getExcerpt(item.body, 34),
     },
   }[kind];
@@ -1804,6 +2251,15 @@ function bindDetailSidebar(scope) {
     button.addEventListener("click", () => {
       state.activeLetterId = button.dataset.sidebarLetter;
       renderLetterDetail();
+      saveState();
+    });
+  });
+  scope.querySelectorAll("[data-sidebar-essay]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeEssayId = button.dataset.sidebarEssay;
+      const essay = state.essays.find((item) => item.id === state.activeEssayId);
+      if (essay) state.activeWritingEventId = essay.eventId;
+      renderEssayDetail();
       saveState();
     });
   });

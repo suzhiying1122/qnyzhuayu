@@ -90,6 +90,30 @@ export function serializeContract(row) {
   };
 }
 
+export function serializeWritingEvent(row) {
+  return {
+    id: String(row.id),
+    title: row.title,
+    prompt: row.prompt,
+    deadline: row.deadline || "",
+    author: row.author,
+    fixed: Boolean(row.fixed),
+    createdAt: row.created_at,
+  };
+}
+
+export function serializeEssay(row) {
+  return {
+    id: String(row.id),
+    eventId: String(row.event_id),
+    title: row.title,
+    body: row.body,
+    author: row.author,
+    createdAt: row.created_at,
+    attachments: parseAttachments(row.attachments),
+  };
+}
+
 export function buildCommentTree(rows) {
   const byParent = new Map();
   for (const row of rows) {
@@ -117,6 +141,17 @@ export async function getSiteState(env) {
     env.DB.prepare("SELECT * FROM club_activities WHERE status = 'pending' ORDER BY datetime(created_at) DESC").all(),
     env.DB.prepare("SELECT * FROM mail_letters ORDER BY datetime(created_at) DESC").all(),
   ]);
+  let writingEvents = { results: [] };
+  let essays = { results: [] };
+  try {
+    [writingEvents, essays] = await Promise.all([
+      env.DB.prepare("SELECT * FROM writing_events ORDER BY fixed DESC, datetime(created_at) DESC").all(),
+      env.DB.prepare("SELECT * FROM writing_essays ORDER BY datetime(created_at) DESC").all(),
+    ]);
+  } catch {
+    writingEvents = { results: [] };
+    essays = { results: [] };
+  }
 
   const commentsByPost = new Map();
   for (const comment of comments.results) {
@@ -131,5 +166,7 @@ export async function getSiteState(env) {
     activities: activities.results.map(serializeActivity),
     pendingActivities: pendingActivities.results.map(serializeActivity),
     letters: letters.results.map(serializeLetter),
+    writingEvents: writingEvents.results.map(serializeWritingEvent),
+    essays: essays.results.map(serializeEssay),
   };
 }

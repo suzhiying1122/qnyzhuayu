@@ -11,6 +11,7 @@
         <button class="nav-link" data-view-target="forum" type="button">论坛</button>
         <button class="nav-link" data-view-target="activities" type="button">活动</button>
         <button class="nav-link" data-view-target="mailbox" type="button">信箱</button>
+        <button class="nav-link" data-view-target="writing" type="button">征文</button>
         <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" type="button">管理</button>
       </nav>
       <div class="account-area">
@@ -68,6 +69,11 @@
             <span class="gate-label">Mailbox</span>
             <strong>信箱</strong>
             <small>给社团的一封来信</small>
+          </button>
+          <button class="module-gate gate-writing" data-view-target="writing" type="button">
+            <span class="gate-label">Writing</span>
+            <strong>征文</strong>
+            <small>把舞台故事放进书架</small>
           </button>
           <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" type="button">
             <span class="gate-label">Admin</span>
@@ -244,6 +250,77 @@
 
       <section class="view module-screen letter-detail-screen" id="letterDetailScreen" data-view="letterDetail" aria-labelledby="letterDetailTitle">
         <div class="detail-page-shell" id="letterDetailContent"></div>
+      </section>
+
+      <section class="view module-screen writing-screen" id="writingScreen" data-view="writing" aria-labelledby="writingTitle">
+        <div class="module-hero writing-hero">
+          <button class="back-button" data-view-target="home" type="button">返回首页</button>
+          <div>
+            <p class="section-kicker">Writing Shelf</p>
+            <h2 id="writingTitle">征文书架</h2>
+            <p>左侧选择征文活动，右侧像抽书一样翻看文章；社员可以添加新的征文主题，也可以把自己的文字放进书架。</p>
+          </div>
+          <div class="module-stats">
+            <span><strong id="writingEventMetric">0</strong> 征文活动</span>
+            <span><strong id="essayMetric">0</strong> 篇文章</span>
+          </div>
+        </div>
+
+        <div class="writing-layout module-canvas">
+          <aside class="writing-taskbar">
+            <div class="list-title">
+              <h3>征文活动</h3>
+              <span>固定活动与新增活动</span>
+            </div>
+            <div class="writing-event-list" id="writingEventList"></div>
+            <form class="compose-panel writing-event-form" id="writingEventForm">
+              <h3>添加征文活动</h3>
+              <label>
+                活动名称
+                <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：舞台初见征文" required />
+              </label>
+              <label>
+                征文说明
+                <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="写下主题、字数、投稿方向或活动说明" required></textarea>
+              </label>
+              <label>
+                截止时间
+                <input id="writingEventDeadline" type="date" />
+              </label>
+              <button class="primary-button" type="submit">添加活动</button>
+            </form>
+          </aside>
+
+          <section class="writing-library" aria-label="征文书架">
+            <div class="list-title">
+              <h3 id="writingShelfTitle">征文书架</h3>
+              <span id="writingShelfHint">点击一本书查看文章</span>
+            </div>
+            <div class="writing-event-intro" id="writingEventIntro"></div>
+            <div class="writing-shelf" id="writingShelf"></div>
+            <form class="compose-panel essay-compose" id="essayForm">
+              <h3>添加文章</h3>
+              <label>
+                文章标题
+                <input id="essayTitle" type="text" maxlength="52" placeholder="例如：第一次站在追光里" required />
+              </label>
+              <label>
+                正文
+                <textarea id="essayBody" rows="7" maxlength="1800" placeholder="写下你的剧场、校园、社团或舞台故事" required></textarea>
+              </label>
+              <label>
+                附件
+                <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
+                <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
+              </label>
+              <button class="primary-button" type="submit">放上书架</button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section class="view module-screen writing-detail-screen" id="essayDetailScreen" data-view="essayDetail" aria-labelledby="essayDetailTitle">
+        <div class="detail-page-shell" id="essayDetailContent"></div>
       </section>
 
       <section class="view module-screen profile-screen" id="profileScreen" data-view="profile" aria-labelledby="profileTitle">
