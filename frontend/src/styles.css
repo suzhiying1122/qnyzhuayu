@@ -4830,4 +4830,140 @@ body.detail-open {
   .chat-compose {
     grid-template-columns: 1fr;
   }
+
+  .forum-detail-screen,
+  .activity-detail-screen,
+  .letter-detail-screen,
+  .writing-detail-screen {
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .forum-detail-screen .detail-page-shell,
+  .activity-detail-screen .detail-page-shell,
+  .letter-detail-screen .detail-page-shell,
+  .writing-detail-screen .detail-page-shell,
+  .forum-detail-screen .wechat-detail-layout,
+  .activity-detail-screen .wechat-detail-layout,
+  .letter-detail-screen .wechat-detail-layout,
+  .writing-detail-screen .wechat-detail-layout,
+  .forum-detail-screen .wechat-reader,
+  .activity-detail-screen .wechat-reader,
+  .letter-detail-screen .wechat-reader,
+  .writing-detail-screen .wechat-reader,
+  .forum-detail-screen .reader-topbar,
+  .activity-detail-screen .reader-topbar,
+  .letter-detail-screen .reader-topbar,
+  .writing-detail-screen .reader-topbar,
+  .forum-detail-screen .reader-scroll,
+  .activity-detail-screen .reader-scroll,
+  .letter-detail-screen .reader-scroll,
+  .writing-detail-screen .reader-scroll {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .forum-detail-screen .reader-scroll,
+  .activity-detail-screen .reader-scroll,
+  .letter-detail-screen .reader-scroll,
+  .writing-detail-screen .reader-scroll {
+    padding: 0.88rem 0.72rem 7rem;
+  }
+
+  .forum-detail-screen .reader-topbar,
+  .activity-detail-screen .reader-topbar,
+  .letter-detail-screen .reader-topbar,
+  .writing-detail-screen .reader-topbar {
+    padding: 0.72rem 0.78rem;
+  }
+
+  .forum-detail-screen .reader-topbar h2,
+  .activity-detail-screen .reader-topbar h2,
+  .letter-detail-screen .reader-topbar h2,
+  .writing-detail-screen .reader-topbar h2 {
+    max-width: 100%;
+    font-size: clamp(1.36rem, 5.8vw, 1.78rem);
+    line-height: 1.24;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .forum-detail-screen .reader-topbar p:not(.section-kicker),
+  .activity-detail-screen .reader-topbar p:not(.section-kicker),
+  .letter-detail-screen .reader-topbar p:not(.section-kicker),
+  .writing-detail-screen .reader-topbar p:not(.section-kicker) {
+    width: auto;
+    max-width: 100%;
+    font-size: 0.86rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .forum-detail-screen .message-card,
+  .activity-detail-screen .message-card,
+  .letter-detail-screen .message-card,
+  .writing-detail-screen .message-card,
+  .forum-detail-screen .reader-comments,
+  .activity-detail-screen .reader-comments,
+  .letter-detail-screen .reader-comments,
+  .writing-detail-screen .reader-comments {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  .forum-detail-screen .message-body,
+  .activity-detail-screen .message-body,
+  .letter-detail-screen .message-body,
+  .writing-detail-screen .message-body {
+    padding: 0.92rem;
+  }
+
+  .forum-detail-screen .detail-body,
+  .activity-detail-screen .detail-body,
+  .letter-detail-screen .detail-body,
+  .writing-detail-screen .detail-body,
+  .forum-detail-screen .comment-card p,
+  .activity-detail-screen .comment-card p,
+  .letter-detail-screen .comment-card p,
+  .writing-detail-screen .comment-card p,
+  .forum-detail-screen .comment-card .meta-row,
+  .activity-detail-screen .comment-card .meta-row,
+  .letter-detail-screen .comment-card .meta-row,
+  .writing-detail-screen .comment-card .meta-row {
+    width: auto;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .forum-detail-screen .detail-body,
+  .activity-detail-screen .detail-body,
+  .letter-detail-screen .detail-body,
+  .writing-detail-screen .detail-body {
+    font-size: 1.02rem;
+    line-height: 1.82;
+  }
+
+  .forum-detail-screen .comment-main,
+  .activity-detail-screen .comment-main,
+  .letter-detail-screen .comment-main,
+  .writing-detail-screen .comment-main {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0.58rem;
+  }
+
+  .forum-detail-screen .inline-reply-form,
+  .activity-detail-screen .inline-reply-form,
+  .letter-detail-screen .inline-reply-form,
+  .writing-detail-screen .inline-reply-form,
+  .forum-detail-screen .nested-replies,
+  .activity-detail-screen .nested-replies,
+  .letter-detail-screen .nested-replies,
+  .writing-detail-screen .nested-replies {
+    margin-left: 2.82rem;
+  }
 }
