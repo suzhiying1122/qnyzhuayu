@@ -114,6 +114,94 @@ export function serializeEssay(row) {
   };
 }
 
+export function parseJsonValue(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+export function serializeUser(row, { includePassword = false } = {}) {
+  const user = {
+    id: row.id,
+    accountNo: row.account_no,
+    username: row.username,
+    role: row.role || "member",
+    profileName: row.profile_name || row.username,
+    avatarData: row.avatar_data || "",
+    intro: row.intro || "",
+    clubRole: row.club_role || (row.role === "admin" ? "管理员 / 社团秘书" : "社员"),
+    phone: row.phone || "",
+    firstUsedAt: row.first_used_at,
+    lastUsedAt: row.last_used_at,
+    createdAt: row.created_at,
+    friends: parseJsonValue(row.friends, []),
+    friendRequests: parseJsonValue(row.friend_requests, []),
+    chats: parseJsonValue(row.chats, {}),
+  };
+  if (includePassword) user.password = row.password;
+  return user;
+}
+
+export async function ensureUserTables(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS site_users (
+      id TEXT PRIMARY KEY,
+      account_no TEXT NOT NULL UNIQUE,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'member',
+      profile_name TEXT NOT NULL,
+      avatar_data TEXT DEFAULT '',
+      intro TEXT DEFAULT '',
+      club_role TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      first_used_at TEXT NOT NULL,
+      last_used_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      friends TEXT DEFAULT '[]',
+      friend_requests TEXT DEFAULT '[]',
+      chats TEXT DEFAULT '{}'
+    )
+  `).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_site_users_account_no ON site_users(account_no)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_site_users_phone ON site_users(phone)").run();
+
+  const admin = await env.DB.prepare("SELECT id FROM site_users WHERE account_no = '0000'").first();
+  if (!admin) {
+    const now = new Date().toISOString();
+    await env.DB.prepare(`
+      INSERT INTO site_users (
+        id, account_no, username, password, role, profile_name, intro, club_role,
+        first_used_at, last_used_at, created_at, friends, friend_requests, chats
+      )
+      VALUES (?, '0000', '社团秘书', 'huayu2026', 'admin', '社团秘书',
+        '负责华煜话剧社线上内容审核、活动档案发布和社团信箱回复。',
+        '管理员 / 社团秘书', ?, ?, ?, '[]', '[]', '{}')
+    `).bind(`user-${crypto.randomUUID()}`, now, now, now).run();
+  }
+}
+
+export async function getUserById(env, id) {
+  await ensureUserTables(env);
+  return env.DB.prepare("SELECT * FROM site_users WHERE id = ?").bind(id).first();
+}
+
+export async function updateUserJsonFields(env, id, fields) {
+  const assignments = [];
+  const values = [];
+  for (const [key, value] of Object.entries(fields)) {
+    assignments.push(`${key} = ?`);
+    values.push(JSON.stringify(value));
+  }
+  if (!assignments.length) return;
+  values.push(id);
+  await env.DB.prepare(`UPDATE site_users SET ${assignments.join(", ")} WHERE id = ?`).bind(...values).run();
+}
+
 export function buildCommentTree(rows) {
   const byParent = new Map();
   for (const row of rows) {

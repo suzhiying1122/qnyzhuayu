@@ -342,6 +342,7 @@ export function initLegacyApp() {
   applyHashView();
   bindEvents();
   syncStateFromApi();
+  syncUsersFromApi({ silent: true });
   render();
 
   window.addEventListener("popstate", () => {
@@ -352,6 +353,10 @@ export function initLegacyApp() {
   window.addEventListener("hashchange", () => {
     applyHashView();
     render();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncUsersFromApi({ silent: true });
   });
 }
 
@@ -388,11 +393,124 @@ async function syncStateFromApi() {
   }
 }
 
+async function syncUsersFromApi({ silent = false } = {}) {
+  const currentBefore = currentUser();
+  try {
+    const data = await apiRequest("/api/users");
+    if (!Array.isArray(data.users)) return;
+    const shouldUploadCurrentProfile = mergeRemoteUsers(data.users, currentBefore);
+    saveState();
+    render();
+    if (shouldUploadCurrentProfile) {
+      await pushCurrentProfileToApi({ silent: true });
+    }
+  } catch (error) {
+    if (!silent) showToast(`账号同步失败：${error.message}`);
+  }
+}
+
+function mergeRemoteUsers(remoteUsers, currentBefore = null) {
+  const localById = new Map(state.users.map((user) => [user.id, user]));
+  const localByAccount = new Map(state.users.map((user) => [String(user.accountNo), user]));
+  const remoteIds = new Set(remoteUsers.map((user) => user.id));
+  const remoteAccounts = new Set(remoteUsers.map((user) => String(user.accountNo)));
+  let shouldUploadCurrentProfile = false;
+  const mergedUsers = remoteUsers.map((remote) => {
+    const local = localById.get(remote.id) || localByAccount.get(String(remote.accountNo));
+    const merged = {
+      ...(local || {}),
+      ...remote,
+      password: remote.password || local?.password || "",
+      avatarData: remote.avatarData || local?.avatarData || "",
+      intro: remote.intro || local?.intro || "",
+      clubRole: remote.clubRole || local?.clubRole || "",
+      profileName: remote.profileName || local?.profileName || remote.username,
+      friends: Array.isArray(remote.friends) ? remote.friends : local?.friends || [],
+      friendRequests: Array.isArray(remote.friendRequests) ? remote.friendRequests : local?.friendRequests || [],
+      chats: remote.chats && typeof remote.chats === "object" ? remote.chats : local?.chats || {},
+    };
+    ensureUserProfile(merged);
+    if (
+      currentBefore &&
+      String(currentBefore.accountNo) === String(merged.accountNo) &&
+      currentBefore.avatarData &&
+      currentBefore.avatarData !== remote.avatarData
+    ) {
+      shouldUploadCurrentProfile = true;
+    }
+    return merged;
+  });
+  const localOnlyUsers = state.users.filter((user) => {
+    if (!user.id || !user.accountNo) return false;
+    return !remoteIds.has(user.id) && !remoteAccounts.has(String(user.accountNo));
+  });
+  state.users = [...mergedUsers, ...localOnlyUsers];
+  ensureAdminUser(state);
+  normalizeLoadedState(state);
+  if (state.currentUserId && !state.users.some((user) => user.id === state.currentUserId)) {
+    const matched = currentBefore
+      ? state.users.find((user) => String(user.accountNo) === String(currentBefore.accountNo))
+      : null;
+    state.currentUserId = matched?.id || null;
+  }
+  return shouldUploadCurrentProfile;
+}
+
+function mergeReturnedUsers(users) {
+  const incoming = Array.isArray(users) ? users : [users].filter(Boolean);
+  if (!incoming.length) return;
+  const byId = new Map(state.users.map((user) => [user.id, user]));
+  const byAccount = new Map(state.users.map((user) => [String(user.accountNo), user]));
+  incoming.forEach((remote) => {
+    const existing = byId.get(remote.id) || byAccount.get(String(remote.accountNo));
+    const merged = {
+      ...(existing || {}),
+      ...remote,
+      password: remote.password || existing?.password || "",
+      friends: Array.isArray(remote.friends) ? remote.friends : existing?.friends || [],
+      friendRequests: Array.isArray(remote.friendRequests) ? remote.friendRequests : existing?.friendRequests || [],
+      chats: remote.chats && typeof remote.chats === "object" ? remote.chats : existing?.chats || {},
+    };
+    ensureUserProfile(merged);
+    if (existing) {
+      Object.assign(existing, merged);
+    } else {
+      state.users.push(merged);
+    }
+  });
+  normalizeLoadedState(state);
+}
+
+async function pushCurrentProfileToApi({ silent = false } = {}) {
+  const user = currentUser();
+  if (!user) return;
+  try {
+    const data = await apiRequest("/api/users/profile", {
+      method: "POST",
+      body: JSON.stringify({
+        userId: user.id,
+        profileName: user.profileName,
+        avatarData: user.avatarData || "",
+        clubRole: user.clubRole,
+        intro: user.intro,
+      }),
+    });
+    mergeReturnedUsers(data.user);
+    saveState();
+    render();
+  } catch (error) {
+    if (!silent) showToast(`个人资料同步失败：${error.message}`);
+  }
+}
+
 function bindEvents() {
   bindInteractiveMotion();
 
-  document.querySelectorAll("[data-view-target]").forEach((button) => {
-    button.addEventListener("click", () => setView(button.dataset.viewTarget));
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-view-target]");
+    if (!button) return;
+    event.preventDefault();
+    setView(button.dataset.viewTarget);
   });
 
   document.querySelectorAll("[data-auth-mode]").forEach((button) => {
@@ -1502,11 +1620,12 @@ async function handleProfileSubmit(event) {
   }
 
   elements.profileAvatarInput.value = "";
+  await pushCurrentProfileToApi({ silent: true });
   showToast("个人资料已保存");
   render();
 }
 
-function handlePasswordSubmit(event) {
+async function handlePasswordSubmit(event) {
   event.preventDefault();
   const user = currentUser();
   if (!user) {
@@ -1517,10 +1636,6 @@ function handlePasswordSubmit(event) {
   const currentPassword = elements.currentPassword.value;
   const newPassword = elements.newPassword.value;
   const confirmPassword = elements.confirmPassword.value;
-  if (currentPassword !== user.password) {
-    showToast("当前密码不正确");
-    return;
-  }
   if (newPassword !== confirmPassword) {
     showToast("两次输入的新密码不一致");
     return;
@@ -1530,7 +1645,23 @@ function handlePasswordSubmit(event) {
     return;
   }
 
-  user.password = newPassword;
+  try {
+    const data = await apiRequest("/api/users/password", {
+      method: "POST",
+      body: JSON.stringify({
+        userId: user.id,
+        currentPassword,
+        newPassword,
+      }),
+    });
+    mergeReturnedUsers(data.user);
+  } catch (error) {
+    if (user.password && currentPassword !== user.password) {
+      showToast(error.message || "当前密码不正确");
+      return;
+    }
+    user.password = newPassword;
+  }
   saveState();
   elements.passwordForm.reset();
   showToast("密码已更新");
@@ -1601,7 +1732,7 @@ function renderFriendRow(friend) {
   `;
 }
 
-function handleFriendSearchSubmit(event) {
+async function handleFriendSearchSubmit(event) {
   event.preventDefault();
   const user = currentUser();
   if (!user) {
@@ -1625,29 +1756,51 @@ function handleFriendSearchSubmit(event) {
     showToast("好友申请已经发送，等待对方处理");
     return;
   }
-  target.friendRequests.unshift({
+  const requestRecord = {
     fromUserId: user.id,
     createdAt: new Date().toISOString(),
-  });
+  };
+  try {
+    const data = await apiRequest("/api/users/friend-request", {
+      method: "POST",
+      body: JSON.stringify({ fromUserId: user.id, targetId: target.id }),
+    });
+    mergeReturnedUsers(data.users);
+  } catch (error) {
+    target.friendRequests.unshift(requestRecord);
+    showToast(`已本地记录，云端同步失败：${error.message}`);
+  }
   elements.friendSearchForm.reset();
   saveState();
   showToast(`已向 ${getUserDisplayName(target)} 发送好友申请`);
   renderProfile();
 }
 
-function respondFriendRequest(fromUserId, accepted) {
+async function respondFriendRequest(fromUserId, accepted) {
   const user = currentUser();
   if (!user) return;
   const fromUser = state.users.find((item) => item.id === fromUserId);
-  user.friendRequests = user.friendRequests.filter((request) => request.fromUserId !== fromUserId);
-  if (accepted && fromUser) {
-    ensureUserProfile(fromUser);
-    if (!user.friends.includes(fromUser.id)) user.friends.push(fromUser.id);
-    if (!fromUser.friends.includes(user.id)) fromUser.friends.push(user.id);
-    showToast(`已添加 ${getUserDisplayName(fromUser)} 为好友`);
-  } else {
-    showToast("已忽略好友申请");
+  let handledLocally = false;
+  try {
+    const data = await apiRequest("/api/users/friend-response", {
+      method: "POST",
+      body: JSON.stringify({ userId: user.id, fromUserId, accepted }),
+    });
+    mergeReturnedUsers(data.users);
+  } catch (error) {
+    handledLocally = true;
+    user.friendRequests = user.friendRequests.filter((request) => request.fromUserId !== fromUserId);
+    if (accepted && fromUser) {
+      ensureUserProfile(fromUser);
+      if (!user.friends.includes(fromUser.id)) user.friends.push(fromUser.id);
+      if (!fromUser.friends.includes(user.id)) fromUser.friends.push(user.id);
+      showToast(`已本地添加，云端同步失败：${error.message}`);
+    } else {
+      showToast("已忽略好友申请");
+    }
   }
+  if (!handledLocally && accepted && fromUser) showToast(`已添加 ${getUserDisplayName(fromUser)} 为好友`);
+  if (!handledLocally && !accepted) showToast("已忽略好友申请");
   saveState();
   renderProfile();
 }
@@ -1695,7 +1848,7 @@ function renderChatMessage(message, currentUserId) {
   `;
 }
 
-function handleChatSubmit(event) {
+async function handleChatSubmit(event) {
   event.preventDefault();
   const user = currentUser();
   const friend = state.users.find((item) => item.id === state.activeChatFriendId);
@@ -1713,9 +1866,22 @@ function handleChatSubmit(event) {
     body,
     createdAt: new Date().toISOString(),
   };
-  ensureUserProfile(friend);
-  user.chats[friend.id] = [...getChatMessages(user, friend.id), message];
-  friend.chats[user.id] = [...getChatMessages(friend, user.id), message];
+  try {
+    const data = await apiRequest("/api/users/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        fromUserId: user.id,
+        toUserId: friend.id,
+        body,
+      }),
+    });
+    mergeReturnedUsers(data.users);
+  } catch (error) {
+    ensureUserProfile(friend);
+    user.chats[friend.id] = [...getChatMessages(user, friend.id), message];
+    friend.chats[user.id] = [...getChatMessages(friend, user.id), message];
+    showToast(`消息已本地保存，云端同步失败：${error.message}`);
+  }
   elements.chatForm.reset();
   saveState();
   renderProfile();
@@ -1861,7 +2027,7 @@ function requireAdminAccess() {
   return true;
 }
 
-function deleteUserAccount(id) {
+async function deleteUserAccount(id) {
   if (!requireAdminAccess()) return;
   const target = state.users.find((user) => user.id === id);
   if (!target) return;
@@ -1871,6 +2037,11 @@ function deleteUserAccount(id) {
   }
   const ok = window.confirm(`确定注销账号“${target.username}”吗？注销后该账号不能再登录。`);
   if (!ok) return;
+  try {
+    await apiRequest(`/api/users/${id}`, { method: "DELETE" });
+  } catch (error) {
+    showToast(`云端注销失败，已先本地注销：${error.message}`);
+  }
   state.users = state.users.filter((user) => user.id !== id);
   state.users.forEach((user) => {
     user.friends = (user.friends || []).filter((friendId) => friendId !== id);
@@ -2100,7 +2271,7 @@ function handleSendCode() {
   showToast(`验证码已发送：${code}`);
 }
 
-function handleAuth(event) {
+async function handleAuth(event) {
   event.preventDefault();
   const accountInput = elements.authUsername.value.trim();
   const password = elements.authPassword.value;
@@ -2130,36 +2301,59 @@ function handleAuth(event) {
       elements.authMessage.textContent = "验证码不正确";
       return;
     }
-    const now = new Date().toISOString();
-    const accountNo = nextAccountNo();
-    const newUser = {
-      id: createId("user"),
-      accountNo,
-      username,
-      password,
-      role: "member",
-      profileName: username,
-      avatarData: "",
-      intro: "",
-      clubRole: "社员",
-      phone,
-      firstUsedAt: now,
-      lastUsedAt: now,
-      createdAt: now,
-      friends: [],
-      friendRequests: [],
-    };
-    state.users.push(newUser);
+    let newUser = null;
+    try {
+      const data = await apiRequest("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ username, password, phone }),
+      });
+      newUser = data.user;
+      mergeReturnedUsers(newUser);
+    } catch (error) {
+      const now = new Date().toISOString();
+      const accountNo = nextAccountNo();
+      newUser = {
+        id: createId("user"),
+        accountNo,
+        username,
+        password,
+        role: "member",
+        profileName: username,
+        avatarData: "",
+        intro: "",
+        clubRole: "社员",
+        phone,
+        firstUsedAt: now,
+        lastUsedAt: now,
+        createdAt: now,
+        friends: [],
+        friendRequests: [],
+        chats: {},
+      };
+      state.users.push(newUser);
+      showToast(`云端注册失败，已先本地创建：${error.message}`);
+    }
     state.currentUserId = newUser.id;
     registerVerification = { phone: "", code: "", expiresAt: 0 };
     saveState();
     closeAuthModal();
-    showToast(`注册成功，你的编号是 ${accountNo}`);
+    showToast(`注册成功，你的编号是 ${newUser.accountNo}`);
     render();
     return;
   }
 
-  const user = state.users.find((item) => String(item.accountNo) === accountInput && item.password === password);
+  let user = null;
+  try {
+    const data = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ accountNo: accountInput, password }),
+    });
+    mergeReturnedUsers(data.user);
+    user = state.users.find((item) => item.id === data.user.id);
+    await syncUsersFromApi({ silent: true });
+  } catch {
+    user = state.users.find((item) => String(item.accountNo) === accountInput && item.password === password);
+  }
   if (!user) {
     elements.authMessage.textContent = "编号或密码不正确";
     return;
