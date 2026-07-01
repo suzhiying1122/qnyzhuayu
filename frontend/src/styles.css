@@ -4493,10 +4493,30 @@ body.detail-open {
 }
 
 @media (max-width: 760px) {
+  html,
+  body,
+  #app {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: var(--red-ink);
+  }
+
+  main,
+  .view,
+  .site-header {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
   .site-header {
     grid-template-columns: minmax(0, 1fr) auto;
     min-height: 3.95rem;
-    padding: 0.56rem 0.72rem 0.56rem 3.65rem;
+    padding: 0.56rem 0.58rem 0.56rem 3.35rem;
     background:
       linear-gradient(90deg, rgba(54, 9, 16, 0.94), rgba(75, 13, 24, 0.9)),
       var(--red-ink);
@@ -4588,15 +4608,16 @@ body.detail-open {
 
   .home-view,
   .module-screen {
-    padding-left: 3.7rem;
-    padding-right: 0.72rem;
+    padding-left: 3.35rem;
+    padding-right: 0.42rem;
   }
 
   .home-view {
     display: grid;
     align-content: start;
     gap: 0.9rem;
-    width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     min-height: auto;
     overflow: visible;
     padding-top: 1rem;
@@ -4610,6 +4631,7 @@ body.detail-open {
   .hero-content {
     display: grid;
     justify-content: stretch;
+    justify-self: stretch;
     min-height: auto;
     width: 100%;
     max-width: 100%;
@@ -4650,6 +4672,7 @@ body.detail-open {
     right: auto;
     bottom: auto;
     order: 2;
+    justify-self: stretch;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
     margin: 0;
@@ -4676,6 +4699,7 @@ body.detail-open {
     left: auto;
     bottom: auto;
     order: 3;
+    justify-self: stretch;
     grid-template-columns: 1fr;
     width: 100%;
     max-width: 100%;
