@@ -4786,6 +4786,20 @@ body.detail-open {
     border-radius: 18px;
   }
 
+  .thread-list-wrap,
+  .activity-board,
+  .letter-board,
+  .writing-library {
+    order: 1;
+  }
+
+  .forum-compose,
+  .activity-compose,
+  .letter-compose,
+  .writing-taskbar {
+    order: 2;
+  }
+
   body[data-view="postDetail"] .site-header,
   body[data-view="activityDetail"] .site-header,
   body[data-view="letterDetail"] .site-header {
