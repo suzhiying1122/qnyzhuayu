@@ -873,7 +873,7 @@ function setView(viewName) {
   if (viewName === "letterDetail") renderLetterDetail();
   if (viewName === "essayDetail") renderEssayDetail();
   updateHash(viewName);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function applyHashView() {

@@ -4630,6 +4630,10 @@ body.detail-open {
     display: grid;
   }
 
+  .home-view.view:not(.is-active) {
+    display: none;
+  }
+
   .hero-content {
     display: grid;
     justify-content: stretch;
@@ -4679,14 +4683,17 @@ body.detail-open {
   .quick-stats {
     position: relative;
     z-index: 5;
+    left: auto;
     right: auto;
     bottom: auto;
     order: 2;
     justify-self: stretch;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
+    max-width: 100%;
     margin: 0;
     gap: 0.45rem;
+    transform: none;
   }
 
   .quick-stats div {
