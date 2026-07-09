@@ -2458,11 +2458,15 @@ function renderPostDetail() {
       ${renderDetailSidebar("forum")}
       <section class="wechat-reader">
         <header class="reader-topbar">
-          <button class="back-button" data-view-target="forum" type="button">返回论坛</button>
+          <button class="reader-icon-button back-button" data-view-target="forum" type="button" aria-label="返回论坛"></button>
           <div>
-            <p class="section-kicker">Huayu Forum</p>
+            <p class="section-kicker">华煜话剧社 · 社团论坛</p>
             <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
             <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${countCommentThreads(comments)} 条留言</p>
+          </div>
+          <div class="reader-title-actions" aria-label="帖子操作">
+            <button class="reader-icon-button" type="button" data-scroll-comments aria-label="查看留言">⌄</button>
+            <button class="reader-icon-button" type="button" data-focus-comment aria-label="写留言">✎</button>
           </div>
           ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
         </header>
@@ -2492,8 +2496,9 @@ function renderPostDetail() {
           ${renderDetailStageFooter()}
         </div>
         <form class="comment-form reader-composer" data-comment-form data-post-id="${post.id}">
-          <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
-          <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布</button>
+          <div class="composer-mark" aria-hidden="true">✦</div>
+          <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，发布后立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
+          <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布留言</button>
         </form>
       </section>
     </div>
@@ -2501,6 +2506,12 @@ function renderPostDetail() {
   bindViewTargetButtons(elements.postDetailContent);
   bindPostDetailForms();
   bindDetailSidebar(elements.postDetailContent);
+  elements.postDetailContent.querySelector("[data-scroll-comments]")?.addEventListener("click", () => {
+    elements.postDetailContent.querySelector(".reader-comments")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  elements.postDetailContent.querySelector("[data-focus-comment]")?.addEventListener("click", () => {
+    elements.postDetailContent.querySelector(".reader-composer textarea")?.focus();
+  });
   elements.postDetailContent.querySelectorAll("[data-delete-post]").forEach((button) => {
     button.addEventListener("click", () => deletePost(button.dataset.deletePost));
   });
@@ -2754,20 +2765,58 @@ function renderDetailSidebar(kind) {
         )
         .join("")
     : `<div class="empty-state">${config.empty}</div>`;
+  const forumBrand =
+    kind === "forum"
+      ? `
+        <div class="reader-club-mark" aria-hidden="true">华</div>
+        <span>
+          <strong>华煜话剧社</strong>
+          <small>${config.title}</small>
+        </span>
+      `
+      : `
+        <button class="back-button" data-view-target="${config.viewTarget}" type="button">返回</button>
+        <strong>${config.title}</strong>
+      `;
+  const forumFolders =
+    kind === "forum"
+      ? `
+        <nav class="reader-folders" aria-label="论坛分类">
+          <button class="is-active" type="button"><span>◇</span>全部帖子 <em>${config.items.length}</em></button>
+          <button type="button"><span>☆</span>最新讨论</button>
+          <button type="button"><span>♧</span>社团日常</button>
+        </nav>
+      `
+      : "";
+  const forumShortcut =
+    kind === "forum"
+      ? `<button class="reader-compose-shortcut" data-view-target="${config.viewTarget}" type="button">＋ 发布新内容</button>`
+      : "";
 
   return `
     <aside class="reader-sidebar">
       <div class="reader-sidebar-head">
-        <button class="back-button" data-view-target="${config.viewTarget}" type="button">返回</button>
-        <strong>${config.title}</strong>
+        ${forumBrand}
       </div>
-      <div class="reader-search">${config.search}</div>
+      <label class="reader-search">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" placeholder="${config.search}" data-reader-search aria-label="${config.search}" />
+      </label>
+      ${forumFolders}
       <div class="reader-list">${itemsHtml}</div>
+      ${forumShortcut}
     </aside>
   `;
 }
 
 function bindDetailSidebar(scope) {
+  const search = scope.querySelector("[data-reader-search]");
+  search?.addEventListener("input", () => {
+    const keyword = search.value.trim().toLowerCase();
+    scope.querySelectorAll(".reader-list-item").forEach((item) => {
+      item.hidden = Boolean(keyword) && !item.textContent.toLowerCase().includes(keyword);
+    });
+  });
   scope.querySelectorAll("[data-sidebar-post]").forEach((button) => {
     button.addEventListener("click", () => {
       state.activePostId = button.dataset.sidebarPost;
