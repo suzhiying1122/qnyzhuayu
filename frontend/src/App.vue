@@ -1,18 +1,33 @@
 ﻿<template>
 
+    <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
+      <video class="intro-bg-video" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <div class="intro-atmosphere" aria-hidden="true"></div>
+      <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
+        <span>进入网站</span>
+        <small>ENTER SITE</small>
+      </button>
+    </div>
+
+    <div class="scene-video-stage" aria-hidden="true">
+      <video class="scene-video scene-video-home" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-community" src="/assets/scene2-idle-loop.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-reader" src="/assets/scene3-loop.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <div class="cinema-vignette"></div>
+      <div class="cinema-grain"></div>
+    </div>
+
     <header class="site-header" aria-label="站点导航">
       <button class="brand" data-view-target="home" type="button" aria-label="返回华煜话剧社首页">
-        <span class="brand-mark">
-          <img src="/assets/huayu-logo.png" alt="" />
-        </span>
-        <span>华煜话剧社</span>
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>HUAYU / STUDIO</span>
       </button>
       <nav class="top-nav" aria-label="主导航">
-        <button class="nav-link" data-view-target="forum" type="button">论坛</button>
-        <button class="nav-link" data-view-target="activities" type="button">活动</button>
-        <button class="nav-link" data-view-target="mailbox" type="button">信箱</button>
-        <button class="nav-link" data-view-target="writing" type="button">征文</button>
-        <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" type="button">管理</button>
+        <button class="nav-link" data-view-target="forum" data-label="论坛" type="button" aria-label="论坛">论坛</button>
+        <button class="nav-link" data-view-target="activities" data-label="活动" type="button" aria-label="活动">活动</button>
+        <button class="nav-link" data-view-target="mailbox" data-label="信箱" type="button" aria-label="信箱">信箱</button>
+        <button class="nav-link" data-view-target="writing" data-label="征文" type="button" aria-label="征文">征文</button>
+        <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" data-label="管理" type="button" aria-label="管理">管理</button>
       </nav>
       <div class="account-area">
         <button class="account-avatar-button" id="accountAvatarButton" type="button" aria-label="打开个人主页">华</button>
@@ -35,20 +50,23 @@
           <div class="hero-logo-card" aria-label="华煜话剧社社团标志">
             <img src="/assets/huayu-logo.png" alt="华煜话剧社 logo" />
           </div>
-          <p class="eyebrow">SCENE 01 / 在排练场里相遇</p>
-          <h1 id="heroTitle">华煜话剧社</h1>
-          <p class="hero-copy">在舞台上发光。排练、交流、活动记录和公开来信，都在这里留下痕迹。</p>
+          <p class="eyebrow">SCENE 01 / HUAYU DRAMA CLUB</p>
+          <h1 id="heroTitle"><span>欢迎来到，</span><span>华煜话剧社</span></h1>
+          <p class="hero-copy">社员交流、活动记录、公开来信与征文投稿，在同一个线上空间里展开。</p>
           <div class="hero-actions">
             <button class="primary-button" data-view-target="forum" type="button">进入社团论坛</button>
             <button class="secondary-button" data-view-target="activities" type="button">观看活动档案</button>
           </div>
         </div>
         <aside class="scene-profile-card" aria-label="华煜话剧社简介">
-          <span class="scene-card-kicker">HUAYU DRAMA CLUB</span>
-          <strong>一方舞台，<br />让每个声音被听见。</strong>
-          <p>社员交流 · 活动档案 · 征文与来信</p>
+          <span class="scene-card-kicker">PROFILE</span>
+          <strong>华煜话剧社</strong>
+          <p>在排练与表达之间，让每一个想法找到自己的舞台。</p>
           <span class="scene-card-line" aria-hidden="true"></span>
-          <small>黔南民族医学高等专科学校</small>
+          <dl>
+            <div><dt>LOCATION</dt><dd>黔南民族医学高等专科学校</dd></div>
+            <div><dt>FOCUS</dt><dd>Drama · Community · Story</dd></div>
+          </dl>
         </aside>
         <div class="quick-stats" aria-label="社团站点概览">
           <div>
@@ -525,6 +543,11 @@
           <button class="primary-button full-width" id="authSubmitButton" type="submit">登录</button>
         </form>
       </div>
+    </div>
+
+    <div class="scene-progress" aria-hidden="true">
+      <span>HUAYU DRAMA CLUB</span>
+      <i></i>
     </div>
 
     <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
