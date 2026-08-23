@@ -1,7 +1,7 @@
 ﻿<template>
 
     <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
-      <video class="intro-bg-video" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <video class="intro-bg-video" src="/assets/cinematic-stage.mp4" poster="/assets/cinematic-stage-poster.webp" muted playsinline autoplay loop preload="auto"></video>
       <div class="intro-atmosphere" aria-hidden="true"></div>
       <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
         <span>进入网站</span>
@@ -10,9 +10,9 @@
     </div>
 
     <div class="scene-video-stage" aria-hidden="true">
-      <video class="scene-video scene-video-home" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="auto"></video>
-      <video class="scene-video scene-video-community" src="/assets/scene2-idle-loop.mp4" muted playsinline autoplay loop preload="auto"></video>
-      <video class="scene-video scene-video-reader" src="/assets/scene3-loop.mp4" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-home" src="/assets/cinematic-stage.mp4" poster="/assets/cinematic-stage-poster.webp" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-community" src="/assets/scene2-idle-loop.mp4" poster="/assets/scene2-idle-loop-poster.webp" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-reader" src="/assets/scene3-loop.mp4" poster="/assets/scene3-loop-poster.webp" muted playsinline autoplay loop preload="auto"></video>
       <div class="cinema-vignette"></div>
       <div class="cinema-grain"></div>
     </div>
