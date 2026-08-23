@@ -24,22 +24,32 @@
 
     <main id="top">
       <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
+        <video class="cinematic-home-video" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="metadata" aria-hidden="true"></video>
         <img class="hero-image" src="/assets/bg-main-stage.png" alt="红色幕布与暖色追光下的华煜话剧社舞台" />
         <div class="hero-shade"></div>
+        <div class="cinema-grain" aria-hidden="true"></div>
+        <div class="cinema-scanline" aria-hidden="true"></div>
         <div class="stage-ribbon ribbon-one"></div>
         <div class="stage-ribbon ribbon-two"></div>
         <div class="hero-content">
           <div class="hero-logo-card" aria-label="华煜话剧社社团标志">
             <img src="/assets/huayu-logo.png" alt="华煜话剧社 logo" />
           </div>
-          <p class="eyebrow">在排练场里相遇，在舞台上发光</p>
+          <p class="eyebrow">SCENE 01 / 在排练场里相遇</p>
           <h1 id="heroTitle">华煜话剧社</h1>
-          <p class="hero-copy">排练想法、活动记录和公开来信，在一个属于剧场的线上空间里展开。</p>
+          <p class="hero-copy">在舞台上发光。排练、交流、活动记录和公开来信，都在这里留下痕迹。</p>
           <div class="hero-actions">
-            <button class="primary-button" data-view-target="forum" type="button">进入论坛</button>
-            <button class="secondary-button" data-view-target="mailbox" type="button">投递信件</button>
+            <button class="primary-button" data-view-target="forum" type="button">进入社团论坛</button>
+            <button class="secondary-button" data-view-target="activities" type="button">观看活动档案</button>
           </div>
         </div>
+        <aside class="scene-profile-card" aria-label="华煜话剧社简介">
+          <span class="scene-card-kicker">HUAYU DRAMA CLUB</span>
+          <strong>一方舞台，<br />让每个声音被听见。</strong>
+          <p>社员交流 · 活动档案 · 征文与来信</p>
+          <span class="scene-card-line" aria-hidden="true"></span>
+          <small>黔南民族医学高等专科学校</small>
+        </aside>
         <div class="quick-stats" aria-label="社团站点概览">
           <div>
             <strong id="postCount">0</strong>
