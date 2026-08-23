@@ -1,7 +1,20 @@
 ﻿<template>
 
     <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
-      <video class="intro-bg-video" src="/assets/cinematic-stage.mp4" poster="/assets/cinematic-stage-poster.webp" muted playsinline autoplay loop preload="auto"></video>
+      <video
+        class="intro-bg-video"
+        poster="/assets/cinematic-stage-poster.webp"
+        data-src-lite="/assets/cinematic-stage.mp4"
+        data-src-mobile="/assets/cinematic-stage-mobile.mp4"
+        data-src-hd="/assets/cinematic-stage-hd.mp4"
+        data-poster-lite="/assets/cinematic-stage-poster.webp"
+        data-poster-mobile="/assets/cinematic-stage-poster-mobile.webp"
+        data-poster-hd="/assets/cinematic-stage-poster-hd.webp"
+        muted
+        playsinline
+        loop
+        preload="none"
+      ></video>
       <div class="intro-atmosphere" aria-hidden="true"></div>
       <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
         <span>进入网站</span>
@@ -10,9 +23,9 @@
     </div>
 
     <div class="scene-video-stage" aria-hidden="true">
-      <video class="scene-video scene-video-home" src="/assets/cinematic-stage.mp4" poster="/assets/cinematic-stage-poster.webp" muted playsinline autoplay loop preload="auto"></video>
-      <video class="scene-video scene-video-community" src="/assets/scene2-idle-loop.mp4" poster="/assets/scene2-idle-loop-poster.webp" muted playsinline autoplay loop preload="auto"></video>
-      <video class="scene-video scene-video-reader" src="/assets/scene3-loop.mp4" poster="/assets/scene3-loop-poster.webp" muted playsinline autoplay loop preload="auto"></video>
+      <video class="scene-video scene-video-home" data-scene="home" data-src-lite="/assets/cinematic-stage.mp4" data-src-mobile="/assets/cinematic-stage-mobile.mp4" data-src-hd="/assets/cinematic-stage-hd.mp4" data-poster-lite="/assets/cinematic-stage-poster.webp" data-poster-mobile="/assets/cinematic-stage-poster-mobile.webp" data-poster-hd="/assets/cinematic-stage-poster-hd.webp" poster="/assets/cinematic-stage-poster.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-community" data-scene="community" data-src-lite="/assets/scene2-idle-loop.mp4" data-src-mobile="/assets/scene2-idle-loop-mobile.mp4" data-src-hd="/assets/scene2-idle-loop-hd.mp4" data-poster-lite="/assets/scene2-idle-loop-poster.webp" data-poster-mobile="/assets/scene2-idle-loop-poster-mobile.webp" data-poster-hd="/assets/scene2-idle-loop-poster-hd.webp" poster="/assets/scene2-idle-loop-poster.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-reader" data-scene="reader" data-src-lite="/assets/scene3-loop.mp4" data-src-mobile="/assets/scene3-loop-mobile.mp4" data-src-hd="/assets/scene3-loop-hd.mp4" data-poster-lite="/assets/scene3-loop-poster.webp" data-poster-mobile="/assets/scene3-loop-poster-mobile.webp" data-poster-hd="/assets/scene3-loop-poster-hd.webp" poster="/assets/scene3-loop-poster.webp" muted playsinline loop preload="none"></video>
       <div class="cinema-vignette"></div>
       <div class="cinema-grain"></div>
     </div>
@@ -39,7 +52,6 @@
 
     <main id="top">
       <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
-        <video class="cinematic-home-video" src="/assets/cinematic-stage.mp4" muted playsinline autoplay loop preload="metadata" aria-hidden="true"></video>
         <img class="hero-image" src="/assets/bg-main-stage.png" alt="红色幕布与暖色追光下的华煜话剧社舞台" />
         <div class="hero-shade"></div>
         <div class="cinema-grain" aria-hidden="true"></div>
