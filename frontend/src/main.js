@@ -12,13 +12,22 @@ nextTick(async () => {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const constrainedConnection = Boolean(connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType));
-  const communityViews = new Set(["forum", "activities", "profile", "admin"]);
-  const readerViews = new Set(["mailbox", "writing", "postDetail", "activityDetail", "letterDetail", "essayDetail"]);
+  const viewScenes = {
+    forum: "forum",
+    postDetail: "discussion",
+    activities: "activities",
+    activityDetail: "activities",
+    mailbox: "mailbox",
+    letterDetail: "mailbox",
+    writing: "writing",
+    essayDetail: "writing",
+    profile: "profile",
+    admin: "admin",
+  };
   let introActive = Boolean(intro);
   let mediaResizeTimer;
 
   const selectedMediaProfile = () => {
-    if (constrainedConnection) return "lite";
     return hdViewport.matches ? "hd" : "mobile";
   };
 
@@ -30,9 +39,17 @@ nextTick(async () => {
 
   const selectedScene = () => {
     const view = document.body.dataset.view || "home";
-    if (communityViews.has(view)) return "community";
-    if (readerViews.has(view)) return "reader";
-    return "home";
+    if (view === "profile" && document.body.dataset.profileScene === "friends") return "friends";
+    return viewScenes[view] || "home";
+  };
+
+  const syncProfileSceneState = () => {
+    const friendsOpen = document.querySelector("#profileFriendsDrawer")?.classList.contains("is-open");
+    if (friendsOpen) {
+      document.body.dataset.profileScene = "friends";
+    } else {
+      delete document.body.dataset.profileScene;
+    }
   };
 
   const setPoster = (video) => {
@@ -69,7 +86,7 @@ nextTick(async () => {
 
   const syncSceneMedia = () => {
     const scene = selectedScene();
-    const pageCanAnimate = !document.hidden && !reducedMotion.matches;
+    const pageCanAnimate = !constrainedConnection && !document.hidden && !reducedMotion.matches;
 
     sceneVideos.forEach((video) => {
       window.clearTimeout(video.releaseTimer);
@@ -132,13 +149,19 @@ nextTick(async () => {
 
     const shouldOpen = !panel.classList.contains("is-open");
     closeDrawerGroup(group);
-    if (!shouldOpen) return;
+    if (!shouldOpen) {
+      syncProfileSceneState();
+      syncSceneMedia();
+      return;
+    }
 
     trigger.classList.add("is-active");
     trigger.setAttribute("aria-expanded", "true");
     panel.classList.add("is-open");
     panel.setAttribute("aria-hidden", "false");
     panel.inert = false;
+    syncProfileSceneState();
+    syncSceneMedia();
   });
 
   const enterButton = document.querySelector("#cinemaEnterButton");

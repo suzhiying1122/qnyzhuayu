@@ -104,14 +104,17 @@ video {
   opacity: 0;
 }
 
-.intro-bg-video {
+.intro-bg-picture {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+}
+
+.intro-bg-picture img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: none;
-  transform: none;
+  animation: cover-breathe 18s ease-in-out infinite alternate;
 }
 
 .intro-atmosphere {
@@ -163,59 +166,104 @@ video {
   background: #061013;
 }
 
-.scene-video {
+.scene-video,
+.scene-cover {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   opacity: 0;
-  filter: none;
-  transform: none;
   backface-visibility: hidden;
   transition: opacity 620ms var(--ease-cinema);
   will-change: opacity;
 }
 
-.scene-video-home {
+.scene-video {
+  object-fit: cover;
+}
+
+.scene-cover {
+  overflow: hidden;
+}
+
+.scene-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: cover-breathe 22s ease-in-out infinite alternate;
+}
+
+@keyframes cover-breathe {
+  from {
+    transform: scale(1.015);
+  }
+
+  to {
+    transform: scale(1.065);
+  }
+}
+
+.scene-cover-home,
+body[data-view="home"] .scene-cover-home {
   opacity: 1;
 }
 
-body[data-view="forum"] .scene-video-home,
-body[data-view="activities"] .scene-video-home,
-body[data-view="mailbox"] .scene-video-home,
-body[data-view="writing"] .scene-video-home,
-body[data-view="profile"] .scene-video-home,
-body[data-view="admin"] .scene-video-home,
-body[data-view="postDetail"] .scene-video-home,
-body[data-view="activityDetail"] .scene-video-home,
-body[data-view="letterDetail"] .scene-video-home,
-body[data-view="essayDetail"] .scene-video-home {
+body[data-view]:not([data-view="home"]) .scene-cover-home {
   opacity: 0;
 }
 
-body[data-view="forum"] .scene-video-community,
-body[data-view="activities"] .scene-video-community,
-body[data-view="profile"] .scene-video-community,
-body[data-view="admin"] .scene-video-community {
+body[data-view="forum"] .scene-video-forum,
+body[data-view="postDetail"] .scene-video-discussion,
+body[data-view="activities"] .scene-video-activities,
+body[data-view="activityDetail"] .scene-video-activities,
+body[data-view="mailbox"] .scene-video-mailbox,
+body[data-view="letterDetail"] .scene-video-mailbox,
+body[data-view="writing"] .scene-video-writing,
+body[data-view="essayDetail"] .scene-video-writing,
+body[data-view="profile"]:not([data-profile-scene="friends"]) .scene-video-profile,
+body[data-view="profile"][data-profile-scene="friends"] .scene-video-friends,
+body[data-view="admin"] .scene-video-admin {
   opacity: 1;
 }
 
-body[data-view="mailbox"] .scene-video-reader,
-body[data-view="writing"] .scene-video-reader,
-body[data-view="postDetail"] .scene-video-reader,
-body[data-view="activityDetail"] .scene-video-reader,
-body[data-view="letterDetail"] .scene-video-reader,
-body[data-view="essayDetail"] .scene-video-reader {
-  opacity: 1;
+body {
+  --scene-wash-top: rgba(1, 10, 12, 0.16);
+  --scene-wash-bottom: rgba(1, 6, 9, 0.48);
+}
+
+body[data-view="forum"],
+body[data-view="postDetail"] {
+  --scene-wash-top: rgba(2, 24, 24, 0.25);
+  --scene-wash-bottom: rgba(1, 11, 13, 0.54);
+}
+
+body[data-view="activities"],
+body[data-view="activityDetail"] {
+  --scene-wash-top: rgba(7, 22, 34, 0.42);
+  --scene-wash-bottom: rgba(4, 13, 22, 0.6);
+}
+
+body[data-view="mailbox"],
+body[data-view="letterDetail"],
+body[data-view="writing"],
+body[data-view="essayDetail"] {
+  --scene-wash-top: rgba(4, 8, 28, 0.2);
+  --scene-wash-bottom: rgba(2, 5, 20, 0.52);
+}
+
+body[data-view="profile"],
+body[data-view="admin"] {
+  --scene-wash-top: rgba(2, 20, 14, 0.28);
+  --scene-wash-bottom: rgba(1, 10, 8, 0.58);
 }
 
 .cinema-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 42%, transparent 0 38%, rgba(0, 0, 0, 0.18) 72%, rgba(0, 0, 0, 0.58) 100%),
-    linear-gradient(180deg, rgba(2, 7, 9, 0.12), rgba(2, 6, 8, 0.3));
+    linear-gradient(180deg, var(--scene-wash-top), var(--scene-wash-bottom)),
+    radial-gradient(circle at 50% 42%, transparent 0 38%, rgba(0, 0, 0, 0.16) 72%, rgba(0, 0, 0, 0.5) 100%);
+  transition: background 620ms var(--ease-cinema);
 }
 
 .cinema-grain {
@@ -655,32 +703,39 @@ main {
   font-size: 0.62rem;
 }
 
-body[data-view="forum"] .scene-progress span::after,
-body[data-view="postDetail"] .scene-progress span::after {
+body[data-view="forum"] .scene-progress span::after {
   content: "SCENE 02 / FORUM";
+}
+
+body[data-view="postDetail"] .scene-progress span::after {
+  content: "SCENE 03 / DISCUSSION";
 }
 
 body[data-view="activities"] .scene-progress span::after,
 body[data-view="activityDetail"] .scene-progress span::after {
-  content: "SCENE 02 / EVENTS";
+  content: "SCENE 04 / EVENTS";
 }
 
 body[data-view="mailbox"] .scene-progress span::after,
 body[data-view="letterDetail"] .scene-progress span::after {
-  content: "SCENE 03 / MAILBOX";
+  content: "SCENE 05 / MAILBOX";
 }
 
 body[data-view="writing"] .scene-progress span::after,
 body[data-view="essayDetail"] .scene-progress span::after {
-  content: "SCENE 03 / WRITING";
+  content: "SCENE 06 / WRITING";
 }
 
 body[data-view="profile"] .scene-progress span::after {
-  content: "SCENE 02 / PROFILE";
+  content: "SCENE 07 / PROFILE";
+}
+
+body[data-view="profile"][data-profile-scene="friends"] .scene-progress span::after {
+  content: "SCENE 08 / FRIENDS";
 }
 
 body[data-view="admin"] .scene-progress span::after {
-  content: "SCENE 02 / ADMIN";
+  content: "SCENE 09 / ADMIN";
 }
 
 .scene-progress i {
@@ -2301,7 +2356,8 @@ input[type="file"]::file-selector-button {
     display: none;
   }
 
-  .scene-video {
+  .scene-video,
+  .scene-cover {
     transition-duration: 320ms;
   }
 
@@ -2708,7 +2764,10 @@ input[type="file"]::file-selector-button {
     transition-duration: 0.01ms !important;
   }
 
-  .scene-video {
+  .scene-video,
+  .scene-cover img,
+  .intro-bg-picture img {
+    animation: none;
     transform: none;
   }
 }

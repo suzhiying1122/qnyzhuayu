@@ -1,20 +1,10 @@
 ﻿<template>
 
     <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
-      <video
-        class="intro-bg-video"
-        poster="/assets/cinematic-stage-poster.webp"
-        data-src-lite="/assets/cinematic-stage.mp4"
-        data-src-mobile="/assets/cinematic-stage-mobile.mp4"
-        data-src-hd="/assets/cinematic-stage-hd.mp4"
-        data-poster-lite="/assets/cinematic-stage-poster.webp"
-        data-poster-mobile="/assets/cinematic-stage-poster-mobile.webp"
-        data-poster-hd="/assets/cinematic-stage-poster-hd.webp"
-        muted
-        playsinline
-        loop
-        preload="none"
-      ></video>
+      <picture class="intro-bg-picture" aria-hidden="true">
+        <source media="(max-width: 820px)" srcset="/assets/ambient-home-mobile.webp" />
+        <img src="/assets/ambient-home-hd.webp" alt="" />
+      </picture>
       <div class="intro-atmosphere" aria-hidden="true"></div>
       <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
         <span>进入网站</span>
@@ -23,9 +13,18 @@
     </div>
 
     <div class="scene-video-stage" aria-hidden="true">
-      <video class="scene-video scene-video-home" data-scene="home" data-src-lite="/assets/cinematic-stage.mp4" data-src-mobile="/assets/cinematic-stage-mobile.mp4" data-src-hd="/assets/cinematic-stage-hd.mp4" data-poster-lite="/assets/cinematic-stage-poster.webp" data-poster-mobile="/assets/cinematic-stage-poster-mobile.webp" data-poster-hd="/assets/cinematic-stage-poster-hd.webp" poster="/assets/cinematic-stage-poster.webp" muted playsinline loop preload="none"></video>
-      <video class="scene-video scene-video-community" data-scene="community" data-src-lite="/assets/scene2-idle-loop.mp4" data-src-mobile="/assets/scene2-idle-loop-mobile.mp4" data-src-hd="/assets/scene2-idle-loop-hd.mp4" data-poster-lite="/assets/scene2-idle-loop-poster.webp" data-poster-mobile="/assets/scene2-idle-loop-poster-mobile.webp" data-poster-hd="/assets/scene2-idle-loop-poster-hd.webp" poster="/assets/scene2-idle-loop-poster.webp" muted playsinline loop preload="none"></video>
-      <video class="scene-video scene-video-reader" data-scene="reader" data-src-lite="/assets/scene3-loop.mp4" data-src-mobile="/assets/scene3-loop-mobile.mp4" data-src-hd="/assets/scene3-loop-hd.mp4" data-poster-lite="/assets/scene3-loop-poster.webp" data-poster-mobile="/assets/scene3-loop-poster-mobile.webp" data-poster-hd="/assets/scene3-loop-poster-hd.webp" poster="/assets/scene3-loop-poster.webp" muted playsinline loop preload="none"></video>
+      <picture class="scene-cover scene-cover-home">
+        <source media="(max-width: 820px)" srcset="/assets/ambient-home-mobile.webp" />
+        <img src="/assets/ambient-home-hd.webp" alt="" />
+      </picture>
+      <video class="scene-video scene-video-forum" data-scene="forum" data-src-mobile="/assets/ambient-forum-mobile.mp4" data-src-hd="/assets/ambient-forum-hd.mp4" data-poster-mobile="/assets/ambient-forum-poster-mobile.webp" data-poster-hd="/assets/ambient-forum-poster-hd.webp" poster="/assets/ambient-forum-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-discussion" data-scene="discussion" data-src-mobile="/assets/ambient-discussion-mobile.mp4" data-src-hd="/assets/ambient-discussion-hd.mp4" data-poster-mobile="/assets/ambient-discussion-poster-mobile.webp" data-poster-hd="/assets/ambient-discussion-poster-hd.webp" poster="/assets/ambient-discussion-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-activities" data-scene="activities" data-src-mobile="/assets/ambient-activities-mobile.mp4" data-src-hd="/assets/ambient-activities-hd.mp4" data-poster-mobile="/assets/ambient-activities-poster-mobile.webp" data-poster-hd="/assets/ambient-activities-poster-hd.webp" poster="/assets/ambient-activities-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-mailbox" data-scene="mailbox" data-src-mobile="/assets/ambient-mailbox-mobile.mp4" data-src-hd="/assets/ambient-mailbox-hd.mp4" data-poster-mobile="/assets/ambient-mailbox-poster-mobile.webp" data-poster-hd="/assets/ambient-mailbox-poster-hd.webp" poster="/assets/ambient-mailbox-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-writing" data-scene="writing" data-src-mobile="/assets/ambient-writing-mobile.mp4" data-src-hd="/assets/ambient-writing-hd.mp4" data-poster-mobile="/assets/ambient-writing-poster-mobile.webp" data-poster-hd="/assets/ambient-writing-poster-hd.webp" poster="/assets/ambient-writing-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-profile" data-scene="profile" data-src-mobile="/assets/ambient-profile-mobile.mp4" data-src-hd="/assets/ambient-profile-hd.mp4" data-poster-mobile="/assets/ambient-profile-poster-mobile.webp" data-poster-hd="/assets/ambient-profile-poster-hd.webp" poster="/assets/ambient-profile-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-friends" data-scene="friends" data-src-mobile="/assets/ambient-friends-mobile.mp4" data-src-hd="/assets/ambient-friends-hd.mp4" data-poster-mobile="/assets/ambient-friends-poster-mobile.webp" data-poster-hd="/assets/ambient-friends-poster-hd.webp" poster="/assets/ambient-friends-poster-hd.webp" muted playsinline loop preload="none"></video>
+      <video class="scene-video scene-video-admin" data-scene="admin" data-src-mobile="/assets/ambient-admin-mobile.mp4" data-src-hd="/assets/ambient-admin-hd.mp4" data-poster-mobile="/assets/ambient-admin-poster-mobile.webp" data-poster-hd="/assets/ambient-admin-poster-hd.webp" poster="/assets/ambient-admin-poster-hd.webp" muted playsinline loop preload="none"></video>
       <div class="cinema-vignette"></div>
       <div class="cinema-grain"></div>
     </div>
