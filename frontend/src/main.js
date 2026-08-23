@@ -64,6 +64,7 @@ nextTick(async () => {
     const source = mediaAsset(video, "src");
     if (!source || video.dataset.activeSource === source) return;
     video.pause();
+    video.classList.remove("is-ready");
     video.src = source;
     video.dataset.activeSource = source;
     video.load();
@@ -72,6 +73,7 @@ nextTick(async () => {
   const releaseVideo = (video) => {
     if (!video) return;
     video.pause();
+    video.classList.remove("is-ready");
     if (!video.dataset.activeSource) return;
     video.removeAttribute("src");
     delete video.dataset.activeSource;
@@ -81,7 +83,13 @@ nextTick(async () => {
   const playVideo = (video) => {
     prepareVideo(video);
     const playback = video.play();
-    if (playback?.catch) playback.catch(() => undefined);
+    if (playback?.then) {
+      playback
+        .then(() => {
+          if (!introActive && video.dataset.scene === selectedScene()) video.classList.add("is-ready");
+        })
+        .catch(() => video.classList.remove("is-ready"));
+    }
   };
 
   const syncSceneMedia = () => {
@@ -97,6 +105,7 @@ nextTick(async () => {
       }
 
       video.pause();
+      video.classList.remove("is-ready");
       setPoster(video);
       if (video.dataset.scene !== scene) {
         video.releaseTimer = window.setTimeout(() => releaseVideo(video), 900);
@@ -111,6 +120,14 @@ nextTick(async () => {
       setPoster(introVideo);
     }
   };
+
+  sceneVideos.forEach((video) => {
+    video.addEventListener("playing", () => {
+      if (!introActive && video.dataset.scene === selectedScene()) video.classList.add("is-ready");
+    });
+    video.addEventListener("waiting", () => video.classList.remove("is-ready"));
+    video.addEventListener("stalled", () => video.classList.remove("is-ready"));
+  });
 
   const refreshMediaQuality = () => {
     [introVideo, ...sceneVideos].forEach((video) => {

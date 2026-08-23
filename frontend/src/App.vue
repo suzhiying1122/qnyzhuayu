@@ -17,6 +17,7 @@
         <source media="(max-width: 820px)" srcset="/assets/ambient-home-mobile.webp" />
         <img src="/assets/ambient-home-hd.webp" alt="" />
       </picture>
+      <div class="scene-poster-stage" aria-hidden="true"></div>
       <video class="scene-video scene-video-forum" data-scene="forum" data-src-mobile="/assets/ambient-forum-mobile.mp4" data-src-hd="/assets/ambient-forum-hd.mp4" data-poster-mobile="/assets/ambient-forum-poster-mobile.webp" data-poster-hd="/assets/ambient-forum-poster-hd.webp" poster="/assets/ambient-forum-poster-hd.webp" muted playsinline loop preload="none"></video>
       <video class="scene-video scene-video-discussion" data-scene="discussion" data-src-mobile="/assets/ambient-discussion-mobile.mp4" data-src-hd="/assets/ambient-discussion-hd.mp4" data-poster-mobile="/assets/ambient-discussion-poster-mobile.webp" data-poster-hd="/assets/ambient-discussion-poster-hd.webp" poster="/assets/ambient-discussion-poster-hd.webp" muted playsinline loop preload="none"></video>
       <video class="scene-video scene-video-activities" data-scene="activities" data-src-mobile="/assets/ambient-activities-mobile.mp4" data-src-hd="/assets/ambient-activities-hd.mp4" data-poster-mobile="/assets/ambient-activities-poster-mobile.webp" data-poster-hd="/assets/ambient-activities-poster-hd.webp" poster="/assets/ambient-activities-poster-hd.webp" muted playsinline loop preload="none"></video>

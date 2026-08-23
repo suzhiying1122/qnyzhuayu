@@ -167,7 +167,8 @@ video {
 }
 
 .scene-video,
-.scene-cover {
+.scene-cover,
+.scene-poster-stage {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -184,6 +185,13 @@ video {
 
 .scene-cover {
   overflow: hidden;
+}
+
+.scene-poster-stage {
+  background-image: var(--scene-poster-image, none);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .scene-cover img {
@@ -212,23 +220,25 @@ body[data-view]:not([data-view="home"]) .scene-cover-home {
   opacity: 0;
 }
 
-body[data-view="forum"] .scene-video-forum,
-body[data-view="postDetail"] .scene-video-discussion,
-body[data-view="activities"] .scene-video-activities,
-body[data-view="activityDetail"] .scene-video-activities,
-body[data-view="mailbox"] .scene-video-mailbox,
-body[data-view="letterDetail"] .scene-video-mailbox,
-body[data-view="writing"] .scene-video-writing,
-body[data-view="essayDetail"] .scene-video-writing,
-body[data-view="profile"]:not([data-profile-scene="friends"]) .scene-video-profile,
-body[data-view="profile"][data-profile-scene="friends"] .scene-video-friends,
-body[data-view="admin"] .scene-video-admin {
+body[data-view]:not([data-view="home"]) .scene-poster-stage,
+body[data-view="forum"] .scene-video-forum.is-ready,
+body[data-view="postDetail"] .scene-video-discussion.is-ready,
+body[data-view="activities"] .scene-video-activities.is-ready,
+body[data-view="activityDetail"] .scene-video-activities.is-ready,
+body[data-view="mailbox"] .scene-video-mailbox.is-ready,
+body[data-view="letterDetail"] .scene-video-mailbox.is-ready,
+body[data-view="writing"] .scene-video-writing.is-ready,
+body[data-view="essayDetail"] .scene-video-writing.is-ready,
+body[data-view="profile"]:not([data-profile-scene="friends"]) .scene-video-profile.is-ready,
+body[data-view="profile"][data-profile-scene="friends"] .scene-video-friends.is-ready,
+body[data-view="admin"] .scene-video-admin.is-ready {
   opacity: 1;
 }
 
 body {
   --scene-wash-top: rgba(1, 10, 12, 0.16);
   --scene-wash-bottom: rgba(1, 6, 9, 0.48);
+  --scene-poster-image: none;
 }
 
 body[data-view="forum"],
@@ -237,24 +247,49 @@ body[data-view="postDetail"] {
   --scene-wash-bottom: rgba(1, 11, 13, 0.54);
 }
 
+body[data-view="forum"] {
+  --scene-poster-image: url("/assets/ambient-forum-poster-hd.webp");
+}
+
+body[data-view="postDetail"] {
+  --scene-poster-image: url("/assets/ambient-discussion-poster-hd.webp");
+}
+
 body[data-view="activities"],
 body[data-view="activityDetail"] {
   --scene-wash-top: rgba(7, 22, 34, 0.42);
   --scene-wash-bottom: rgba(4, 13, 22, 0.6);
+  --scene-poster-image: url("/assets/ambient-activities-poster-hd.webp");
 }
 
 body[data-view="mailbox"],
-body[data-view="letterDetail"],
+body[data-view="letterDetail"] {
+  --scene-wash-top: rgba(4, 8, 28, 0.2);
+  --scene-wash-bottom: rgba(2, 5, 20, 0.52);
+  --scene-poster-image: url("/assets/ambient-mailbox-poster-hd.webp");
+}
+
 body[data-view="writing"],
 body[data-view="essayDetail"] {
   --scene-wash-top: rgba(4, 8, 28, 0.2);
   --scene-wash-bottom: rgba(2, 5, 20, 0.52);
+  --scene-poster-image: url("/assets/ambient-writing-poster-hd.webp");
 }
 
-body[data-view="profile"],
+body[data-view="profile"] {
+  --scene-wash-top: rgba(2, 20, 14, 0.28);
+  --scene-wash-bottom: rgba(1, 10, 8, 0.58);
+  --scene-poster-image: url("/assets/ambient-profile-poster-hd.webp");
+}
+
+body[data-view="profile"][data-profile-scene="friends"] {
+  --scene-poster-image: url("/assets/ambient-friends-poster-hd.webp");
+}
+
 body[data-view="admin"] {
   --scene-wash-top: rgba(2, 20, 14, 0.28);
   --scene-wash-bottom: rgba(1, 10, 8, 0.58);
+  --scene-poster-image: url("/assets/ambient-admin-poster-hd.webp");
 }
 
 .cinema-vignette {
@@ -2323,6 +2358,41 @@ input[type="file"]::file-selector-button {
 @media (max-width: 820px) {
   :root {
     --header-height: 4.6rem;
+  }
+
+  body[data-view="forum"] {
+    --scene-poster-image: url("/assets/ambient-forum-poster-mobile.webp");
+  }
+
+  body[data-view="postDetail"] {
+    --scene-poster-image: url("/assets/ambient-discussion-poster-mobile.webp");
+  }
+
+  body[data-view="activities"],
+  body[data-view="activityDetail"] {
+    --scene-poster-image: url("/assets/ambient-activities-poster-mobile.webp");
+  }
+
+  body[data-view="mailbox"],
+  body[data-view="letterDetail"] {
+    --scene-poster-image: url("/assets/ambient-mailbox-poster-mobile.webp");
+  }
+
+  body[data-view="writing"],
+  body[data-view="essayDetail"] {
+    --scene-poster-image: url("/assets/ambient-writing-poster-mobile.webp");
+  }
+
+  body[data-view="profile"] {
+    --scene-poster-image: url("/assets/ambient-profile-poster-mobile.webp");
+  }
+
+  body[data-view="profile"][data-profile-scene="friends"] {
+    --scene-poster-image: url("/assets/ambient-friends-poster-mobile.webp");
+  }
+
+  body[data-view="admin"] {
+    --scene-poster-image: url("/assets/ambient-admin-poster-mobile.webp");
   }
 
   .intro-enter-button,
