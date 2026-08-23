@@ -126,37 +126,67 @@
           </div>
         </div>
 
-        <div class="forum-layout module-canvas">
-          <form class="compose-panel forum-compose" id="postForm">
-            <h3>提交论坛内容</h3>
-            <label>
-              标题
-              <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
-            </label>
-            <label>
-              内容
-              <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
-            </label>
-            <label>
-              标签
-              <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
-            </label>
-            <label>
-              附件
-              <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-              <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
-            </label>
-            <button class="primary-button" type="submit">提交审核</button>
-          </form>
-
-          <div class="thread-list-wrap">
-            <div class="list-title">
-              <h3>公开交流</h3>
-              <span id="currentUserHint">注册账号后可参与讨论</span>
-            </div>
-            <div class="thread-list" id="threadList"></div>
+        <div class="forum-layout module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-two" aria-label="论坛功能">
+            <button class="module-drawer-trigger" data-drawer-target="forumPublicDrawer" aria-controls="forumPublicDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>PUBLIC FEED</small>
+                <strong>公开交流</strong>
+                <em>浏览已发布帖子与实时留言</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="forumComposeDrawer" aria-controls="forumComposeDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>NEW TOPIC</small>
+                <strong>发起话题</strong>
+                <em>提交后进入管理员审核</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
           </div>
 
+          <div class="module-drawer-stack">
+            <section class="module-drawer-panel" id="forumPublicDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <div class="thread-list-wrap">
+                  <div class="list-title">
+                    <h3>公开交流</h3>
+                    <span id="currentUserHint">注册账号后可参与讨论</span>
+                  </div>
+                  <div class="thread-list" id="threadList"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="forumComposeDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="compose-panel forum-compose" id="postForm">
+                  <h3>提交论坛内容</h3>
+                  <label>
+                    标题
+                    <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
+                  </label>
+                  <label>
+                    内容
+                    <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
+                  </label>
+                  <label>
+                    标签
+                    <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
+                  </label>
+                  <label>
+                    附件
+                    <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                    <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
+                  </label>
+                  <button class="primary-button" type="submit">提交审核</button>
+                </form>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
 
@@ -178,43 +208,74 @@
           </div>
         </div>
 
-        <div class="activity-grid module-canvas">
-          <form class="compose-panel activity-compose" id="activityForm">
-            <h3>提交活动审核</h3>
-            <label>
-              类型
-              <select id="activityType" required>
-                <option value="briefing">活动简报</option>
-                <option value="preview">活动预告</option>
-              </select>
-            </label>
-            <label>
-              标题
-              <input id="activityTitle" type="text" maxlength="52" placeholder="例如：《雷雨》片段展演复盘" required />
-            </label>
-            <label>
-              日期
-              <input id="activityDate" type="date" required />
-            </label>
-            <label>
-              摘要
-              <textarea id="activitySummary" rows="5" maxlength="520" placeholder="简要记录活动内容、亮点或报名信息" required></textarea>
-            </label>
-            <label>
-              附件
-              <input id="activityFile" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-              <small class="field-note">简报、预告海报、排练照片、视频和文档都可以一起提交。</small>
-            </label>
-            <button class="primary-button" type="submit">提交审核</button>
-          </form>
+        <div class="activity-grid module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-two" aria-label="活动功能">
+            <button class="module-drawer-trigger" data-drawer-target="activityArchiveDrawer" aria-controls="activityArchiveDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>EVENT ARCHIVE</small>
+                <strong>活动档案</strong>
+                <em>查看简报、预告与社团记录</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="activityComposeDrawer" aria-controls="activityComposeDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>SUBMIT EVENT</small>
+                <strong>提交活动</strong>
+                <em>上传简报、预告与活动附件</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
 
-          <div class="activity-board">
-            <div class="filter-row" aria-label="活动筛选">
-              <button class="filter-button is-active" data-activity-filter="all" type="button">全部</button>
-              <button class="filter-button" data-activity-filter="briefing" type="button">简报</button>
-              <button class="filter-button" data-activity-filter="preview" type="button">预告</button>
-            </div>
-            <div class="activity-list" id="activityList"></div>
+          <div class="module-drawer-stack">
+            <section class="module-drawer-panel" id="activityArchiveDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <div class="activity-board">
+                  <div class="filter-row" aria-label="活动筛选">
+                    <button class="filter-button is-active" data-activity-filter="all" type="button">全部</button>
+                    <button class="filter-button" data-activity-filter="briefing" type="button">简报</button>
+                    <button class="filter-button" data-activity-filter="preview" type="button">预告</button>
+                  </div>
+                  <div class="activity-list" id="activityList"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="activityComposeDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="compose-panel activity-compose" id="activityForm">
+                  <h3>提交活动审核</h3>
+                  <label>
+                    类型
+                    <select id="activityType" required>
+                      <option value="briefing">活动简报</option>
+                      <option value="preview">活动预告</option>
+                    </select>
+                  </label>
+                  <label>
+                    标题
+                    <input id="activityTitle" type="text" maxlength="52" placeholder="例如：《雷雨》片段展演复盘" required />
+                  </label>
+                  <label>
+                    日期
+                    <input id="activityDate" type="date" required />
+                  </label>
+                  <label>
+                    摘要
+                    <textarea id="activitySummary" rows="5" maxlength="520" placeholder="简要记录活动内容、亮点或报名信息" required></textarea>
+                  </label>
+                  <label>
+                    附件
+                    <input id="activityFile" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                    <small class="field-note">简报、预告海报、排练照片、视频和文档都可以一起提交。</small>
+                  </label>
+                  <button class="primary-button" type="submit">提交审核</button>
+                </form>
+              </div>
+            </section>
           </div>
         </div>
       </section>
@@ -237,42 +298,73 @@
           </div>
         </div>
 
-        <div class="mailbox-layout module-canvas">
-          <form class="compose-panel letter-compose" id="letterForm">
-            <h3>投递信件</h3>
-            <label>
-              主题
-              <input id="letterSubject" type="text" maxlength="48" placeholder="例如：关于招新面试的小建议" required />
-            </label>
-            <label>
-              内容
-              <textarea id="letterBody" rows="7" maxlength="760" placeholder="写给华煜话剧社的话" required></textarea>
-            </label>
-            <fieldset class="choice-group">
-              <legend>公开方式</legend>
-              <label>
-                <input type="radio" name="letterVisibility" value="public" checked />
-                公开
-              </label>
-              <label>
-                <input type="radio" name="letterVisibility" value="private" />
-                不公开
-              </label>
-            </fieldset>
-            <label>
-              附件
-              <input id="letterAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-              <small class="field-note">可附上图片、视频、文档或日报材料。</small>
-            </label>
-            <button class="primary-button" type="submit">投递</button>
-          </form>
+        <div class="mailbox-layout module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-two" aria-label="信箱功能">
+            <button class="module-drawer-trigger" data-drawer-target="mailboxPublicDrawer" aria-controls="mailboxPublicDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>OPEN LETTERS</small>
+                <strong>公开回信</strong>
+                <em>查看公开来信与社团回复</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="mailboxComposeDrawer" aria-controls="mailboxComposeDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>WRITE A LETTER</small>
+                <strong>投递信件</strong>
+                <em>可选择公开或仅社团内部阅读</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
 
-          <div class="letter-board">
-            <div class="list-title">
-              <h3>公开信件与回复</h3>
-              <span id="mailboxAdminHint"></span>
-            </div>
-            <div class="letter-list" id="letterList"></div>
+          <div class="module-drawer-stack">
+            <section class="module-drawer-panel" id="mailboxPublicDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <div class="letter-board">
+                  <div class="list-title">
+                    <h3>公开信件与回复</h3>
+                    <span id="mailboxAdminHint"></span>
+                  </div>
+                  <div class="letter-list" id="letterList"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="mailboxComposeDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="compose-panel letter-compose" id="letterForm">
+                  <h3>投递信件</h3>
+                  <label>
+                    主题
+                    <input id="letterSubject" type="text" maxlength="48" placeholder="例如：关于招新面试的小建议" required />
+                  </label>
+                  <label>
+                    内容
+                    <textarea id="letterBody" rows="7" maxlength="760" placeholder="写给华煜话剧社的话" required></textarea>
+                  </label>
+                  <fieldset class="choice-group">
+                    <legend>公开方式</legend>
+                    <label>
+                      <input type="radio" name="letterVisibility" value="public" checked />
+                      公开
+                    </label>
+                    <label>
+                      <input type="radio" name="letterVisibility" value="private" />
+                      不公开
+                    </label>
+                  </fieldset>
+                  <label>
+                    附件
+                    <input id="letterAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                    <small class="field-note">可附上图片、视频、文档或日报材料。</small>
+                  </label>
+                  <button class="primary-button" type="submit">投递</button>
+                </form>
+              </div>
+            </section>
           </div>
         </div>
       </section>
@@ -295,56 +387,115 @@
           </div>
         </div>
 
-        <div class="writing-layout module-canvas">
-          <aside class="writing-taskbar">
-            <div class="list-title">
-              <h3>征文活动</h3>
-              <span>固定活动与新增活动</span>
-            </div>
-            <div class="writing-event-list" id="writingEventList"></div>
-            <form class="compose-panel writing-event-form" id="writingEventForm">
-              <h3>添加征文活动</h3>
-              <label>
-                活动名称
-                <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：招新主题征文" required />
-              </label>
-              <label>
-                征文说明
-                <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="填写主题、字数要求、投稿范围、截止时间说明" required></textarea>
-              </label>
-              <label>
-                截止时间
-                <input id="writingEventDeadline" type="date" />
-              </label>
-              <button class="primary-button" type="submit">添加活动</button>
-            </form>
-          </aside>
+        <div class="writing-layout module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-four" aria-label="征文功能">
+            <button class="module-drawer-trigger" data-drawer-target="writingEventsDrawer" aria-controls="writingEventsDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>OPEN CALLS</small>
+                <strong>征文活动</strong>
+                <em>长期征文与新增主题</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="writingShelfDrawer" aria-controls="writingShelfDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>ESSAY SHELF</small>
+                <strong>文章书架</strong>
+                <em>按征文活动浏览文章</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="essayComposeDrawer" aria-controls="essayComposeDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">03</span>
+              <span class="module-drawer-copy">
+                <small>SUBMIT ESSAY</small>
+                <strong>提交文章</strong>
+                <em>选择活动并添加正文与附件</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="writingEventComposeDrawer" aria-controls="writingEventComposeDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">04</span>
+              <span class="module-drawer-copy">
+                <small>MANAGE CALLS</small>
+                <strong>活动管理</strong>
+                <em>添加新的征文活动</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
 
-          <section class="writing-library" aria-label="征文书架">
-            <div class="list-title">
-              <h3 id="writingShelfTitle">文章列表</h3>
-              <span id="writingShelfHint">点击条目查看文章</span>
-            </div>
-            <div class="writing-event-intro" id="writingEventIntro"></div>
-            <div class="writing-shelf" id="writingShelf"></div>
-            <form class="compose-panel essay-compose" id="essayForm">
-              <h3>添加文章</h3>
-              <label>
-                文章标题
-                <input id="essayTitle" type="text" maxlength="52" placeholder="例如：2026 招新征文投稿" required />
-              </label>
-              <label>
-                正文
-                <textarea id="essayBody" rows="7" maxlength="1800" placeholder="输入文章正文，可按段落填写" required></textarea>
-              </label>
-              <label>
-                附件
-                <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
-                <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
-              </label>
-              <button class="primary-button" type="submit">提交文章</button>
-            </form>
-          </section>
+          <div class="module-drawer-stack">
+            <section class="module-drawer-panel" id="writingEventsDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <aside class="writing-taskbar">
+                  <div class="list-title">
+                    <h3>征文活动</h3>
+                    <span>固定活动与新增活动</span>
+                  </div>
+                  <div class="writing-event-list" id="writingEventList"></div>
+                </aside>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="writingShelfDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <section class="writing-library" aria-label="征文书架">
+                  <div class="list-title">
+                    <h3 id="writingShelfTitle">文章列表</h3>
+                    <span id="writingShelfHint">点击条目查看文章</span>
+                  </div>
+                  <div class="writing-event-intro" id="writingEventIntro"></div>
+                  <div class="writing-shelf" id="writingShelf"></div>
+                </section>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="essayComposeDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="compose-panel essay-compose" id="essayForm">
+                  <h3>添加文章</h3>
+                  <label>
+                    文章标题
+                    <input id="essayTitle" type="text" maxlength="52" placeholder="例如：2026 招新征文投稿" required />
+                  </label>
+                  <label>
+                    正文
+                    <textarea id="essayBody" rows="7" maxlength="1800" placeholder="输入文章正文，可按段落填写" required></textarea>
+                  </label>
+                  <label>
+                    附件
+                    <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
+                    <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
+                  </label>
+                  <button class="primary-button" type="submit">提交文章</button>
+                </form>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="writingEventComposeDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="compose-panel writing-event-form" id="writingEventForm">
+                  <h3>添加征文活动</h3>
+                  <label>
+                    活动名称
+                    <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：招新主题征文" required />
+                  </label>
+                  <label>
+                    征文说明
+                    <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="填写主题、字数要求、投稿范围、截止时间说明" required></textarea>
+                  </label>
+                  <label>
+                    截止时间
+                    <input id="writingEventDeadline" type="date" />
+                  </label>
+                  <button class="primary-button" type="submit">添加活动</button>
+                </form>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
 
