@@ -801,6 +801,10 @@ body[data-view="admin"] .scene-progress span::after {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.module-drawer-rail-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .module-drawer-rail-four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -1491,8 +1495,14 @@ input[type="file"]::file-selector-button {
 /* Profile and admin workspaces */
 .profile-layout {
   display: grid;
-  grid-template-columns: minmax(14rem, 0.68fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
   gap: 0.8rem;
+}
+
+.profile-panel {
+  display: grid;
+  gap: 0.9rem;
 }
 
 .profile-summary-card {
@@ -2216,6 +2226,7 @@ input[type="file"]::file-selector-button {
   }
 
   .module-drawer-rail-two,
+  .module-drawer-rail-three,
   .module-drawer-rail-four {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;

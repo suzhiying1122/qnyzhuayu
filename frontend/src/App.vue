@@ -517,100 +517,154 @@
           </div>
         </div>
 
-        <div class="profile-layout module-canvas">
-          <aside class="profile-summary-card">
-            <div class="profile-avatar-preview" id="profileAvatarPreview" aria-hidden="true">华</div>
-            <div>
-              <p class="section-kicker">Member Card</p>
-              <h3 id="profileDisplayTitle">未登录</h3>
-              <p id="profileRoleText">登录后完善你的社员资料</p>
-              <p class="profile-number" id="profileAccountNo">编号：未登录</p>
-            </div>
-            <div class="profile-intro-box" id="profileIntroText">这里会显示你的个人介绍。</div>
-          </aside>
+        <div class="profile-layout module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-four" aria-label="个人主页功能">
+            <button class="module-drawer-trigger" data-drawer-target="profileCardDrawer" aria-controls="profileCardDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>MEMBER CARD</small>
+                <strong>社员名片</strong>
+                <em>查看头像、编号与个人介绍</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="profileEditDrawer" aria-controls="profileEditDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>EDIT PROFILE</small>
+                <strong>编辑资料</strong>
+                <em>更新姓名、头像和社团职务</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="profileSecurityDrawer" aria-controls="profileSecurityDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">03</span>
+              <span class="module-drawer-copy">
+                <small>ACCOUNT SECURITY</small>
+                <strong>账号安全</strong>
+                <em>修改当前账号密码</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="profileFriendsDrawer" aria-controls="profileFriendsDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">04</span>
+              <span class="module-drawer-copy">
+                <small>FRIENDS & CHAT</small>
+                <strong>好友私聊</strong>
+                <em>添加好友、处理申请并聊天</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
 
-          <div class="profile-workbench">
-            <form class="profile-panel" id="profileForm">
-              <h3>编辑个人资料</h3>
-              <label>
-                姓名
-                <input id="profileNameInput" type="text" maxlength="24" placeholder="填写你希望展示的姓名" required />
-              </label>
-              <label>
-                头像
-                <input id="profileAvatarInput" type="file" accept="image/*" />
-                <small class="field-note">建议使用正方形图片，单张不超过 2.5MB。</small>
-              </label>
-              <label>
-                社团职务
-                <input id="profileClubRoleInput" type="text" maxlength="32" placeholder="例如：演员 / 编剧 / 灯光 / 社团秘书" />
-              </label>
-              <label>
-                个人介绍
-                <textarea id="profileIntroInput" rows="4" maxlength="260" placeholder="写一点关于你和话剧社的故事"></textarea>
-              </label>
-              <button class="primary-button" type="submit">保存个人资料</button>
-            </form>
-
-            <form class="profile-panel" id="passwordForm">
-              <h3>修改密码</h3>
-              <label>
-                当前密码
-                <input id="currentPassword" type="password" autocomplete="current-password" required />
-              </label>
-              <label>
-                新密码
-                <input id="newPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
-              </label>
-              <label>
-                确认新密码
-                <input id="confirmPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
-              </label>
-              <button class="primary-button" type="submit">更新密码</button>
-            </form>
-
-            <section class="profile-panel friend-panel">
-              <h3>好友</h3>
-              <form class="friend-search-form" id="friendSearchForm">
-                <label>
-                  搜索编号或昵称
-                  <input id="friendSearchInput" type="text" maxlength="24" placeholder="输入对方编号或昵称" />
-                </label>
-                <button class="primary-button" type="submit">发送申请</button>
-              </form>
-              <div class="friend-section">
-                <div class="list-title compact-title">
-                  <h4>收到的申请</h4>
-                  <span id="friendRequestHint"></span>
-                </div>
-                <div class="friend-list" id="friendRequestList"></div>
-              </div>
-              <div class="friend-section">
-                <div class="list-title compact-title">
-                  <h4>我的好友</h4>
-                  <span id="friendListHint"></span>
-                </div>
-                <div class="friend-list" id="friendList"></div>
-              </div>
-              <section class="private-chat" id="privateChatPanel" aria-label="好友私聊">
-                <div class="chat-empty" id="privateChatEmpty">选择一位好友开始私聊。</div>
-                <div class="chat-room hidden" id="privateChatRoom">
-                  <div class="chat-header">
-                    <div class="mini-avatar" id="chatFriendAvatar" aria-hidden="true">友</div>
-                    <div>
-                      <strong id="chatFriendName">好友</strong>
-                      <span id="chatFriendMeta">编号</span>
-                    </div>
+          <div class="module-drawer-stack">
+            <section class="module-drawer-panel" id="profileCardDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <aside class="profile-summary-card">
+                  <div class="profile-avatar-preview" id="profileAvatarPreview" aria-hidden="true">华</div>
+                  <div>
+                    <p class="section-kicker">Member Card</p>
+                    <h3 id="profileDisplayTitle">未登录</h3>
+                    <p id="profileRoleText">登录后完善你的社员资料</p>
+                    <p class="profile-number" id="profileAccountNo">编号：未登录</p>
                   </div>
-                  <div class="chat-messages" id="chatMessages"></div>
-                  <form class="chat-compose" id="chatForm">
-                    <input id="chatInput" type="text" maxlength="300" placeholder="输入私聊内容" autocomplete="off" />
-                    <button class="primary-button" type="submit">发送</button>
-                  </form>
-                </div>
-              </section>
+                  <div class="profile-intro-box" id="profileIntroText">这里会显示你的个人介绍。</div>
+                </aside>
+              </div>
             </section>
 
+            <section class="module-drawer-panel" id="profileEditDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="profile-panel" id="profileForm">
+                  <h3>编辑个人资料</h3>
+                  <label>
+                    姓名
+                    <input id="profileNameInput" type="text" maxlength="24" placeholder="填写你希望展示的姓名" required />
+                  </label>
+                  <label>
+                    头像
+                    <input id="profileAvatarInput" type="file" accept="image/*" />
+                    <small class="field-note">建议使用正方形图片，单张不超过 2.5MB。</small>
+                  </label>
+                  <label>
+                    社团职务
+                    <input id="profileClubRoleInput" type="text" maxlength="32" placeholder="例如：演员 / 编剧 / 灯光 / 社团秘书" />
+                  </label>
+                  <label>
+                    个人介绍
+                    <textarea id="profileIntroInput" rows="4" maxlength="260" placeholder="写一点关于你和话剧社的故事"></textarea>
+                  </label>
+                  <button class="primary-button" type="submit">保存个人资料</button>
+                </form>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="profileSecurityDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <form class="profile-panel" id="passwordForm">
+                  <h3>修改密码</h3>
+                  <label>
+                    当前密码
+                    <input id="currentPassword" type="password" autocomplete="current-password" required />
+                  </label>
+                  <label>
+                    新密码
+                    <input id="newPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
+                  </label>
+                  <label>
+                    确认新密码
+                    <input id="confirmPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
+                  </label>
+                  <button class="primary-button" type="submit">更新密码</button>
+                </form>
+              </div>
+            </section>
+
+            <section class="module-drawer-panel" id="profileFriendsDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <section class="profile-panel friend-panel">
+                  <h3>好友</h3>
+                  <form class="friend-search-form" id="friendSearchForm">
+                    <label>
+                      搜索编号或昵称
+                      <input id="friendSearchInput" type="text" maxlength="24" placeholder="输入对方编号或昵称" />
+                    </label>
+                    <button class="primary-button" type="submit">发送申请</button>
+                  </form>
+                  <div class="friend-section">
+                    <div class="list-title compact-title">
+                      <h4>收到的申请</h4>
+                      <span id="friendRequestHint"></span>
+                    </div>
+                    <div class="friend-list" id="friendRequestList"></div>
+                  </div>
+                  <div class="friend-section">
+                    <div class="list-title compact-title">
+                      <h4>我的好友</h4>
+                      <span id="friendListHint"></span>
+                    </div>
+                    <div class="friend-list" id="friendList"></div>
+                  </div>
+                  <section class="private-chat" id="privateChatPanel" aria-label="好友私聊">
+                    <div class="chat-empty" id="privateChatEmpty">选择一位好友开始私聊。</div>
+                    <div class="chat-room hidden" id="privateChatRoom">
+                      <div class="chat-header">
+                        <div class="mini-avatar" id="chatFriendAvatar" aria-hidden="true">友</div>
+                        <div>
+                          <strong id="chatFriendName">好友</strong>
+                          <span id="chatFriendMeta">编号</span>
+                        </div>
+                      </div>
+                      <div class="chat-messages" id="chatMessages"></div>
+                      <form class="chat-compose" id="chatForm">
+                        <input id="chatInput" type="text" maxlength="300" placeholder="输入私聊内容" autocomplete="off" />
+                        <button class="primary-button" type="submit">发送</button>
+                      </form>
+                    </div>
+                  </section>
+                </section>
+              </div>
+            </section>
           </div>
         </div>
       </section>
@@ -629,30 +683,72 @@
           </div>
         </div>
 
-        <div class="admin-layout module-canvas">
-          <div class="admin-review-grid" id="adminReviewArea">
-            <section class="review-board">
-              <div class="list-title">
-                <h3>论坛帖子待审</h3>
-                <span id="pendingPostHint"></span>
+        <div class="admin-layout module-canvas module-drawer-workspace" data-module-drawers>
+          <div class="module-drawer-rail module-drawer-rail-three" aria-label="管理员功能">
+            <button class="module-drawer-trigger" data-drawer-target="adminPostDrawer" aria-controls="adminPostDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">01</span>
+              <span class="module-drawer-copy">
+                <small>FORUM REVIEW</small>
+                <strong>帖子审核</strong>
+                <em>审批论坛待发布内容</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="adminActivityDrawer" aria-controls="adminActivityDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-copy">
+                <small>EVENT REVIEW</small>
+                <strong>活动审核</strong>
+                <em>审批活动简报与预告</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+            <button class="module-drawer-trigger" data-drawer-target="adminAccountDrawer" aria-controls="adminAccountDrawer" aria-expanded="false" type="button">
+              <span class="module-drawer-index">03</span>
+              <span class="module-drawer-copy">
+                <small>ACCOUNT CONTROL</small>
+                <strong>账号管理</strong>
+                <em>查看并注销平台注册账号</em>
+              </span>
+              <span class="module-drawer-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="module-drawer-stack" id="adminReviewArea">
+            <section class="module-drawer-panel" id="adminPostDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <section class="review-board">
+                  <div class="list-title">
+                    <h3>论坛帖子待审</h3>
+                    <span id="pendingPostHint"></span>
+                  </div>
+                  <div class="review-list" id="pendingPostList"></div>
+                </section>
               </div>
-              <div class="review-list" id="pendingPostList"></div>
             </section>
 
-            <section class="review-board review-board-wide">
-              <div class="list-title">
-                <h3>活动档案待审</h3>
-                <span id="pendingActivityHint"></span>
+            <section class="module-drawer-panel" id="adminActivityDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <section class="review-board review-board-wide">
+                  <div class="list-title">
+                    <h3>活动档案待审</h3>
+                    <span id="pendingActivityHint"></span>
+                  </div>
+                  <div class="review-list review-list-two" id="pendingActivityList"></div>
+                </section>
               </div>
-              <div class="review-list review-list-two" id="pendingActivityList"></div>
             </section>
 
-            <section class="review-board review-board-wide account-management-board">
-              <div class="list-title">
-                <h3>账号管理</h3>
-                <span id="accountAdminHint"></span>
+            <section class="module-drawer-panel" id="adminAccountDrawer" aria-hidden="true">
+              <div class="module-drawer-reveal">
+                <section class="review-board review-board-wide account-management-board">
+                  <div class="list-title">
+                    <h3>账号管理</h3>
+                    <span id="accountAdminHint"></span>
+                  </div>
+                  <div class="account-list" id="accountAdminList"></div>
+                </section>
               </div>
-              <div class="account-list" id="accountAdminList"></div>
             </section>
           </div>
         </div>
