@@ -2854,6 +2854,207 @@ input[type="file"]::file-selector-button {
   }
 }
 
+/* Detail reading uses one uninterrupted column: author context first, post content second. */
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-card {
+  display: block;
+  overflow: hidden;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  min-height: 4.6rem;
+  padding: 0.9rem clamp(1rem, 2.2vw, 1.6rem);
+  border-right: 0;
+  border-bottom: 1px solid var(--detail-rule);
+  text-align: left;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author .floor-avatar {
+  flex: 0 0 auto;
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author strong,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span {
+  align-self: center;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span::before {
+  margin-right: 0.18rem;
+  content: "·";
+  color: var(--detail-rule-strong, var(--detail-muted));
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
+  min-width: 0;
+  padding: clamp(1.2rem, 2.6vw, 2.2rem) clamp(1rem, 3vw, 2.8rem) clamp(1.35rem, 2.8vw, 2.4rem);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body > .detail-body {
+  max-width: 88ch;
+}
+
+@media (max-width: 820px) {
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
+    min-height: 0;
+    padding: 0.75rem 0.9rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author .floor-avatar {
+    width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
+    padding: 1.05rem 0.9rem 1.25rem;
+  }
+}
+
+/* User-provided animated scene backgrounds. Static posters remain the fallback when a GIF cannot load. */
+.scene-gif-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  filter: saturate(0.78) brightness(1.06);
+  backface-visibility: hidden;
+  transition: opacity 620ms var(--ease-cinema);
+  will-change: opacity;
+  pointer-events: none;
+}
+
+body[data-view] .scene-gif-stage {
+  opacity: 0.72;
+}
+
+body[data-view="home"] .scene-gif-stage {
+  opacity: 0.92;
+}
+
+.scene-gif-stage.is-failed {
+  opacity: 0 !important;
+}
+
+body.gif-background-ready .scene-poster-stage,
+body.gif-background-ready .scene-cover-home {
+  opacity: 0 !important;
+  animation: none;
+}
+
+body.gif-background-ready .scene-video-stage::after {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.35), rgba(246, 241, 233, 0.56)),
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.16), transparent 56%);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
+  background:
+    linear-gradient(100deg, rgba(255, 253, 248, 0.93) 8%, rgba(255, 253, 248, 0.78) 68%, rgba(255, 253, 248, 0.62));
+  background-position: center;
+  background-size: cover;
+  backdrop-filter: blur(5px);
+}
+
+/* Keep long discussions quiet until someone asks to open a reply or its thread. */
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold {
+  margin: 0.72rem 0 0 3rem;
+  overflow: hidden;
+  border: 1px solid var(--detail-rule);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary {
+  display: flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.58rem 0.78rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--detail-wine-dark);
+  font-size: 0.74rem;
+  user-select: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary::-webkit-details-marker,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary::-webkit-details-marker {
+  display: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary::after,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary::after {
+  flex: 0 0 auto;
+  content: "+";
+  color: var(--detail-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold[open] > .comment-reply-summary,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold[open] > .comment-replies-summary {
+  border-bottom: 1px solid var(--detail-rule);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold[open] > .comment-reply-summary::after,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold[open] > .comment-replies-summary::after {
+  content: "−";
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary small,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary small {
+  margin-left: auto;
+  color: var(--detail-muted);
+  font-size: 0.64rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold > .comment-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.55rem;
+  max-width: none;
+  margin: 0;
+  padding: 0.68rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold > .nested-replies {
+  padding: 0.05rem 0.72rem 0.65rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold .comment-card {
+  margin-left: 0;
+  padding-left: 0.25rem;
+}
+
+@media (max-width: 820px) {
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold {
+    margin-left: 0.1rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold > .comment-form {
+    grid-template-columns: 1fr;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold .secondary-button {
+    width: 100%;
+  }
+}
+
 /* Forum detail: give the post a real reading canvas and a visible social rail. */
 body[data-view="postDetail"] .forum-chat-layout .reader-scroll {
   gap: 1.25rem;

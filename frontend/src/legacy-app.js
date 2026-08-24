@@ -3067,6 +3067,7 @@ function renderCommentThread(comment, postId, level = 1) {
   const nested = replies.length
     ? replies.map((reply) => renderCommentThread(reply, postId, Math.min(level + 1, 5))).join("")
     : "";
+  const replyCountLabel = replies.length === 1 ? "查看 1 条回复" : `查看 ${replies.length} 条回复`;
   return `
     <article class="comment-card comment-depth-${Math.min(level, 5)}">
       <div class="comment-main">
@@ -3079,11 +3080,17 @@ function renderCommentThread(comment, postId, level = 1) {
           <p>${escapeHtml(comment.body)}</p>
         </div>
       </div>
-      <form class="comment-form inline-reply-form" data-comment-form data-post-id="${postId}" data-parent-id="${comment.id}">
-        <textarea name="commentBody" rows="2" maxlength="360" placeholder="${user ? `回复 ${escapeAttribute(comment.author || "这条留言")}` : "登录后可以回复"}" ${user ? "" : "disabled"} required></textarea>
-        <button class="secondary-button" type="submit" ${user ? "" : "disabled"}>回复</button>
-      </form>
-      ${nested ? `<div class="nested-replies">${nested}</div>` : ""}
+      <details class="comment-reply-fold">
+        <summary class="comment-reply-summary">
+          <span>回复这条留言</span>
+          <small>${user ? "点击展开输入框" : "登录后可回复"}</small>
+        </summary>
+        <form class="comment-form inline-reply-form" data-comment-form data-post-id="${postId}" data-parent-id="${comment.id}">
+          <textarea name="commentBody" rows="2" maxlength="360" placeholder="${user ? `回复 ${escapeAttribute(comment.author || "这条留言")}` : "登录后可以回复"}" ${user ? "" : "disabled"} required></textarea>
+          <button class="secondary-button" type="submit" ${user ? "" : "disabled"}>回复</button>
+        </form>
+      </details>
+      ${nested ? `<details class="comment-replies-fold"><summary class="comment-replies-summary"><span>${replyCountLabel}</span><small>展开讨论</small></summary><div class="nested-replies">${nested}</div></details>` : ""}
     </article>
   `;
 }
