@@ -6557,3 +6557,153 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
     background-color: rgba(4, 23, 25, 0.9);
   }
 }
+
+/* User-selected scene art: mailbox and activities keep their own image-led themes. */
+body[data-view="mailbox"],
+body[data-view="letterDetail"] {
+  --scene-poster-image: url("/assets/wallpaper-mailbox-user.jpg");
+}
+
+body[data-view="activities"],
+body[data-view="activityDetail"] {
+  --scene-poster-image: url("/assets/wallpaper-activities-user.jpg");
+}
+
+/* Let the selected still lead the composition while the original scene video remains available underneath. */
+body[data-view="mailbox"] .scene-poster-stage,
+body[data-view="letterDetail"] .scene-poster-stage,
+body[data-view="activities"] .scene-poster-stage,
+body[data-view="activityDetail"] .scene-poster-stage {
+  opacity: 0.72;
+  filter: none;
+}
+
+body[data-view="mailbox"] .scene-video-mailbox.is-ready,
+body[data-view="letterDetail"] .scene-video-mailbox.is-ready,
+body[data-view="activities"] .scene-video-activities.is-ready,
+body[data-view="activityDetail"] .scene-video-activities.is-ready {
+  opacity: 0.08 !important;
+}
+
+body[data-view="mailbox"] .scene-video-stage::after,
+body[data-view="letterDetail"] .scene-video-stage::after {
+  background: linear-gradient(180deg, rgba(244, 252, 252, 0.18), rgba(18, 31, 58, 0.34));
+}
+
+body[data-view="activities"] .scene-video-stage::after,
+body[data-view="activityDetail"] .scene-video-stage::after {
+  background: linear-gradient(180deg, rgba(54, 28, 48, 0.2), rgba(38, 21, 36, 0.4));
+}
+
+/* The detail shell uses the same selected scene art, with a local readable tint. */
+body[data-view="letterDetail"] {
+  --detail-top-art: url("/assets/wallpaper-mailbox-user.jpg");
+  --detail-message-art: url("/assets/wallpaper-mailbox-user.jpg");
+  --detail-fold-art: url("/assets/wallpaper-mailbox-user.jpg");
+  --detail-comments-art: url("/assets/wallpaper-mailbox-user.jpg");
+  --detail-composer-art: url("/assets/wallpaper-mailbox-user.jpg");
+  --readable-ink: #1d3851;
+  --readable-muted: rgba(43, 70, 94, 0.8);
+  --readable-subtle: rgba(63, 89, 114, 0.7);
+  --readable-border: rgba(55, 93, 125, 0.28);
+  --readable-surface: rgba(238, 249, 250, 0.82);
+  --readable-surface-soft: rgba(216, 239, 240, 0.74);
+}
+
+body[data-view="activityDetail"] {
+  --detail-top-art: url("/assets/wallpaper-activities-user.jpg");
+  --detail-message-art: url("/assets/wallpaper-activities-user.jpg");
+  --detail-fold-art: url("/assets/wallpaper-activities-user.jpg");
+  --detail-comments-art: url("/assets/wallpaper-activities-user.jpg");
+  --detail-composer-art: url("/assets/wallpaper-activities-user.jpg");
+  --readable-ink: #fff8ed;
+  --readable-muted: rgba(255, 235, 211, 0.82);
+  --readable-subtle: rgba(255, 219, 182, 0.72);
+  --readable-border: rgba(255, 204, 145, 0.3);
+  --readable-surface: rgba(53, 31, 42, 0.84);
+  --readable-surface-soft: rgba(91, 51, 48, 0.72);
+}
+
+body[data-view="letterDetail"] .wechat-detail-layout {
+  border-color: rgba(55, 93, 125, 0.28);
+  background: rgba(223, 243, 245, 0.68);
+}
+
+body[data-view="activityDetail"] .wechat-detail-layout {
+  border-color: rgba(255, 204, 145, 0.3);
+  background: rgba(54, 31, 42, 0.62);
+}
+
+body[data-view="letterDetail"] .reader-topbar {
+  background: linear-gradient(115deg, rgba(231, 247, 248, 0.9), rgba(178, 218, 224, 0.62) 52%, rgba(107, 122, 164, 0.7)), var(--detail-top-art);
+}
+
+body[data-view="activityDetail"] .reader-topbar {
+  background: linear-gradient(115deg, rgba(49, 25, 44, 0.9), rgba(137, 73, 62, 0.62) 52%, rgba(220, 151, 76, 0.58)), var(--detail-top-art);
+}
+
+body[data-view="letterDetail"] .message-card,
+body[data-view="letterDetail"] .reader-comments,
+body[data-view="letterDetail"] .reader-composer,
+body[data-view="letterDetail"] .detail-fold-composer,
+body[data-view="letterDetail"] .message-body > .detail-fold:not(.detail-fold-composer),
+body[data-view="letterDetail"] .detail-fold-reply {
+  background: linear-gradient(118deg, rgba(235, 248, 249, 0.86), rgba(190, 226, 231, 0.68) 56%, rgba(116, 128, 169, 0.58)), var(--detail-message-art);
+}
+
+body[data-view="activityDetail"] .message-card,
+body[data-view="activityDetail"] .reader-comments,
+body[data-view="activityDetail"] .reader-composer,
+body[data-view="activityDetail"] .detail-fold-composer,
+body[data-view="activityDetail"] .message-body > .detail-fold:not(.detail-fold-composer),
+body[data-view="activityDetail"] .detail-fold-reply {
+  background: linear-gradient(118deg, rgba(47, 26, 41, 0.9), rgba(105, 54, 51, 0.7) 56%, rgba(210, 137, 69, 0.52)), var(--detail-message-art);
+}
+
+body[data-view="letterDetail"] .message-author {
+  background: linear-gradient(180deg, rgba(235, 248, 249, 0.9), rgba(185, 222, 228, 0.72));
+}
+
+body[data-view="activityDetail"] .message-author {
+  background: linear-gradient(180deg, rgba(94, 48, 52, 0.86), rgba(45, 25, 39, 0.72));
+}
+
+body[data-view="letterDetail"] .message-body {
+  background: rgba(235, 248, 249, 0.42);
+}
+
+body[data-view="activityDetail"] .message-body {
+  background: rgba(48, 26, 40, 0.42);
+}
+
+body[data-view="letterDetail"] .comment-card,
+body[data-view="letterDetail"] .comment-reply-fold,
+body[data-view="letterDetail"] .comment-replies-fold,
+body[data-view="letterDetail"] .club-reply {
+  border-color: rgba(55, 93, 125, 0.24) !important;
+  background: rgba(235, 248, 249, 0.72) !important;
+}
+
+body[data-view="activityDetail"] .comment-card,
+body[data-view="activityDetail"] .comment-reply-fold,
+body[data-view="activityDetail"] .comment-replies-fold,
+body[data-view="activityDetail"] .club-reply {
+  border-color: rgba(255, 204, 145, 0.28) !important;
+  background: rgba(54, 29, 41, 0.76) !important;
+}
+
+body[data-view="letterDetail"] .reader-composer textarea,
+body[data-view="letterDetail"] .comment-form textarea,
+body[data-view="letterDetail"] .reply-form textarea {
+  border-color: rgba(55, 93, 125, 0.34) !important;
+  color: #1d3851 !important;
+  background: rgba(246, 252, 252, 0.86) !important;
+}
+
+body[data-view="activityDetail"] .reader-composer textarea,
+body[data-view="activityDetail"] .comment-form textarea,
+body[data-view="activityDetail"] .reply-form textarea {
+  border-color: rgba(255, 204, 145, 0.32) !important;
+  color: #fff8ed !important;
+  background: rgba(39, 22, 34, 0.82) !important;
+}
