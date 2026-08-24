@@ -39,7 +39,10 @@ export function parseAttachments(value) {
   }
 }
 
-export function serializePost(row, comments = []) {
+export function serializePost(row, comments = [], reaction = {}) {
+  const likeCount = Number.isFinite(Number(reaction.likeCount))
+    ? Math.max(0, Number(reaction.likeCount))
+    : Math.max(0, Number(row.like_count) || 0);
   return {
     id: String(row.id),
     title: row.title,
@@ -49,6 +52,8 @@ export function serializePost(row, comments = []) {
     createdAt: row.created_at,
     approvedAt: row.approved_at || "",
     attachments: parseAttachments(row.attachments),
+    likeCount,
+    liked: Boolean(reaction.liked),
     comments,
   };
 }
@@ -220,7 +225,21 @@ export function buildCommentTree(rows) {
   return (byParent.get("") || []).map(render);
 }
 
-export async function getSiteState(env) {
+export async function ensureForumReactionTable(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS forum_post_likes (
+      post_id INTEGER NOT NULL,
+      actor_id TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (post_id, actor_id),
+      FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE
+    )
+  `).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_forum_post_likes_post_id ON forum_post_likes(post_id)").run();
+}
+
+export async function getSiteState(env, viewerId = "") {
+  await ensureForumReactionTable(env);
   const [posts, pendingPosts, comments, activities, pendingActivities, letters] = await Promise.all([
     env.DB.prepare("SELECT * FROM forum_posts WHERE status = 'approved' ORDER BY datetime(created_at) DESC").all(),
     env.DB.prepare("SELECT * FROM forum_posts WHERE status = 'pending' ORDER BY datetime(created_at) DESC").all(),
@@ -229,6 +248,7 @@ export async function getSiteState(env) {
     env.DB.prepare("SELECT * FROM club_activities WHERE status = 'pending' ORDER BY datetime(created_at) DESC").all(),
     env.DB.prepare("SELECT * FROM mail_letters ORDER BY datetime(created_at) DESC").all(),
   ]);
+  const likes = await env.DB.prepare("SELECT post_id, actor_id FROM forum_post_likes").all();
   let writingEvents = { results: [] };
   let essays = { results: [] };
   try {
@@ -248,8 +268,23 @@ export async function getSiteState(env) {
     commentsByPost.get(key).push(comment);
   }
 
+  const likesByPost = new Map();
+  for (const like of likes.results || []) {
+    const key = String(like.post_id);
+    if (!likesByPost.has(key)) likesByPost.set(key, []);
+    likesByPost.get(key).push(String(like.actor_id));
+  }
+
+  const reactionFor = (post) => {
+    const actors = likesByPost.get(String(post.id)) || [];
+    return {
+      likeCount: actors.length,
+      liked: Boolean(viewerId && actors.includes(String(viewerId))),
+    };
+  };
+
   return {
-    posts: posts.results.map((post) => serializePost(post, buildCommentTree(commentsByPost.get(String(post.id)) || []))),
+    posts: posts.results.map((post) => serializePost(post, buildCommentTree(commentsByPost.get(String(post.id)) || []), reactionFor(post))),
     pendingPosts: pendingPosts.results.map((post) => serializePost(post, [])),
     activities: activities.results.map(serializeActivity),
     pendingActivities: pendingActivities.results.map(serializeActivity),

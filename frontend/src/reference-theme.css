@@ -2854,6 +2854,170 @@ input[type="file"]::file-selector-button {
   }
 }
 
+/* Forum detail: give the post a real reading canvas and a visible social rail. */
+body[data-view="postDetail"] .forum-chat-layout .reader-scroll {
+  gap: 1.25rem;
+  padding-top: clamp(1.25rem, 2.6vw, 2.4rem);
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message {
+  grid-template-columns: minmax(11rem, 13.5rem) minmax(0, 1fr);
+  min-height: clamp(18rem, 32vw, 25rem);
+  border-radius: 24px;
+  box-shadow: 0 18px 38px rgba(74, 45, 26, 0.11);
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message .message-author {
+  padding: clamp(1.5rem, 3vw, 2.35rem) 1.1rem;
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message .message-author .floor-avatar {
+  width: clamp(3.5rem, 6vw, 4.7rem);
+  height: clamp(3.5rem, 6vw, 4.7rem);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message .message-author strong {
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message .message-body {
+  padding: clamp(1.6rem, 3vw, 3rem) clamp(1.45rem, 4vw, 4rem);
+}
+
+body[data-view="postDetail"] .forum-chat-layout .host-message .post-reading-copy {
+  max-width: 66ch;
+  margin-top: clamp(1.2rem, 2vw, 1.7rem);
+  color: var(--detail-ink);
+  font-size: clamp(1.22rem, 1.65vw, 1.58rem);
+  line-height: 1.92;
+  letter-spacing: 0.015em;
+}
+
+body[data-view="postDetail"] .post-social-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: clamp(1.5rem, 2.4vw, 2.2rem);
+  padding-top: 1rem;
+  border-top: 1px solid rgba(159, 36, 58, 0.16);
+}
+
+body[data-view="postDetail"] .post-social-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  min-height: 2.85rem;
+  padding: 0.55rem 0.9rem;
+  color: var(--detail-muted);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 650;
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+body[data-view="postDetail"] .post-social-action:hover,
+body[data-view="postDetail"] .post-social-action:focus-visible {
+  color: var(--detail-wine-dark);
+  border-color: rgba(159, 36, 58, 0.2);
+  background: rgba(159, 36, 58, 0.06);
+}
+
+body[data-view="postDetail"] .post-social-action:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+body[data-view="postDetail"] .post-social-action.is-liked {
+  color: var(--detail-wine-dark);
+  border-color: rgba(159, 36, 58, 0.22);
+  background: rgba(159, 36, 58, 0.1);
+}
+
+body[data-view="postDetail"] .post-social-icon {
+  min-width: 1.1rem;
+  color: currentColor;
+  font-family: Georgia, serif;
+  font-size: 1.12rem;
+  line-height: 1;
+}
+
+body[data-view="postDetail"] .post-social-action strong {
+  min-width: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+body[data-view="postDetail"] .detail-fold-comments {
+  margin-top: 0;
+  border-radius: 20px;
+  box-shadow: 0 10px 26px rgba(74, 45, 26, 0.06);
+}
+
+body[data-view="postDetail"] .detail-fold-comments .detail-fold-summary,
+body[data-view="postDetail"] .detail-fold-composer .detail-fold-summary {
+  min-height: 3.8rem;
+  padding-inline: 1.2rem;
+}
+
+body[data-view="postDetail"] .detail-fold-comments .detail-fold-title,
+body[data-view="postDetail"] .detail-fold-composer .detail-fold-title {
+  font-size: 0.9rem;
+}
+
+body[data-view="postDetail"] .post-card-like-count {
+  color: var(--detail-wine-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 820px) {
+  body[data-view="postDetail"] .forum-chat-layout .reader-scroll {
+    gap: 0.85rem;
+    padding: 0.95rem 0.65rem 0;
+  }
+
+  body[data-view="postDetail"] .forum-chat-layout .host-message {
+    min-height: 0;
+    border-radius: 18px;
+  }
+
+  body[data-view="postDetail"] .forum-chat-layout .host-message .message-author {
+    padding: 0.9rem 1rem;
+  }
+
+  body[data-view="postDetail"] .forum-chat-layout .host-message .message-body {
+    padding: 1.3rem 1.05rem 1.35rem;
+  }
+
+  body[data-view="postDetail"] .forum-chat-layout .host-message .post-reading-copy {
+    margin-top: 1rem;
+    font-size: 1.12rem;
+    line-height: 1.86;
+  }
+
+  body[data-view="postDetail"] .post-social-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+  }
+
+  body[data-view="postDetail"] .post-social-action {
+    width: 100%;
+    min-height: 3rem;
+    padding-inline: 0.55rem;
+  }
+
+  body[data-view="postDetail"] .detail-fold-comments .detail-fold-summary,
+  body[data-view="postDetail"] .detail-fold-composer .detail-fold-summary {
+    min-height: 3.35rem;
+    padding-inline: 0.85rem;
+  }
+}
+
 @media (max-width: 460px) {
   .brand {
     max-width: 8rem;

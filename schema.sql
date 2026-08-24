@@ -29,6 +29,14 @@ CREATE TABLE IF NOT EXISTS forum_comments (
   FOREIGN KEY (parent_id) REFERENCES forum_comments(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS forum_post_likes (
+  post_id INTEGER NOT NULL,
+  actor_id TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (post_id, actor_id),
+  FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS club_activities (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type TEXT NOT NULL,
@@ -95,6 +103,7 @@ CREATE TABLE IF NOT EXISTS site_users (
 
 CREATE INDEX IF NOT EXISTS idx_forum_posts_status ON forum_posts(status);
 CREATE INDEX IF NOT EXISTS idx_forum_comments_post_id ON forum_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_forum_post_likes_post_id ON forum_post_likes(post_id);
 CREATE INDEX IF NOT EXISTS idx_club_activities_status ON club_activities(status);
 CREATE INDEX IF NOT EXISTS idx_mail_letters_visibility ON mail_letters(visibility);
 CREATE INDEX IF NOT EXISTS idx_writing_essays_event_id ON writing_essays(event_id);

@@ -67,6 +67,8 @@ const initialState = {
       createdAt: "2026-06-18T12:10:00.000Z",
       approvedAt: "2026-06-18T12:40:00.000Z",
       attachments: [],
+      likeCount: 0,
+      liked: false,
       comments: [
         {
           id: "comment-1",
@@ -97,6 +99,8 @@ const initialState = {
       createdAt: "2026-06-14T09:25:00.000Z",
       approvedAt: "2026-06-14T10:00:00.000Z",
       attachments: [],
+      likeCount: 0,
+      liked: false,
       comments: [],
     },
   ],
@@ -377,7 +381,9 @@ async function apiRequest(url, options = {}) {
 
 async function syncStateFromApi() {
   try {
-    const data = await apiRequest("/api/site-state");
+    const viewer = currentUser();
+    const viewerQuery = viewer ? `?viewer_id=${encodeURIComponent(viewer.id)}` : "";
+    const data = await apiRequest(`/api/site-state${viewerQuery}`);
     state.posts = Array.isArray(data.posts) ? data.posts : state.posts;
     state.pendingPosts = Array.isArray(data.pendingPosts) ? data.pendingPosts : state.pendingPosts;
     state.activities = Array.isArray(data.activities) ? data.activities : state.activities;
@@ -551,8 +557,10 @@ function bindEvents() {
   elements.logoutButton.addEventListener("click", () => {
     state.currentUserId = null;
     saveState();
-    showToast("已退出当前账号");
-    render();
+    syncStateFromApi().finally(() => {
+      showToast("已退出当前账号");
+      render();
+    });
   });
 
   elements.authForm.addEventListener("submit", handleAuth);
@@ -672,11 +680,13 @@ function normalizeLoadedState(targetState) {
   assignMissingAccountNumbers(targetState);
   targetState.users.forEach(ensureUserProfile);
   targetState.posts.forEach((post) => {
+    normalizePostSocial(post);
     post.attachments = normalizeAttachments(post);
     post.comments = Array.isArray(post.comments) ? post.comments : [];
     post.comments = post.comments.map(normalizeCommentThread);
   });
   targetState.pendingPosts.forEach((post) => {
+    normalizePostSocial(post);
     post.attachments = normalizeAttachments(post);
   });
   targetState.pendingComments.forEach((comment) => {
@@ -1071,11 +1081,14 @@ function renderForum() {
 function renderPostCard(post) {
   const comments = Array.isArray(post.comments) ? post.comments : [];
   const attachmentText = renderAttachmentCount(post);
+  const likeCount = Math.max(0, Number(post.likeCount) || 0);
+  const commentCount = countCommentThreads(comments);
   return `
     <article class="thread-card ${post.id === state.activePostId ? "is-active" : ""}" data-post-id="${post.id}">
       <div class="tag-row">
         <span class="tag">${escapeHtml(post.tag || "讨论")}</span>
-        <span>${countCommentThreads(comments)} 条留言</span>
+        <span>${commentCount} 条留言</span>
+        <span class="post-card-like-count" aria-label="${likeCount} 个赞">♡ ${likeCount}</span>
         ${attachmentText}
       </div>
       <button class="thread-title-button" type="button" data-open-post="${post.id}">
@@ -2338,6 +2351,7 @@ async function handleAuth(event) {
     saveState();
     closeAuthModal();
     showToast(`注册成功，你的编号是 ${newUser.accountNo}`);
+    await syncStateFromApi();
     render();
     return;
   }
@@ -2363,6 +2377,7 @@ async function handleAuth(event) {
   saveState();
   closeAuthModal();
   showToast(`欢迎回来，${getUserDisplayName(user)}`);
+  await syncStateFromApi();
   render();
 }
 
@@ -2448,6 +2463,9 @@ function renderPostDetail() {
     return;
   }
   const comments = Array.isArray(post.comments) ? post.comments : [];
+  const commentCount = countCommentThreads(comments);
+  const likeCount = Math.max(0, Number(post.likeCount) || 0);
+  const isLiked = Boolean(post.liked);
   const commentsHtml = comments.length
     ? comments.map((comment) => renderCommentThread(comment, post.id, 1)).join("")
     : `<p class="detail-fold-empty">暂无留言，展开后即可开始讨论。</p>`;
@@ -2462,7 +2480,7 @@ function renderPostDetail() {
           <div>
             <p class="section-kicker">Huayu Forum</p>
             <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
-            <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${countCommentThreads(comments)} 条留言</p>
+            <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${commentCount} 条留言</p>
           </div>
           ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
         </header>
@@ -2478,7 +2496,27 @@ function renderPostDetail() {
                 <span class="tag">${escapeHtml(post.tag || "交流")}</span>
                 ${renderAttachmentCount(post)}
               </div>
-              <div class="detail-body">${escapeHtml(post.body)}</div>
+              <div class="detail-body post-reading-copy">${escapeHtml(post.body)}</div>
+              <div class="post-social-bar" role="group" aria-label="帖子互动">
+                <button class="post-social-action ${isLiked ? "is-liked" : ""}" data-post-like="${post.id}" type="button" aria-pressed="${isLiked ? "true" : "false"}" title="${currentUser() ? "给这篇帖子点赞" : "登录后点赞"}">
+                  <span class="post-social-icon" aria-hidden="true">${isLiked ? "♥" : "♡"}</span>
+                  <span>${isLiked ? "已赞" : "点赞"}</span>
+                  <strong>${likeCount}</strong>
+                </button>
+                <button class="post-social-action" data-open-post-comments="${post.id}" type="button">
+                  <span class="post-social-icon" aria-hidden="true">▱</span>
+                  <span>评论</span>
+                  <strong>${commentCount}</strong>
+                </button>
+                <button class="post-social-action" data-open-post-composer="${post.id}" type="button">
+                  <span class="post-social-icon" aria-hidden="true">✎</span>
+                  <span>写评论</span>
+                </button>
+                <button class="post-social-action" data-share-post="${post.id}" type="button">
+                  <span class="post-social-icon" aria-hidden="true">↗</span>
+                  <span>分享</span>
+                </button>
+              </div>
               ${renderAttachmentList(post, "full")}
             </div>
           </article>
@@ -2514,6 +2552,7 @@ function renderPostDetail() {
   `;
   bindViewTargetButtons(elements.postDetailContent);
   bindPostDetailForms();
+  bindPostDetailActions();
   bindDetailSidebar(elements.postDetailContent);
   elements.postDetailContent.querySelectorAll("[data-delete-post]").forEach((button) => {
     button.addEventListener("click", () => deletePost(button.dataset.deletePost));
@@ -2878,6 +2917,96 @@ function bindPostDetailForms() {
   });
 }
 
+function bindPostDetailActions() {
+  const scope = elements.postDetailContent;
+  scope.querySelectorAll("[data-post-like]").forEach((button) => {
+    button.addEventListener("click", () => togglePostLike(button.dataset.postLike));
+  });
+  scope.querySelectorAll("[data-open-post-comments]").forEach((button) => {
+    button.addEventListener("click", () => openPostDetailFold("comments", false));
+  });
+  scope.querySelectorAll("[data-open-post-composer]").forEach((button) => {
+    button.addEventListener("click", () => openPostDetailFold("composer", true));
+  });
+  scope.querySelectorAll("[data-share-post]").forEach((button) => {
+    button.addEventListener("click", () => sharePost(button.dataset.sharePost));
+  });
+}
+
+async function togglePostLike(postId) {
+  if (!requireLogin()) return;
+  const post = state.posts.find((item) => item.id === postId);
+  const user = currentUser();
+  if (!post || !user) return;
+
+  try {
+    const data = await apiRequest(`/api/forum/posts/${encodeURIComponent(postId)}/like`, {
+      method: "POST",
+      body: JSON.stringify({ actor_id: user.id }),
+    });
+    post.liked = Boolean(data.result?.liked);
+    post.likeCount = Math.max(0, Number(data.result?.likeCount) || 0);
+  } catch (error) {
+    const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
+    const index = likedBy.indexOf(String(user.id));
+    if (index >= 0) {
+      likedBy.splice(index, 1);
+      post.liked = false;
+    } else {
+      likedBy.push(String(user.id));
+      post.liked = true;
+    }
+    post.likedBy = likedBy;
+    post.likeCount = likedBy.length;
+    saveState();
+    render();
+    showToast(`已记录本机点赞（${error.message}）`);
+    return;
+  }
+
+  saveState();
+  render();
+  showToast(post.liked ? "已点赞" : "已取消点赞");
+}
+
+function openPostDetailFold(kind, focusComposer = false) {
+  const selector = kind === "composer" ? ".detail-fold-composer" : ".detail-fold-comments";
+  const fold = elements.postDetailContent.querySelector(selector);
+  if (!fold) return;
+  fold.open = true;
+  window.setTimeout(() => {
+    fold.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (focusComposer) fold.querySelector("textarea")?.focus({ preventScroll: true });
+  }, 0);
+}
+
+async function sharePost(postId) {
+  const post = state.posts.find((item) => item.id === postId);
+  if (!post) return;
+  const url = new URL(`/forum/${encodeURIComponent(postId)}/`, window.location.origin).href;
+  const shareData = {
+    title: post.title,
+    text: `${post.title}｜华煜话剧社论坛`,
+    url,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      showToast("分享面板已打开");
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+      showToast("帖子链接已复制");
+      return;
+    }
+    window.prompt("请复制帖子链接", url);
+  } catch (error) {
+    if (error?.name !== "AbortError") showToast("暂时无法分享，请稍后再试");
+  }
+}
+
 function bindLetterDetailForm() {
   const form = elements.letterDetailContent.querySelector("#letterDetailReplyForm");
   form?.addEventListener("submit", async (event) => {
@@ -3013,6 +3142,16 @@ function renderAttachmentList(item, mode = "full") {
       </div>
     </details>
   `;
+}
+
+function normalizePostSocial(post) {
+  const legacyLikedBy = Array.isArray(post.likedBy) ? post.likedBy.filter(Boolean).map(String) : [];
+  const parsedLikeCount = Number(post.likeCount);
+  post.likeCount = Number.isFinite(parsedLikeCount)
+    ? Math.max(0, Math.floor(parsedLikeCount))
+    : legacyLikedBy.length;
+  post.likedBy = legacyLikedBy;
+  post.liked = Boolean(post.liked);
 }
 
 function renderAttachmentItem(attachment, mode) {
