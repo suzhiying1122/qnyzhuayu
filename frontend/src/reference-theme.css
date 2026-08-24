@@ -5973,35 +5973,35 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 
 /* Restore distinct scene art per detail component without touching the page video. */
 body[data-view="postDetail"] {
-  --detail-top-art: url("/assets/bg-module-forum.png");
-  --detail-message-art: url("/assets/card-forum-designed.webp");
-  --detail-fold-art: url("/assets/bg-module-activities.png");
-  --detail-comments-art: url("/assets/card-mailbox-designed.webp");
-  --detail-composer-art: url("/assets/bg-module-admin.png");
+  --detail-top-art: url("/assets/wallpaper-night-market.jpg");
+  --detail-message-art: url("/assets/wallpaper-grove.jpg");
+  --detail-fold-art: url("/assets/wallpaper-frog-river.gif");
+  --detail-comments-art: url("/assets/wallpaper-cat-veranda.jpg");
+  --detail-composer-art: url("/assets/wallpaper-anime-water.jpg");
 }
 
 body[data-view="activityDetail"] {
-  --detail-top-art: url("/assets/bg-module-activities.png");
-  --detail-message-art: url("/assets/card-activities-designed.webp");
-  --detail-fold-art: url("/assets/bg-module-mailbox.png");
-  --detail-comments-art: url("/assets/card-forum-designed.webp");
-  --detail-composer-art: url("/assets/bg-module-admin.png");
+  --detail-top-art: url("/assets/wallpaper-grove.jpg");
+  --detail-message-art: url("/assets/wallpaper-boat-water.gif");
+  --detail-fold-art: url("/assets/wallpaper-winter-friends.gif");
+  --detail-comments-art: url("/assets/wallpaper-night-market.jpg");
+  --detail-composer-art: url("/assets/wallpaper-frog-ice.gif");
 }
 
 body[data-view="letterDetail"] {
-  --detail-top-art: url("/assets/bg-module-mailbox.png");
-  --detail-message-art: url("/assets/card-mailbox-designed.webp");
-  --detail-fold-art: url("/assets/bg-module-admin.png");
-  --detail-comments-art: url("/assets/card-writing-designed.webp");
-  --detail-composer-art: url("/assets/bg-module-forum.png");
+  --detail-top-art: url("/assets/wallpaper-anime-water.jpg");
+  --detail-message-art: url("/assets/wallpaper-night-market.jpg");
+  --detail-fold-art: url("/assets/wallpaper-grove.jpg");
+  --detail-comments-art: url("/assets/wallpaper-frog-river.gif");
+  --detail-composer-art: url("/assets/wallpaper-cat-veranda.jpg");
 }
 
 body[data-view="essayDetail"] {
-  --detail-top-art: url("/assets/bg-module-admin.png");
-  --detail-message-art: url("/assets/card-writing-designed.webp");
-  --detail-fold-art: url("/assets/bg-module-forum.png");
-  --detail-comments-art: url("/assets/card-mailbox-designed.webp");
-  --detail-composer-art: url("/assets/bg-module-activities.png");
+  --detail-top-art: url("/assets/wallpaper-frog-ice.gif");
+  --detail-message-art: url("/assets/wallpaper-winter-friends.gif");
+  --detail-fold-art: url("/assets/wallpaper-boat-water.gif");
+  --detail-comments-art: url("/assets/wallpaper-anime-water.jpg");
+  --detail-composer-art: url("/assets/wallpaper-grove.jpg");
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-detail-layout {
