@@ -37,12 +37,14 @@ nextTick(async () => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
+      timeZone: "Asia/Shanghai",
     }).format(now);
     if (homeClockDate) {
       homeClockDate.textContent = new Intl.DateTimeFormat("zh-CN", {
         month: "2-digit",
         day: "2-digit",
         weekday: "short",
+        timeZone: "Asia/Shanghai",
       }).format(now).replace(/\s+/g, " ");
     }
   };
