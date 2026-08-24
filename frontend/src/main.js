@@ -152,8 +152,19 @@ nextTick(async () => {
     });
   };
 
+  const openDrawer = (trigger, panel) => {
+    trigger.classList.add("is-active");
+    trigger.setAttribute("aria-expanded", "true");
+    panel.classList.add("is-open");
+    panel.setAttribute("aria-hidden", "false");
+    panel.inert = false;
+  };
+
   document.querySelectorAll("[data-module-drawers]").forEach((group) => {
     closeDrawerGroup(group);
+    const firstTrigger = group.querySelector("[data-drawer-target]");
+    const firstPanel = firstTrigger ? document.getElementById(firstTrigger.dataset.drawerTarget || "") : null;
+    if (firstTrigger && firstPanel && group.contains(firstPanel)) openDrawer(firstTrigger, firstPanel);
   });
 
   document.addEventListener("click", (event) => {
@@ -172,11 +183,7 @@ nextTick(async () => {
       return;
     }
 
-    trigger.classList.add("is-active");
-    trigger.setAttribute("aria-expanded", "true");
-    panel.classList.add("is-open");
-    panel.setAttribute("aria-hidden", "false");
-    panel.inert = false;
+    openDrawer(trigger, panel);
     syncProfileSceneState();
     syncSceneMedia();
   });
