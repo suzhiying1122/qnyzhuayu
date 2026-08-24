@@ -2916,55 +2916,6 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
   }
 }
 
-/* User-provided animated scene backgrounds. Static posters remain the fallback when a GIF cannot load. */
-.scene-gif-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0;
-  filter: saturate(0.78) brightness(1.06);
-  backface-visibility: hidden;
-  transition: opacity 620ms var(--ease-cinema);
-  will-change: opacity;
-  pointer-events: none;
-}
-
-body[data-view] .scene-gif-stage {
-  opacity: 0.72;
-}
-
-body[data-view="home"] .scene-gif-stage {
-  opacity: 0.92;
-}
-
-.scene-gif-stage.is-failed {
-  opacity: 0 !important;
-}
-
-body.gif-background-ready .scene-poster-stage,
-body.gif-background-ready .scene-cover-home {
-  opacity: 0 !important;
-  animation: none;
-}
-
-body.gif-background-ready .scene-video-stage::after {
-  background:
-    linear-gradient(180deg, rgba(255, 253, 248, 0.35), rgba(246, 241, 233, 0.56)),
-    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.16), transparent 56%);
-}
-
-body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
-  background:
-    linear-gradient(100deg, rgba(255, 253, 248, 0.93) 8%, rgba(255, 253, 248, 0.78) 68%, rgba(255, 253, 248, 0.62));
-  background-position: center;
-  background-size: cover;
-  backdrop-filter: blur(5px);
-}
-
 /* Keep long discussions quiet until someone asks to open a reply or its thread. */
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold {

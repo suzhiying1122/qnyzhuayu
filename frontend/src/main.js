@@ -8,7 +8,6 @@ nextTick(async () => {
   const intro = document.querySelector("#cinemaIntro");
   const introVideo = intro?.querySelector(".intro-bg-video");
   const sceneVideos = [...document.querySelectorAll(".scene-video[data-scene]")];
-  const sceneGifStage = document.querySelector("#sceneGifStage");
   const hdViewport = window.matchMedia("(min-width: 900px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -24,17 +23,6 @@ nextTick(async () => {
     essayDetail: "writing",
     profile: "profile",
     admin: "admin",
-  };
-  const sceneGifAssets = {
-    home: "/assets/ambient-gif-home.gif",
-    forum: "/assets/ambient-gif-forum.gif",
-    discussion: "/assets/ambient-gif-discussion.gif",
-    activities: "/assets/ambient-gif-activities.gif",
-    mailbox: "/assets/ambient-gif-mailbox.gif",
-    writing: "/assets/ambient-gif-writing.gif",
-    profile: "/assets/ambient-gif-profile.gif",
-    friends: "/assets/ambient-gif-friends.gif",
-    admin: "/assets/ambient-gif-admin.gif",
   };
   let introActive = Boolean(intro);
   let mediaResizeTimer;
@@ -105,20 +93,9 @@ nextTick(async () => {
     }
   };
 
-  const syncSceneGif = () => {
-    if (!sceneGifStage) return;
-    const source = sceneGifAssets[selectedScene()] || sceneGifAssets.home;
-    if (sceneGifStage.dataset.activeSource === source && !sceneGifStage.classList.contains("is-failed")) return;
-    sceneGifStage.classList.remove("is-failed");
-    sceneGifStage.dataset.activeSource = source;
-    sceneGifStage.src = source;
-  };
-
   const syncSceneMedia = () => {
     const scene = selectedScene();
     const pageCanAnimate = !constrainedConnection && !document.hidden && !reducedMotion.matches;
-
-    syncSceneGif();
 
     sceneVideos.forEach((video) => {
       window.clearTimeout(video.releaseTimer);
@@ -154,14 +131,6 @@ nextTick(async () => {
     });
     video.addEventListener("waiting", () => video.classList.remove("is-ready"));
     video.addEventListener("stalled", () => video.classList.remove("is-ready"));
-  });
-  sceneGifStage?.addEventListener("error", () => {
-    sceneGifStage.classList.add("is-failed");
-    document.body.classList.remove("gif-background-ready");
-  });
-  sceneGifStage?.addEventListener("load", () => {
-    sceneGifStage.classList.remove("is-failed");
-    document.body.classList.add("gif-background-ready");
   });
 
   const refreshMediaQuality = () => {
