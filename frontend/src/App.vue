@@ -54,6 +54,10 @@
       <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
         <img class="hero-image" src="/assets/bg-main-stage.png" alt="红色幕布与暖色追光下的华煜话剧社舞台" />
         <div class="hero-shade"></div>
+        <div class="home-gif-stage" aria-hidden="true">
+          <span class="home-gif-stage-mark"></span>
+          <img id="homeAmbientGif" src="/assets/ambient-gif-home.gif" alt="" />
+        </div>
         <div class="cinema-grain" aria-hidden="true"></div>
         <div class="cinema-scanline" aria-hidden="true"></div>
         <div class="stage-ribbon ribbon-one"></div>
@@ -96,27 +100,27 @@
         </div>
 
         <div class="module-gates" aria-label="功能入口">
-          <button class="module-gate gate-forum" data-view-target="forum" type="button">
+          <button class="module-gate gate-forum" data-view-target="forum" data-ambient-gif="/assets/ambient-gif-forum.gif" type="button">
             <span class="gate-label">Forum</span>
             <strong>论坛</strong>
             <small>社员交流，话题不限</small>
           </button>
-          <button class="module-gate gate-activities" data-view-target="activities" type="button">
+          <button class="module-gate gate-activities" data-view-target="activities" data-ambient-gif="/assets/ambient-gif-activities.gif" type="button">
             <span class="gate-label">Events</span>
             <strong>活动</strong>
             <small>简报、预告和社团档案</small>
           </button>
-          <button class="module-gate gate-mailbox" data-view-target="mailbox" type="button">
+          <button class="module-gate gate-mailbox" data-view-target="mailbox" data-ambient-gif="/assets/ambient-gif-mailbox.gif" type="button">
             <span class="gate-label">Mailbox</span>
             <strong>信箱</strong>
             <small>给社团的一封来信</small>
           </button>
-          <button class="module-gate gate-writing" data-view-target="writing" type="button">
+          <button class="module-gate gate-writing" data-view-target="writing" data-ambient-gif="/assets/ambient-gif-writing.gif" type="button">
             <span class="gate-label">Writing</span>
             <strong>征文</strong>
             <small>征文活动与文章投稿</small>
           </button>
-          <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" type="button">
+          <button class="module-gate gate-admin hidden" id="adminHomeGate" data-view-target="admin" data-ambient-gif="/assets/ambient-gif-admin.gif" type="button">
             <span class="gate-label">Admin</span>
             <strong>管理后台</strong>
             <small>审核发布与账号管理</small>
