@@ -6069,3 +6069,203 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
     background-size: cover, cover;
   }
 }
+
+/* Final contrast audit: keep the artwork, but give every text-bearing surface a readable layer. */
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) {
+  --readable-ink: #f7fff9;
+  --readable-muted: rgba(232, 247, 237, 0.88);
+  --readable-subtle: rgba(216, 238, 224, 0.76);
+  --readable-border: rgba(214, 240, 221, 0.42);
+  --readable-surface: rgba(3, 23, 16, 0.9);
+  --readable-surface-soft: rgba(5, 40, 27, 0.84);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
+  border-bottom-color: var(--readable-border);
+  background:
+    linear-gradient(115deg, rgba(2, 20, 14, 0.92), rgba(5, 50, 32, 0.78) 52%, rgba(2, 18, 13, 0.9)),
+    var(--detail-top-art);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar h2,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar p,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar .section-kicker {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.26);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar h2 {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar p:not(.section-kicker) {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-card {
+  border-color: var(--readable-border);
+  background:
+    linear-gradient(118deg, rgba(2, 21, 15, 0.92), rgba(5, 55, 35, 0.78) 56%, rgba(2, 17, 12, 0.9)),
+    var(--detail-message-art);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
+  border-bottom-color: var(--readable-border);
+  color: var(--readable-muted) !important;
+  background: linear-gradient(180deg, rgba(5, 37, 25, 0.88), rgba(2, 21, 15, 0.76));
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author strong,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body .tag-row,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-body {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body .tag-row > span:not(.tag):not(.type-pill):not(.reply-pill) {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
+  background: linear-gradient(180deg, rgba(3, 24, 16, 0.8), rgba(2, 18, 13, 0.76));
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body > .detail-fold:not(.detail-fold-composer),
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-reply {
+  border-color: var(--readable-border);
+  color: var(--readable-ink);
+  background:
+    linear-gradient(110deg, rgba(2, 20, 14, 0.92), rgba(5, 53, 34, 0.78) 60%, rgba(2, 18, 13, 0.9)),
+    var(--detail-fold-art);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-title,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-meta,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-empty,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-body {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-meta {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments {
+  border-color: var(--readable-border);
+  color: var(--readable-ink);
+  background:
+    linear-gradient(110deg, rgba(2, 20, 14, 0.92), rgba(5, 49, 32, 0.78) 58%, rgba(2, 18, 13, 0.9)),
+    var(--detail-comments-art);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title h3,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title span {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title span {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card {
+  border-color: rgba(214, 240, 221, 0.3);
+  color: var(--readable-ink) !important;
+  background: rgba(2, 25, 17, 0.72);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .meta-row strong,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card p {
+  color: var(--readable-ink) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .meta-row span,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-summary small,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-summary small {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-replies-fold {
+  border-color: rgba(214, 240, 221, 0.34);
+  background: rgba(2, 22, 15, 0.88);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .club-reply {
+  border-color: rgba(214, 240, 221, 0.42) !important;
+  color: var(--readable-ink) !important;
+  background: rgba(2, 21, 14, 0.9) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .club-reply strong,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .club-reply span {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-composer {
+  border-color: var(--readable-border);
+  background:
+    linear-gradient(118deg, rgba(2, 21, 15, 0.94), rgba(5, 56, 36, 0.82) 58%, rgba(2, 18, 13, 0.92)),
+    var(--detail-composer-art);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer textarea,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-form textarea,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reply-form textarea {
+  border-color: rgba(214, 240, 221, 0.48) !important;
+  color: var(--readable-ink) !important;
+  background: rgba(1, 15, 10, 0.88) !important;
+  caret-color: #ffffff;
+  opacity: 1;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) textarea::placeholder {
+  color: var(--readable-subtle) !important;
+  opacity: 1;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item {
+  color: var(--readable-ink) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item small,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item em,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-search {
+  color: var(--readable-muted) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-delete-button,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer .primary-button,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-composer .primary-button,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-form .secondary-button {
+  color: #fffdf8 !important;
+  text-shadow: 0 1px 2px rgba(91, 16, 31, 0.34);
+}
+
+/* The mailbox cards use the same scene backgrounds outside detail pages. */
+body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-view="letterDetail"]):not([data-view="essayDetail"]) .club-reply {
+  border-color: rgba(214, 240, 221, 0.38) !important;
+  color: #f7fff9 !important;
+  background: linear-gradient(115deg, rgba(2, 21, 15, 0.9), rgba(5, 53, 34, 0.78)) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-view="letterDetail"]):not([data-view="essayDetail"]) .club-reply strong,
+body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-view="letterDetail"]):not([data-view="essayDetail"]) .club-reply span {
+  color: #f7fff9 !important;
+}
+
+body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-view="letterDetail"]):not([data-view="essayDetail"]) .empty-state,
+body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-view="letterDetail"]):not([data-view="essayDetail"]) .attachment-list {
+  color: rgba(239, 250, 242, 0.9) !important;
+  background: rgba(2, 21, 15, 0.78) !important;
+  border-color: rgba(214, 240, 221, 0.3) !important;
+}
