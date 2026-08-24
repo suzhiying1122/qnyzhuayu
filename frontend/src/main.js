@@ -201,7 +201,8 @@ nextTick(async () => {
     }, 760);
     window.setTimeout(syncSceneMedia, 220);
   };
-  if (window.sessionStorage.getItem("huayu-intro-seen") === "1") {
+  const skipIntro = window.matchMedia("(max-width: 820px)").matches || constrainedConnection || reducedMotion.matches;
+  if (skipIntro || window.sessionStorage.getItem("huayu-intro-seen") === "1") {
     intro?.remove();
     introActive = false;
   } else {

@@ -56,12 +56,25 @@ button {
   cursor: pointer;
 }
 
-button:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 input:disabled,
 textarea:disabled,
 select:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(3, 9, 13, 0.48);
+}
+
+input:disabled::placeholder,
+textarea:disabled::placeholder {
+  color: rgba(255, 255, 255, 0.68);
+  opacity: 1;
 }
 
 button:focus-visible,
@@ -1366,7 +1379,7 @@ input[type="file"]::file-selector-button {
 
 .list-title span,
 .list-title small {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.84);
   font-size: 0.7rem;
 }
 
@@ -1443,7 +1456,7 @@ input[type="file"]::file-selector-button {
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.68rem;
 }
 
@@ -1487,7 +1500,7 @@ input[type="file"]::file-selector-button {
 .letter-body,
 .review-card p {
   margin: 0.85rem 0;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.8rem;
   line-height: 1.72;
 }
@@ -1535,7 +1548,7 @@ input[type="file"]::file-selector-button {
   padding: 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.86);
   background: rgba(255, 255, 255, 0.05);
   font-size: 0.76rem;
   line-height: 1.65;
@@ -1637,7 +1650,7 @@ input[type="file"]::file-selector-button {
 .reader-list-item em {
   display: block;
   margin-top: 0.2rem;
-  color: rgba(255, 255, 255, 0.44);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.63rem;
   font-style: normal;
   line-height: 1.45;
@@ -1997,7 +2010,7 @@ input[type="file"]::file-selector-button {
   padding: 0.72rem 0.8rem;
   border: 1px solid var(--stroke);
   border-radius: 11px;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.68);
   font-size: 0.68rem;
   background: rgba(0, 0, 0, 0.12);
 }
@@ -2181,7 +2194,7 @@ input[type="file"]::file-selector-button {
   justify-content: center;
   gap: 1rem;
   padding: 1.45rem 0.5rem 0.3rem;
-  color: rgba(255, 255, 255, 0.44);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
 }
@@ -2374,6 +2387,10 @@ input[type="file"]::file-selector-button {
     --header-height: 4.6rem;
   }
 
+  .intro-overlay {
+    display: none;
+  }
+
   body[data-view="forum"] {
     --scene-poster-image: url("/assets/ambient-forum-poster-mobile.webp");
   }
@@ -2450,7 +2467,8 @@ input[type="file"]::file-selector-button {
   }
 
   body[data-view]:not([data-view="home"]) .scene-video.is-ready {
-    opacity: 0.34;
+    opacity: 0.22;
+    filter: saturate(0.82) brightness(0.74);
   }
 
   .site-header {
