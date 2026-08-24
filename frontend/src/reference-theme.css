@@ -5763,13 +5763,13 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 
 /* Final visual guardrail: the last layer owns the detail-page color contrast. */
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) {
-  --detail-ink: #f5fff6;
-  --detail-muted: rgba(222, 240, 226, 0.78);
-  --detail-rule: rgba(166, 213, 177, 0.28);
-  --detail-wine: #e5aa79;
-  --detail-aqua: #a9e3b2;
-  --detail-gold: #e5c486;
-  background-color: #081f18;
+  --detail-ink: #f7fff8;
+  --detail-muted: rgba(232, 244, 232, 0.78);
+  --detail-rule: rgba(214, 231, 211, 0.3);
+  --detail-wine: #d7a36f;
+  --detail-aqua: #b4e6bd;
+  --detail-gold: #e4c48c;
+  background-color: #0b1d16;
   color: var(--detail-ink);
 }
 
@@ -5777,22 +5777,24 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .activity-detail-screen,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .letter-detail-screen,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .writing-detail-screen {
-  background: linear-gradient(180deg, rgba(6, 47, 34, 0.18), rgba(5, 28, 21, 0.34)), var(--scene-poster-image);
+  background: linear-gradient(180deg, rgba(4, 29, 21, 0.08), rgba(3, 18, 13, 0.2)), var(--scene-poster-image);
   background-position: center;
   background-size: cover;
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-detail-layout {
   border-color: rgba(184, 228, 190, 0.36);
-  background: linear-gradient(135deg, rgba(5, 59, 42, 0.84), rgba(22, 128, 82, 0.66) 46%, rgba(85, 125, 62, 0.68)), var(--scene-poster-image);
+  background: linear-gradient(135deg, rgba(5, 38, 27, 0.4), rgba(8, 78, 50, 0.28) 46%, rgba(54, 74, 39, 0.3)), var(--scene-poster-image);
   background-position: center;
   background-size: cover;
-  box-shadow: 0 30px 90px rgba(3, 35, 24, 0.42), 0 0 0 1px rgba(169, 227, 178, 0.1);
+  box-shadow: 0 30px 90px rgba(3, 24, 16, 0.38), 0 0 0 1px rgba(180, 230, 189, 0.1);
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
   border-bottom-color: rgba(205, 233, 208, 0.3);
-  background: linear-gradient(115deg, rgba(4, 50, 35, 0.96), rgba(21, 126, 79, 0.9) 48%, rgba(84, 124, 61, 0.86));
+  background: linear-gradient(115deg, rgba(5, 39, 28, 0.68), rgba(15, 86, 56, 0.48) 48%, rgba(58, 85, 43, 0.5)), var(--scene-poster-image);
+  background-position: center, center 35%;
+  background-size: cover, cover;
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar h2,
@@ -5818,16 +5820,64 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
   color: #f7fff8;
 }
 
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar {
+  border-right-color: rgba(214, 231, 211, 0.3);
+  color: var(--detail-ink);
+  background: linear-gradient(160deg, rgba(5, 43, 31, 0.62), rgba(6, 34, 25, 0.4)), var(--scene-poster-image);
+  background-position: center;
+  background-size: cover;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head {
+  border-bottom-color: rgba(214, 231, 211, 0.26);
+  background: rgba(4, 29, 21, 0.22);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head strong,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item strong {
+  color: #f7fff8;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head .back-button {
+  color: #f7fff8;
+  border-color: rgba(214, 231, 211, 0.32);
+  background: rgba(5, 39, 28, 0.38);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-search {
+  border-color: rgba(214, 231, 211, 0.26);
+  color: var(--detail-ink);
+  background: rgba(4, 29, 21, 0.38);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-search::placeholder,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item small,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item em {
+  color: var(--detail-muted);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item:hover,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item.is-active {
+  border-color: rgba(180, 230, 189, 0.22);
+  background: rgba(165, 214, 164, 0.14);
+  box-shadow: inset 3px 0 var(--detail-aqua);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-avatar {
+  color: #f7fff8;
+  background: linear-gradient(145deg, #07583b, #86c985 58%, #dfb772);
+}
+
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-card {
   border-color: rgba(181, 226, 187, 0.34);
-  background: linear-gradient(135deg, rgba(6, 55, 40, 0.94), rgba(12, 104, 68, 0.82) 56%, rgba(65, 111, 57, 0.84)), var(--scene-poster-image);
+  background: linear-gradient(135deg, rgba(6, 33, 24, 0.74), rgba(10, 84, 54, 0.46) 56%, rgba(54, 75, 42, 0.5)), var(--scene-poster-image);
   background-position: center;
   background-size: cover;
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
   border-bottom-color: rgba(211, 239, 214, 0.28);
-  background: linear-gradient(105deg, rgba(9, 84, 57, 0.84), rgba(103, 178, 102, 0.5) 54%, rgba(224, 180, 104, 0.42));
+  background: linear-gradient(105deg, rgba(6, 57, 38, 0.64), rgba(109, 167, 99, 0.3) 54%, rgba(226, 188, 113, 0.28));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .floor-avatar,
@@ -5838,7 +5888,7 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
-  background: linear-gradient(135deg, rgba(4, 35, 26, 0.4), rgba(9, 79, 52, 0.24) 54%, rgba(58, 99, 52, 0.28));
+  background: linear-gradient(135deg, rgba(4, 35, 26, 0.24), rgba(9, 79, 52, 0.14) 54%, rgba(58, 99, 52, 0.16));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-body,
@@ -5850,19 +5900,21 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .type-pill,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reply-pill {
   border-color: rgba(184, 236, 190, 0.46);
-  background: linear-gradient(135deg, rgba(9, 95, 62, 0.78), rgba(140, 208, 132, 0.38));
+  background: linear-gradient(135deg, rgba(9, 95, 62, 0.52), rgba(140, 208, 132, 0.24));
   color: #f6fff7;
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments {
   border-color: rgba(178, 224, 184, 0.32);
-  background: linear-gradient(135deg, rgba(5, 43, 31, 0.88), rgba(13, 101, 66, 0.76) 58%, rgba(61, 104, 54, 0.74));
+  background: linear-gradient(135deg, rgba(5, 43, 31, 0.52), rgba(13, 101, 66, 0.34) 58%, rgba(61, 104, 54, 0.34)), var(--scene-poster-image);
+  background-position: center;
+  background-size: cover;
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-summary:hover,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-summary:focus-visible {
-  background: linear-gradient(90deg, rgba(169, 227, 178, 0.18), rgba(18, 117, 73, 0.2), rgba(229, 196, 134, 0.16));
+  background: linear-gradient(90deg, rgba(169, 227, 178, 0.12), rgba(18, 117, 73, 0.14), rgba(229, 196, 134, 0.12));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-caret {
@@ -5871,7 +5923,7 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card {
   border-color: rgba(187, 227, 239, 0.22);
-  background: linear-gradient(110deg, rgba(12, 67, 87, 0.48), rgba(38, 30, 100, 0.42));
+  background: linear-gradient(110deg, rgba(16, 87, 61, 0.34), rgba(60, 99, 57, 0.28));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-reply-fold,
@@ -5883,14 +5935,14 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-composer {
   border-color: rgba(183, 229, 190, 0.4);
-  background: linear-gradient(135deg, rgba(4, 43, 31, 0.96), rgba(7, 104, 67, 0.88) 58%, rgba(71, 109, 55, 0.82));
+  background: linear-gradient(135deg, rgba(4, 43, 31, 0.82), rgba(7, 104, 67, 0.64) 58%, rgba(71, 109, 55, 0.62));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer textarea,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-form textarea {
   border-color: rgba(184, 229, 190, 0.34);
   color: #f5fff6;
-  background: linear-gradient(135deg, rgba(3, 38, 28, 0.78), rgba(10, 105, 67, 0.38));
+  background: linear-gradient(135deg, rgba(3, 38, 28, 0.62), rgba(10, 105, 67, 0.24));
 }
 
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) textarea::placeholder {
@@ -5904,14 +5956,14 @@ body[data-view="postDetail"] .post-social-bar {
 body[data-view="postDetail"] .post-social-action {
   border-color: rgba(180, 228, 186, 0.28);
   color: rgba(239, 252, 240, 0.86);
-  background: linear-gradient(135deg, rgba(8, 96, 62, 0.42), rgba(148, 211, 138, 0.2));
+  background: linear-gradient(135deg, rgba(8, 96, 62, 0.26), rgba(148, 211, 138, 0.14));
 }
 
 body[data-view="postDetail"] .post-social-action:hover,
 body[data-view="postDetail"] .post-social-action:focus-visible,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-fold-composer .primary-button {
   border-color: rgba(206, 247, 211, 0.72);
-  background: linear-gradient(135deg, #08744a, #82c97d 62%, #dfb772);
+  background: linear-gradient(135deg, rgba(8, 116, 74, 0.92), rgba(130, 201, 125, 0.86) 62%, rgba(223, 183, 114, 0.9));
   color: #ffffff;
 }
 
@@ -5925,6 +5977,6 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .document-attachment,
 body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .attachment-preview {
   border-color: rgba(177, 225, 184, 0.3);
-  background: linear-gradient(135deg, rgba(7, 73, 49, 0.78), rgba(105, 174, 95, 0.38));
+  background: linear-gradient(135deg, rgba(7, 73, 49, 0.52), rgba(105, 174, 95, 0.24));
   color: #f5fff6;
 }
