@@ -56,6 +56,10 @@
         <div class="hero-shade"></div>
         <div class="home-gif-stage" aria-hidden="true">
           <span class="home-gif-stage-mark"></span>
+          <div class="home-gif-clock" aria-hidden="true">
+            <time id="homeClockTime">--:--</time>
+            <span id="homeClockDate">北京时间</span>
+          </div>
           <img id="homeAmbientGif" src="/assets/ambient-gif-home.gif" alt="" />
         </div>
         <div class="cinema-grain" aria-hidden="true"></div>

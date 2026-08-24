@@ -8,6 +8,8 @@ nextTick(async () => {
   const intro = document.querySelector("#cinemaIntro");
   const introVideo = intro?.querySelector(".intro-bg-video");
   const sceneVideos = [...document.querySelectorAll(".scene-video[data-scene]")];
+  const homeClockTime = document.querySelector("#homeClockTime");
+  const homeClockDate = document.querySelector("#homeClockDate");
   const hdViewport = window.matchMedia("(min-width: 900px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -26,6 +28,29 @@ nextTick(async () => {
   };
   let introActive = Boolean(intro);
   let mediaResizeTimer;
+  let homeClockTimer;
+
+  const updateHomeClock = () => {
+    if (!homeClockTime) return;
+    const now = new Date();
+    homeClockTime.textContent = new Intl.DateTimeFormat("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(now);
+    if (homeClockDate) {
+      homeClockDate.textContent = new Intl.DateTimeFormat("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+      }).format(now).replace(/\s+/g, " ");
+    }
+  };
+
+  if (homeClockTime) {
+    updateHomeClock();
+    homeClockTimer = window.setInterval(updateHomeClock, 1000);
+  }
 
   const selectedMediaProfile = () => {
     return hdViewport.matches ? "hd" : "mobile";
@@ -219,7 +244,10 @@ nextTick(async () => {
   const viewObserver = new MutationObserver(syncSceneMedia);
   viewObserver.observe(document.body, { attributes: true, attributeFilter: ["data-view"] });
   document.addEventListener("visibilitychange", syncSceneMedia);
-  window.addEventListener("pagehide", () => [introVideo, ...sceneVideos].forEach((video) => video?.pause()));
+  window.addEventListener("pagehide", () => {
+    window.clearInterval(homeClockTimer);
+    [introVideo, ...sceneVideos].forEach((video) => video?.pause());
+  });
   window.addEventListener("resize", () => {
     window.clearTimeout(mediaResizeTimer);
     mediaResizeTimer = window.setTimeout(refreshMediaQuality, 220);
