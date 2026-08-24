@@ -4119,3 +4119,578 @@ body:not([data-view="postDetail"]):not([data-view="activityDetail"]):not([data-v
       rgba(7, 30, 31, 0.88);
   }
 }
+/* Detail reader refinement: a lighter theatre reading room with a smaller index. */
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) {
+  --detail-ink: #282321;
+  --detail-muted: #756b62;
+  --detail-paper: #fcfaf5;
+  --detail-paper-deep: #f0e7dc;
+  --detail-wine: #9f243a;
+  --detail-wine-dark: #74172b;
+  --detail-gold: #b98549;
+  --detail-rule: rgba(91, 63, 38, 0.17);
+  background: #efe8de;
+  color: var(--detail-ink);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .forum-detail-screen,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .activity-detail-screen,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .letter-detail-screen,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .writing-detail-screen {
+  min-height: 100svh;
+  padding: calc(var(--header-height) + clamp(1rem, 2.2vw, 2rem)) clamp(1rem, 4vw, 4rem) 3.5rem;
+  background:
+    linear-gradient(180deg, rgba(247, 241, 233, 0.78), rgba(239, 232, 222, 0.95)),
+    var(--scene-poster-image);
+  background-position: center, center;
+  background-size: cover, cover;
+  background-attachment: fixed;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-page-shell {
+  width: min(100%, 1600px);
+  min-height: 0;
+  margin-inline: auto;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-detail-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(13.5rem, 15rem) minmax(0, 1fr);
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  align-items: start;
+  border-color: var(--detail-rule);
+  border-radius: 28px;
+  background:
+    linear-gradient(104deg, rgba(255, 253, 248, 0.96), rgba(250, 246, 239, 0.88)),
+    var(--scene-poster-image);
+  background-position: center, center;
+  background-size: cover, cover;
+  box-shadow: 0 28px 80px rgba(73, 48, 29, 0.16);
+  backdrop-filter: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+  height: min(720px, calc(100svh - var(--header-height) - 3rem));
+  max-height: calc(100svh - var(--header-height) - 3rem);
+  border-right-color: var(--detail-rule);
+  border-radius: 28px 0 0 28px;
+  background: rgba(250, 246, 239, 0.88);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head {
+  min-height: 4.4rem;
+  padding: 1.1rem 1rem 0.9rem;
+  border-bottom-color: var(--detail-rule);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head strong {
+  color: var(--detail-ink);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head .back-button {
+  min-height: 2rem;
+  padding: 0.38rem 0.62rem;
+  color: var(--detail-ink);
+  border-color: var(--detail-rule);
+  background: rgba(255, 253, 248, 0.76);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-search {
+  margin: 0.8rem 0.8rem 0.65rem;
+  padding: 0.63rem 0.7rem;
+  border-color: var(--detail-rule);
+  border-radius: 10px;
+  color: var(--detail-muted);
+  background: rgba(255, 255, 255, 0.66);
+  font-size: 0.66rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list {
+  align-content: start;
+  grid-auto-rows: max-content;
+  padding: 0 0.6rem 0.75rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item {
+  grid-template-columns: 2.15rem minmax(0, 1fr);
+  gap: 0.6rem;
+  min-height: 0;
+  padding: 0.7rem 0.55rem;
+  border-color: transparent;
+  border-radius: 12px;
+  color: var(--detail-ink);
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item:hover,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item.is-active {
+  border-color: rgba(159, 36, 58, 0.18);
+  background: rgba(159, 36, 58, 0.07);
+  box-shadow: inset 3px 0 var(--detail-wine);
+  transform: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-avatar {
+  width: 2.15rem;
+  height: 2.15rem;
+  color: #fff;
+  border-color: transparent;
+  background: var(--detail-wine);
+  box-shadow: none;
+  font-size: 0.72rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item strong {
+  display: block;
+  overflow: hidden;
+  color: var(--detail-ink);
+  font-size: 0.73rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item small,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item em {
+  display: block;
+  overflow: hidden;
+  color: var(--detail-muted);
+  font-size: 0.61rem;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-reader {
+  display: block;
+  min-width: 0;
+  overflow: visible;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: clamp(0.9rem, 2vw, 1.7rem);
+  min-height: 0;
+  padding: clamp(1.6rem, 3vw, 2.8rem) clamp(1.4rem, 3.4vw, 3.4rem) 1.8rem;
+  border-bottom-color: var(--detail-rule);
+  background:
+    linear-gradient(100deg, rgba(255, 253, 248, 0.98) 8%, rgba(255, 253, 248, 0.84) 68%, rgba(255, 253, 248, 0.7)),
+    var(--scene-poster-image);
+  background-position: center, center 35%;
+  background-size: cover, cover;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar > .back-button {
+  align-self: end;
+  min-height: 2.7rem;
+  padding: 0.58rem 0.88rem;
+  color: var(--detail-ink);
+  border-color: var(--detail-rule);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar .section-kicker {
+  margin-bottom: 0.55rem;
+  color: var(--detail-wine);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar h2 {
+  max-width: 20ch;
+  color: var(--detail-ink);
+  font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(2.2rem, 3.4vw, 4rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar p:not(.section-kicker) {
+  margin-top: 0.65rem;
+  color: var(--detail-muted);
+  font-size: 0.75rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-delete-button {
+  align-self: end;
+  min-height: 2.7rem;
+  padding: 0.58rem 0.9rem;
+  color: var(--detail-wine-dark);
+  border-color: rgba(159, 36, 58, 0.24);
+  background: rgba(159, 36, 58, 0.08);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-scroll {
+  min-height: 0;
+  overflow: visible;
+  padding: clamp(1rem, 2.2vw, 2rem) clamp(1rem, 2.4vw, 2.2rem) 0;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-card {
+  grid-template-columns: minmax(8.7rem, 9.7rem) minmax(0, 1fr);
+  border-color: var(--detail-rule);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: 0 14px 34px rgba(74, 45, 26, 0.08);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
+  gap: 0.45rem;
+  padding: 1.3rem 0.9rem;
+  border-right-color: var(--detail-rule);
+  color: var(--detail-muted);
+  background: linear-gradient(180deg, rgba(159, 36, 58, 0.08), rgba(159, 36, 58, 0.025));
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .floor-avatar {
+  width: 3.35rem;
+  height: 3.35rem;
+  color: #fff;
+  background: var(--detail-wine);
+  box-shadow: 0 8px 18px rgba(159, 36, 58, 0.2);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author strong {
+  color: var(--detail-ink);
+  font-size: 0.78rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span {
+  color: var(--detail-muted);
+  font-size: 0.65rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
+  padding: clamp(1.2rem, 2.2vw, 2rem) clamp(1.2rem, 2.8vw, 2.5rem);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-body {
+  max-width: 72ch;
+  margin-top: 0.95rem;
+  color: var(--detail-ink);
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  line-height: 1.82;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .attachment-card a {
+  color: var(--detail-wine-dark);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments {
+  margin: 1.6rem 0 0;
+  padding: 1.15rem 0.15rem 0.25rem;
+  border: 0;
+  border-top: 1px solid var(--detail-rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title {
+  padding: 0.1rem 0.45rem 0.9rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title h3 {
+  color: var(--detail-ink);
+  font-size: 1.18rem;
+  letter-spacing: 0.02em;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title span {
+  color: var(--detail-muted);
+  font-size: 0.68rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-thread-list {
+  display: grid;
+  gap: 0;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card {
+  padding: 0.95rem 0.5rem 1.05rem;
+  border: 0;
+  border-bottom: 1px solid var(--detail-rule);
+  border-radius: 0;
+  color: var(--detail-ink);
+  background: transparent;
+  box-shadow: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-main {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: #fff;
+  background: var(--detail-wine);
+  box-shadow: none;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .meta-row strong {
+  color: var(--detail-ink);
+  font-size: 0.76rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .meta-row span,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card p {
+  color: var(--detail-muted);
+  font-size: 0.78rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card p {
+  margin: 0.45rem 0 0;
+  line-height: 1.7;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-form {
+  max-width: 42rem;
+  margin: 0.75rem 0 0 3rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-form textarea {
+  min-height: 2.6rem;
+  padding: 0.65rem 0.75rem;
+  border-color: var(--detail-rule);
+  border-radius: 10px;
+  color: var(--detail-ink);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-form .secondary-button {
+  min-height: 2.6rem;
+  padding-inline: 0.85rem;
+  color: var(--detail-wine-dark);
+  border-color: rgba(159, 36, 58, 0.24);
+  background: rgba(159, 36, 58, 0.06);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-card {
+  margin: 0.85rem 0 0 3rem;
+  padding: 0.8rem 0 0.1rem 1rem;
+  border-left: 2px solid rgba(159, 36, 58, 0.25);
+  border-bottom: 0;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .empty-state {
+  min-height: 0;
+  margin: 0.2rem 0.4rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed rgba(185, 133, 73, 0.42);
+  border-radius: 14px;
+  color: var(--detail-muted);
+  background: rgba(185, 133, 73, 0.065);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-admin-composer {
+  position: sticky;
+  bottom: 0.8rem;
+  z-index: 5;
+  margin: 0 clamp(1rem, 2.4vw, 2.2rem) 1.2rem;
+  padding: 0.65rem;
+  border: 1px solid var(--detail-rule);
+  border-radius: 17px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 18px 42px rgba(73, 48, 29, 0.15);
+  backdrop-filter: blur(16px);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer textarea,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-admin-composer textarea {
+  min-height: 3.45rem;
+  border-color: transparent;
+  border-radius: 11px;
+  color: var(--detail-ink);
+  background: rgba(244, 238, 230, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(91, 63, 38, 0.09);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer .primary-button,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-admin-composer .primary-button {
+  min-width: 6.4rem;
+  min-height: 3.45rem;
+  color: #fff;
+  border-color: var(--detail-wine);
+  background: var(--detail-wine);
+  box-shadow: 0 8px 18px rgba(159, 36, 58, 0.2);
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-stage-footer {
+  padding: 1.35rem 0.5rem 0.25rem;
+  color: var(--detail-muted);
+  font-size: 0.62rem;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-stage-footer span {
+  background: linear-gradient(90deg, transparent, rgba(185, 133, 73, 0.48));
+}
+
+@media (max-width: 820px) {
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .forum-detail-screen,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .activity-detail-screen,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .letter-detail-screen,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .writing-detail-screen {
+    padding: calc(var(--header-height) + 0.65rem) 0.75rem 5.4rem;
+    background-attachment: scroll;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-detail-layout {
+    display: block;
+    border-radius: 22px;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar {
+    position: static;
+    height: auto;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--detail-rule);
+    border-radius: 22px 22px 0 0;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-sidebar-head {
+    min-height: 3.75rem;
+    padding: 0.8rem 0.85rem 0.6rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-search {
+    margin: 0.6rem 0.75rem 0.45rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0.75rem 0.7rem;
+    scrollbar-width: none;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-list-item {
+    flex: 0 0 14.5rem;
+    padding: 0.62rem 0.55rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar {
+    display: block;
+    padding: 1.35rem 1rem 1.2rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar > .back-button {
+    display: inline-flex;
+    margin-bottom: 1rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-topbar h2 {
+    max-width: none;
+    font-size: clamp(2rem, 10vw, 3rem);
+    line-height: 1.14;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-delete-button {
+    display: inline-flex;
+    margin-top: 1rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-scroll {
+    padding: 0.8rem 0.75rem 0;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-card {
+    grid-template-columns: 1fr;
+    border-radius: 17px;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: start;
+    gap: 0.7rem;
+    padding: 0.8rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--detail-rule);
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author .floor-avatar {
+    grid-row: span 2;
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author strong,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-author span {
+    align-self: end;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .message-body {
+    padding: 1.05rem 1rem 1.25rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .detail-body {
+    font-size: 1rem;
+    line-height: 1.78;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title {
+    display: block;
+    padding-inline: 0.25rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-comments .list-title span {
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card {
+    padding-inline: 0.25rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-form {
+    grid-template-columns: 1fr auto;
+    margin-left: 3rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .comment-card .comment-card {
+    margin-left: 1.25rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-admin-composer {
+    grid-template-columns: 1fr;
+    bottom: 4.8rem;
+    margin: 0 0.75rem 0.75rem;
+    padding: 0.55rem;
+  }
+
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-composer .primary-button,
+  body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-admin-composer .primary-button {
+    width: 100%;
+    min-height: 2.9rem;
+  }
+}
