@@ -176,7 +176,7 @@
                     <h3>公开交流</h3>
                     <span id="currentUserHint">注册账号后可参与讨论</span>
                   </div>
-                  <div class="thread-list" id="threadList"></div>
+                  <div class="thread-list masonry-list" id="threadList"></div>
                 </div>
               </div>
             </section>
@@ -259,7 +259,7 @@
                     <button class="filter-button" data-activity-filter="briefing" type="button">简报</button>
                     <button class="filter-button" data-activity-filter="preview" type="button">预告</button>
                   </div>
-                  <div class="activity-list" id="activityList"></div>
+                  <div class="activity-list masonry-list" id="activityList"></div>
                 </div>
               </div>
             </section>
@@ -348,7 +348,7 @@
                     <h3>公开信件与回复</h3>
                     <span id="mailboxAdminHint"></span>
                   </div>
-                  <div class="letter-list" id="letterList"></div>
+                  <div class="letter-list masonry-list" id="letterList"></div>
                 </div>
               </div>
             </section>

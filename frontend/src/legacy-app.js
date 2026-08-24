@@ -225,6 +225,7 @@ const initialState = {
 };
 
 let state = loadState();
+let isStateHydrating = true;
 let authMode = "login";
 let toastTimer = 0;
 let registerVerification = {
@@ -345,7 +346,10 @@ const elements = {
 export function initLegacyApp() {
   applyHashView();
   bindEvents();
-  syncStateFromApi();
+  syncStateFromApi().finally(() => {
+    isStateHydrating = false;
+    render();
+  });
   syncUsersFromApi({ silent: true });
   render();
 
@@ -1041,6 +1045,33 @@ function renderStats() {
   elements.profileActivityMetric.textContent = userActivityCount;
 }
 
+function renderSkeletonList(kind = "card", count = 3) {
+  const label = {
+    forum: "正在整理公开交流",
+    activity: "正在整理活动档案",
+    letter: "正在整理公开信件",
+    writing: "正在整理征文活动",
+    essay: "正在整理文章书架",
+  }[kind] || "内容加载中";
+
+  return Array.from({ length: count }, (_, index) => `
+    <article class="skeleton-card" aria-hidden="true" style="--skeleton-index: ${index}">
+      <div class="skeleton-card-head">
+        <span class="skeleton-line skeleton-pill"></span>
+        <span class="skeleton-line skeleton-meta"></span>
+      </div>
+      <span class="skeleton-line skeleton-title"></span>
+      <span class="skeleton-line skeleton-copy"></span>
+      <span class="skeleton-line skeleton-copy skeleton-copy-short"></span>
+      <div class="skeleton-card-foot">
+        <span class="skeleton-line skeleton-meta"></span>
+        <span class="skeleton-line skeleton-meta skeleton-meta-short"></span>
+      </div>
+      <span class="sr-only">${label}</span>
+    </article>
+  `).join("");
+}
+
 function renderForum() {
   const user = currentUser();
   elements.postTitle.disabled = !user;
@@ -1049,7 +1080,10 @@ function renderForum() {
   elements.postAttachments.disabled = !user;
   elements.postForm.querySelector("button").disabled = !user;
 
-  elements.threadList.innerHTML = state.posts.length
+  elements.threadList.setAttribute("aria-busy", String(isStateHydrating));
+  elements.threadList.innerHTML = isStateHydrating
+    ? renderSkeletonList("forum", 3)
+    : state.posts.length
     ? state.posts
         .slice()
         .sort((a, b) => new Date(b.approvedAt || b.createdAt) - new Date(a.approvedAt || a.createdAt))
@@ -1193,7 +1227,10 @@ function renderActivities() {
     .filter((activity) => state.activityFilter === "all" || activity.type === state.activityFilter)
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  elements.activityList.innerHTML = filtered.length
+  elements.activityList.setAttribute("aria-busy", String(isStateHydrating));
+  elements.activityList.innerHTML = isStateHydrating
+    ? renderSkeletonList("activity", 3)
+    : filtered.length
     ? filtered.map(renderActivityCard).join("")
     : `<div class="empty-state">当前筛选下暂无公开活动。</div>`;
 
@@ -1287,7 +1324,10 @@ function renderMailbox() {
     .filter((letter) => letter.visibility === "public")
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  elements.letterList.innerHTML = publicLetters.length
+  elements.letterList.setAttribute("aria-busy", String(isStateHydrating));
+  elements.letterList.innerHTML = isStateHydrating
+    ? renderSkeletonList("letter", 3)
+    : publicLetters.length
     ? publicLetters.map(renderLetterCard).join("")
     : `<div class="empty-state">暂无公开信件。</div>`;
 
@@ -1370,7 +1410,11 @@ function renderWriting() {
     field.disabled = !user || !activeEvent;
   });
 
-  elements.writingEventList.innerHTML = state.writingEvents.length
+  elements.writingEventList.setAttribute("aria-busy", String(isStateHydrating));
+  elements.writingShelf.setAttribute("aria-busy", String(isStateHydrating));
+  elements.writingEventList.innerHTML = isStateHydrating
+    ? renderSkeletonList("writing", 3)
+    : state.writingEvents.length
     ? state.writingEvents.map(renderWritingEventCard).join("")
     : `<div class="empty-state">暂无征文活动。</div>`;
 
@@ -1388,7 +1432,9 @@ function renderWriting() {
     `
     : `<div class="empty-state">还没有可展示的征文活动。</div>`;
 
-  elements.writingShelf.innerHTML = essays.length
+  elements.writingShelf.innerHTML = isStateHydrating
+    ? renderSkeletonList("essay", 4)
+    : essays.length
     ? essays.map(renderEssayBook).join("")
     : `<div class="empty-state writing-empty-state">这个活动还没有文章，可以登录后提交。</div>`;
 
