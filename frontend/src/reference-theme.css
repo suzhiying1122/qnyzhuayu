@@ -6707,3 +6707,14 @@ body[data-view="activityDetail"] .reply-form textarea {
   color: #fff8ed !important;
   background: rgba(39, 22, 34, 0.82) !important;
 }
+
+/* Keep the cards readable, but let the selected scene show through the empty space around them. */
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-detail-layout {
+  background: transparent !important;
+  backdrop-filter: blur(3px) saturate(1.03) !important;
+}
+
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .wechat-reader,
+body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="letterDetail"], [data-view="essayDetail"]) .reader-scroll {
+  background: transparent !important;
+}
