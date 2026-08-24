@@ -82,6 +82,7 @@ nextTick(async () => {
 
   const playVideo = (video) => {
     prepareVideo(video);
+    video.preload = "metadata";
     const playback = video.play();
     if (playback?.then) {
       playback
@@ -122,6 +123,9 @@ nextTick(async () => {
   };
 
   sceneVideos.forEach((video) => {
+    video.addEventListener("loadeddata", () => {
+      if (!introActive && video.dataset.scene === selectedScene()) video.classList.add("is-ready");
+    });
     video.addEventListener("playing", () => {
       if (!introActive && video.dataset.scene === selectedScene()) video.classList.add("is-ready");
     });
