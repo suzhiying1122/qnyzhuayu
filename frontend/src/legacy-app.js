@@ -2450,7 +2450,7 @@ function renderPostDetail() {
   const comments = Array.isArray(post.comments) ? post.comments : [];
   const commentsHtml = comments.length
     ? comments.map((comment) => renderCommentThread(comment, post.id, 1)).join("")
-    : `<div class="empty-state">还没有留言，来做第一个回复的人。</div>`;
+    : `<p class="detail-fold-empty">暂无留言，展开后即可开始讨论。</p>`;
   const user = currentUser();
 
   elements.postDetailContent.innerHTML = `
@@ -2482,19 +2482,33 @@ function renderPostDetail() {
               ${renderAttachmentList(post, "full")}
             </div>
           </article>
-          <section class="reader-comments">
-            <div class="list-title">
-              <h3>全部留言</h3>
-              <span>点击任意留言下方输入框即可回复</span>
+          <details class="reader-comments detail-fold detail-fold-comments"${comments.length ? " open" : ""}>
+            <summary class="detail-fold-summary">
+              <span class="detail-fold-title">留言讨论</span>
+              <span class="detail-fold-meta">${countCommentThreads(comments)} 条</span>
+              <span class="detail-fold-caret" aria-hidden="true"></span>
+            </summary>
+            <div class="detail-fold-body">
+              <div class="list-title">
+                <h3>全部留言</h3>
+                <span>点击任意留言下方输入框即可回复</span>
+              </div>
+              <div class="comment-thread-list">${commentsHtml}</div>
             </div>
-            <div class="comment-thread-list">${commentsHtml}</div>
-          </section>
+          </details>
           ${renderDetailStageFooter()}
         </div>
-        <form class="comment-form reader-composer" data-comment-form data-post-id="${post.id}">
-          <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
-          <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布</button>
-        </form>
+        <details class="detail-fold detail-fold-composer reader-composer">
+          <summary class="detail-fold-summary">
+            <span class="detail-fold-title">写留言</span>
+            <span class="detail-fold-meta">${user ? "参与这场讨论" : "登录后参与讨论"}</span>
+            <span class="detail-fold-caret" aria-hidden="true"></span>
+          </summary>
+          <form class="comment-form" data-comment-form data-post-id="${post.id}">
+            <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
+            <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布</button>
+          </form>
+        </details>
       </section>
     </div>
   `;
@@ -2564,13 +2578,41 @@ function renderLetterDetail() {
   const canReply = isAdmin();
   const replyHtml = letter.reply
     ? `<div class="club-reply"><strong>社团回复：</strong>${escapeHtml(letter.reply)}<span>${letter.repliedAt ? ` · ${formatDateTime(letter.repliedAt)}` : ""}</span></div>`
-    : `<div class="empty-state">等待社团回复。</div>`;
+    : `<p class="detail-fold-empty">暂无回复。</p>`;
+  const replySection = letter.reply
+    ? `
+          <article class="message-card club-message">
+            <aside class="message-author">
+              <div class="floor-avatar">华</div>
+              <strong>华煜话剧社</strong>
+              <span>社团回复</span>
+            </aside>
+            <div class="message-body">${replyHtml}</div>
+          </article>
+        `
+    : `
+          <details class="detail-fold detail-fold-reply">
+            <summary class="detail-fold-summary">
+              <span class="detail-fold-title">社团回复</span>
+              <span class="detail-fold-meta">暂未回复</span>
+              <span class="detail-fold-caret" aria-hidden="true"></span>
+            </summary>
+            <div class="detail-fold-body">${replyHtml}</div>
+          </details>
+        `;
   const replyForm = isAdmin()
     ? `
-      <form class="reply-form letter-reply-form" id="letterDetailReplyForm">
-        <textarea rows="4" maxlength="420" placeholder="${canReply ? "填写社团回复" : "管理员登录后可回复"}" ${canReply ? "" : "disabled"}>${escapeHtml(letter.reply)}</textarea>
-        <button class="primary-button" type="submit" ${canReply ? "" : "disabled"}>发布回复</button>
-      </form>
+      <details class="detail-fold detail-fold-composer reader-admin-composer">
+        <summary class="detail-fold-summary">
+          <span class="detail-fold-title">回复来信</span>
+          <span class="detail-fold-meta">管理员操作</span>
+          <span class="detail-fold-caret" aria-hidden="true"></span>
+        </summary>
+        <form class="reply-form letter-reply-form" id="letterDetailReplyForm">
+          <textarea rows="4" maxlength="420" placeholder="${canReply ? "填写社团回复" : "管理员登录后可回复"}" ${canReply ? "" : "disabled"}>${escapeHtml(letter.reply)}</textarea>
+          <button class="primary-button" type="submit" ${canReply ? "" : "disabled"}>发布回复</button>
+        </form>
+      </details>
     `
     : "";
   elements.letterDetailContent.innerHTML = `
@@ -2602,17 +2644,10 @@ function renderLetterDetail() {
               ${renderAttachmentList(letter, "full")}
             </div>
           </article>
-          <article class="message-card club-message">
-            <aside class="message-author">
-              <div class="floor-avatar">华</div>
-              <strong>华煜话剧社</strong>
-              <span>社团回复</span>
-            </aside>
-            <div class="message-body">${replyHtml}</div>
-          </article>
+          ${replySection}
           ${renderDetailStageFooter()}
         </div>
-        ${replyForm ? `<div class="reader-admin-composer">${replyForm}</div>` : ""}
+        ${replyForm}
       </section>
     </div>
   `;
@@ -2954,13 +2989,29 @@ function renderAttachmentCount(item) {
 
 function renderAttachmentList(item, mode = "full") {
   const attachments = normalizeAttachments(item);
-  if (!attachments.length) return mode === "full" ? `<div class="empty-state">暂无附件。</div>` : "";
+  if (!attachments.length) return "";
   const items = attachments.map((attachment) => renderAttachmentItem(attachment, mode)).join("");
+  if (mode === "compact") {
+    return `
+      <div class="attachment-list attachment-list-compact">
+        <h4>附件</h4>
+        <div class="attachment-grid">${items}</div>
+      </div>
+    `;
+  }
   return `
-    <div class="attachment-list ${mode === "compact" ? "attachment-list-compact" : ""}">
-      <h4>附件</h4>
-      <div class="attachment-grid">${items}</div>
-    </div>
+    <details class="detail-fold detail-fold-attachments">
+      <summary class="detail-fold-summary">
+        <span class="detail-fold-title">附件</span>
+        <span class="detail-fold-meta">${attachments.length} 个</span>
+        <span class="detail-fold-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="detail-fold-body">
+        <div class="attachment-list">
+          <div class="attachment-grid">${items}</div>
+        </div>
+      </div>
+    </details>
   `;
 }
 
