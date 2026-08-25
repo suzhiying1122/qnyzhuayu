@@ -6768,27 +6768,36 @@ body:is([data-view="postDetail"], [data-view="activityDetail"], [data-view="lett
   }
 }
 
-/* Activity detail keeps the same compact masthead rhythm as the mailbox detail. */
-body[data-view="activityDetail"] #activityDetailScreen.activity-detail-screen {
+/* Keep activity detail on the same entrance rail as mailbox detail. */
+#activityDetailScreen.activity-detail-screen.is-active,
+#letterDetailScreen.letter-detail-screen.is-active {
+  display: block !important;
+  margin-top: 0 !important;
   padding-top: calc(var(--header-height) - 1.2rem) !important;
 }
 
-body[data-view="activityDetail"] #activityDetailScreen .activity-chat-layout {
+#activityDetailScreen.activity-detail-screen.is-active > .detail-page-shell,
+#letterDetailScreen.letter-detail-screen.is-active > .detail-page-shell,
+#activityDetailScreen.activity-detail-screen.is-active .activity-chat-layout,
+#letterDetailScreen.letter-detail-screen.is-active .mailbox-chat-layout {
   margin-top: 0 !important;
 }
 
-body[data-view="activityDetail"] #activityDetailScreen .reader-topbar {
+#activityDetailScreen.activity-detail-screen.is-active .reader-topbar,
+#letterDetailScreen.letter-detail-screen.is-active .reader-topbar {
   min-height: 0 !important;
   padding-top: clamp(0.9rem, 1.6vw, 1.45rem) !important;
   padding-bottom: clamp(0.85rem, 1.35vw, 1.25rem) !important;
 }
 
 @media (max-width: 820px) {
-  body[data-view="activityDetail"] #activityDetailScreen.activity-detail-screen {
+  #activityDetailScreen.activity-detail-screen.is-active,
+  #letterDetailScreen.letter-detail-screen.is-active {
     padding-top: calc(var(--header-height) - 0.35rem) !important;
   }
 
-  body[data-view="activityDetail"] #activityDetailScreen .reader-topbar {
+  #activityDetailScreen.activity-detail-screen.is-active .reader-topbar,
+  #letterDetailScreen.letter-detail-screen.is-active .reader-topbar {
     padding-top: 0.85rem !important;
     padding-bottom: 0.95rem !important;
   }
