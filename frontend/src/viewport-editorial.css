@@ -4729,6 +4729,10 @@ body[data-view="writing"]:has(#writingScreen.is-active) .writing-shelf {
   overflow: visible !important;
 }
 
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-shelf:empty {
+  display: none !important;
+}
+
 body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-row {
   display: grid !important;
   grid-template-columns: 34px minmax(0, 1fr) auto !important;

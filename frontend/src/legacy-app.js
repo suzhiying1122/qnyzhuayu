@@ -1801,7 +1801,7 @@ function renderWriting() {
     ? renderSkeletonList("essay", 4)
     : writingPreviewItems.length
     ? writingPreviewItems.map((essay, index) => essay ? renderEssayBook(essay, index) : renderEssayBookPlaceholder(index)).join("")
-    : `<div class="empty-state writing-empty-state">这个活动还没有文章，可以登录后提交。</div>`;
+    : "";
 
   elements.writingEventList.querySelectorAll("[data-writing-event]").forEach((button) => {
     button.addEventListener("click", () => {
