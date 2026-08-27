@@ -1,10 +1,13 @@
 ﻿<template>
 
     <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
-      <picture class="intro-bg-picture" aria-hidden="true">
-        <source media="(max-width: 820px)" srcset="/assets/ambient-home-mobile.webp" />
-        <img src="/assets/ambient-home-hd.webp" alt="" />
-      </picture>
+      <div class="intro-bg-picture intro-bg-before" aria-hidden="true">
+        <img src="/assets/intro-stage-before.png" alt="" />
+      </div>
+      <div class="intro-bg-picture intro-bg-after" aria-hidden="true">
+        <img src="/assets/intro-stage-after.png" alt="" />
+      </div>
+      <div class="intro-threshold-light" aria-hidden="true"></div>
       <div class="intro-atmosphere" aria-hidden="true"></div>
       <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
         <span>进入网站</span>

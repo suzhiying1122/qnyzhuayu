@@ -46,6 +46,7 @@ nextTick(async () => {
   let introActive = Boolean(intro);
   let mediaResizeTimer;
   let homeClockTimer;
+  const introSeenKey = "huayu-intro-seen-v2";
 
   const updateHomeClock = () => {
     const now = new Date();
@@ -279,18 +280,26 @@ nextTick(async () => {
   const enterButton = document.querySelector("#cinemaEnterButton");
   const dismissIntro = () => {
     if (!intro || intro.classList.contains("is-leaving")) return;
-    intro.classList.add("is-leaving");
-    introActive = false;
-    introVideo?.pause();
-    window.sessionStorage.setItem("huayu-intro-seen", "1");
+    intro.classList.add("is-entering");
+    if (enterButton) enterButton.disabled = true;
+    window.sessionStorage.setItem(introSeenKey, "1");
+
+    // Let the doorway transition complete before revealing the page behind it.
+    // This keeps the second still frame visible long enough to read as a step in.
+    const transitionDuration = 1280;
+    window.setTimeout(() => {
+      intro.classList.add("is-leaving");
+      introActive = false;
+      introVideo?.pause();
+      syncSceneMedia();
+    }, transitionDuration);
     window.setTimeout(() => {
       releaseVideo(introVideo);
       intro.remove();
-    }, 760);
-    window.setTimeout(syncSceneMedia, 220);
+    }, transitionDuration + 760);
   };
-  const skipIntro = window.matchMedia("(max-width: 820px)").matches || constrainedConnection || reducedMotion.matches;
-  if (skipIntro || window.sessionStorage.getItem("huayu-intro-seen") === "1") {
+  const skipIntro = constrainedConnection || reducedMotion.matches;
+  if (skipIntro || window.sessionStorage.getItem(introSeenKey) === "1") {
     intro?.remove();
     introActive = false;
   } else {
