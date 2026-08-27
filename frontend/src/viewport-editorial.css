@@ -1,0 +1,4916 @@
+/*
+ * One-screen editorial composition.
+ *
+ * The primary views are previews, not full archives: each one occupies the
+ * viewport below the single fixed GlobalHeader. Detail views intentionally
+ * stay outside these selectors so their longer reading surfaces can scroll.
+ */
+
+:root {
+  --viewport-content-width: min(1260px, calc(100% - clamp(36px, 8vw, 128px)));
+  --viewport-header-space: clamp(104px, 12vh, 132px);
+  --viewport-hairline: 0.5px;
+}
+
+/* Final correction pass ----------------------------------------------
+   Keep the one-screen promise without hiding the copy that makes each
+   preview understandable. Empty rows are explicit placeholders from the
+   view renderers, so real records remain intact while the composition still
+   has a complete rhythm when a local database contains only one or two
+   records. */
+
+body:has(#forumScreen.is-active) .forum-public-drawer {
+  height: auto;
+  flex: 1 1 auto;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list {
+  height: auto;
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+body:has(#forumScreen.is-active) .thread-card.is-placeholder {
+  color: var(--editorial-muted);
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-item.is-placeholder,
+body:has(#writingScreen.is-active) .writing-work-row.is-placeholder {
+  color: var(--editorial-muted);
+}
+
+body:has(#activitiesScreen.is-active) .events-placeholder-link {
+  color: var(--events-muted);
+  cursor: default;
+}
+
+@media (max-width: 680px) {
+  /* Forum summaries remain visible on mobile; they use one quiet line. */
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    display: -webkit-box;
+    max-height: 1.35em;
+    margin: 0 0 2px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card {
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    height: auto;
+    min-height: 0;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card::after {
+    grid-row: 1 / span 3;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-preview {
+    display: -webkit-box;
+    grid-column: 2;
+    grid-row: 3;
+    max-height: 1.25em;
+    margin-top: 3px;
+    overflow: hidden;
+    font-size: 0.56rem;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  /* Events: a horizontal focal block keeps the programme and all three
+     timeline rows visible on a 390px screen. */
+  body:has(#activitiesScreen.is-active) .events-programme-header {
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature {
+    min-height: 0;
+    font-size: 0.46rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 258px;
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-columns: minmax(0, 1.12fr) minmax(116px, 0.88fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    padding: 10px 10px 8px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-meta {
+    gap: 6px;
+    padding-bottom: 4px;
+    font-size: 0.47rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-type {
+    margin-top: 3px;
+    font-size: 0.57rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date {
+    gap: 5px;
+    margin: 3px 0 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date span {
+    font-size: 0.49rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date strong {
+    font-size: 1.1rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    max-width: none;
+    font-size: 1.22rem;
+    line-height: 1.1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    height: 2.5em;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    margin-top: 3px;
+    font-size: 0.57rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details dt {
+    font-size: 0.44rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details dd {
+    margin-top: 2px;
+    font-size: 0.53rem;
+    line-height: 1.15;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-actions {
+    margin-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-primary-button {
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 0.55rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    flex: 0 0 38px;
+    height: 38px;
+    padding-bottom: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 0;
+    padding: 4px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date {
+    min-height: 0;
+    padding-right: 7px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date strong {
+    font-size: 0.95rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    font-size: 0.72rem;
+    line-height: 1.15;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    display: -webkit-box;
+    max-height: 1.2em;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.5rem;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-actions {
+    min-width: 40px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-detail-link {
+    font-size: 0.49rem;
+  }
+
+  /* Writing: restore a one-line synopsis for each recent work while keeping
+     the three-row shelf inside the same stage. */
+  body:has(#writingScreen.is-active) .writing-work-open {
+    grid-template-columns: minmax(0, 1fr) 18px;
+    grid-template-rows: auto auto;
+    gap: 0 6px;
+    height: auto;
+    min-height: 0;
+    padding: 3px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    gap: 1px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.72rem;
+    line-height: 1.05;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small {
+    font-size: 0.49rem;
+    line-height: 1.05;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-excerpt {
+    display: -webkit-box;
+    grid-column: 1;
+    grid-row: 2;
+    max-height: 1.1em;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.48rem;
+    line-height: 1.1;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-meta {
+    display: none;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    font-size: 0.75rem;
+  }
+
+  /* Contact: the information and letter become a readable vertical stack;
+     the compact closing note uses the remaining screen edge instead of
+     leaving an over-tall empty paper. */
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    flex: 0 0 auto;
+    height: auto;
+    margin-top: 10px;
+    overflow: visible;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-information {
+    padding: 10px 0 8px;
+    border-bottom: var(--viewport-hairline) solid var(--editorial-line);
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3,
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    grid-template-columns: minmax(100px, 0.42fr) minmax(0, 1fr);
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dd {
+    font-size: 0.64rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder {
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-box {
+    width: 50px;
+    height: 50px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder > div:last-child {
+    gap: 2px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder > div:last-child > span,
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder strong {
+    font-size: 0.58rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder p {
+    font-size: 0.48rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 10px 13px 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form {
+    gap: 6px;
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    min-height: 44px;
+    max-height: 50px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+    max-width: 17ch;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 9px;
+    padding: 9px 12px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.42rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 0.55rem;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+  /* The browser preview can be a narrow desktop window rather than a phone.
+     Let the contact paper and its closing note use content height instead of
+     stretching an otherwise finished form to the bottom edge. */
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    padding: 10px 14px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 4px;
+    font-size: 0.9rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.46rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 0.6rem;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+  /* Low-height desktop windows need a separate rhythm. The text remains
+     readable, but the focal blocks give three timeline/shelf rows and their
+     CTA a real place before the viewport ends. */
+  :root {
+    --viewport-header-space: 96px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme,
+  body:has(#writingScreen.is-active) .writing-gallery,
+  body:has(#mailboxScreen.is-active) .contact-page {
+    padding-top: 96px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-header,
+  body:has(#writingScreen.is-active) .writing-gallery-header,
+  body:has(#mailboxScreen.is-active) .contact-header {
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-heading h2,
+  body:has(#writingScreen.is-active) .writing-gallery-heading h2,
+  body:has(#mailboxScreen.is-active) .contact-heading h2 {
+    font-size: 3.8rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-lede,
+  body:has(#writingScreen.is-active) .writing-lede,
+  body:has(#mailboxScreen.is-active) .contact-lede {
+    margin-top: 5px;
+    font-size: 0.95rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-intro {
+    margin-top: 3px;
+    font-size: 0.7rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 238px;
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy,
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding-top: 12px;
+    padding-bottom: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3,
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    font-size: 1.7rem;
+    line-height: 1.1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description,
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    height: 1.35em;
+    min-height: 1.35em;
+    max-height: 1.35em;
+    margin-top: 4px;
+    font-size: 0.64rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    padding-top: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-actions {
+    margin-top: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header,
+  body:has(#writingScreen.is-active) .writing-section-header {
+    height: 36px;
+    flex-basis: 36px;
+    padding-bottom: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+    padding: 4px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    font-size: 0.86rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    max-height: 1.25em;
+    font-size: 0.56rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    flex-basis: 230px;
+    margin-top: 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 110px;
+    margin-top: 8px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 76px;
+    grid-auto-rows: minmax(25px, 1fr);
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    min-height: 25px;
+    height: auto;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-open {
+    padding: 4px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.78rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small,
+  body:has(#writingScreen.is-active) .writing-work-excerpt,
+  body:has(#writingScreen.is-active) .writing-work-meta {
+    font-size: 0.54rem;
+    line-height: 1.2;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band {
+    min-height: 68px;
+    margin-top: 8px;
+    padding: 10px 14px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band h3 {
+    margin-top: 4px;
+    font-size: 1rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) and (min-height: 820px) {
+  /* A taller desktop has room for the promised closing note; making the
+     paper content-sized prevents an artificial empty lower half. */
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 14px;
+    padding: 14px 20px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 5px;
+    font-size: 1.25rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.5rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (min-width: 901px) and (min-height: 761px) and (max-height: 819px) {
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-timeline-section,
+  body:has(#activitiesScreen.is-active) .events-timeline-list {
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+    padding: 2px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date {
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    margin-top: 2px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    margin-top: 1px;
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-columns: minmax(0, 1.12fr) minmax(116px, 0.88fr);
+    grid-template-rows: minmax(0, 1fr);
+    flex-basis: 240px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding: 10px 10px 8px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    margin-top: 5px;
+    font-size: 1.2rem;
+    line-height: 1.1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-quote {
+    margin-top: 4px;
+    font-size: 0.62rem;
+    line-height: 1.2;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    min-height: 2.4em;
+    max-height: 2.4em;
+    margin-top: 3px;
+    font-size: 0.54rem;
+    line-height: 1.2;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    gap: 4px;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta dt {
+    font-size: 0.43rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta dd {
+    font-size: 0.49rem;
+    line-height: 1.12;
+  }
+
+  body:has(#writingScreen.is-active) .writing-read-button {
+    min-height: 28px;
+    margin-top: 5px;
+    padding: 5px 8px;
+    font-size: 0.54rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-media,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 185px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 145px;
+    grid-auto-rows: minmax(47px, 1fr);
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3 {
+    margin-top: 4px;
+    font-size: 1.08rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 4px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    padding: 2px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dt {
+    font-size: 0.48rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dd {
+    font-size: 0.6rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder {
+    grid-template-columns: 40px minmax(0, 1fr);
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form input {
+    height: 32px;
+    min-height: 32px !important;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    flex-basis: 30px;
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#writingScreen.is-active) .writing-shelf {
+    gap: 0;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: end;
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-page-index {
+    width: auto;
+    min-width: 64px;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
+body:has(#homeView.is-active),
+body:has(#forumScreen.is-active),
+body:has(#activitiesScreen.is-active),
+body:has(#writingScreen.is-active),
+body:has(#mailboxScreen.is-active) {
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body:has(#homeView.is-active) #top,
+body:has(#forumScreen.is-active) #top,
+body:has(#activitiesScreen.is-active) #top,
+body:has(#writingScreen.is-active) #top,
+body:has(#mailboxScreen.is-active) #top {
+  height: 100svh;
+  height: 100dvh;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+body:has(#homeView.is-active) #top > .view.is-active,
+body:has(#forumScreen.is-active) #top > .view.is-active,
+body:has(#activitiesScreen.is-active) #top > .view.is-active,
+body:has(#writingScreen.is-active) #top > .view.is-active,
+body:has(#mailboxScreen.is-active) #top > .view.is-active {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+/* Home keeps the established focal composition; only the outer viewport is
+   locked here so the mobile fallback cannot create a page-level scrollbar. */
+
+body:has(#homeView.is-active) #homeView.is-active {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Forum --------------------------------------------------------------- */
+
+body:has(#forumScreen.is-active) #forumScreen {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:has(#forumScreen.is-active) .forum-editorial-page {
+  display: grid;
+  grid-template-rows: minmax(0, 52%) minmax(0, 48%);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body:has(#forumScreen.is-active) .forum-editorial-hero {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+body:has(#forumScreen.is-active) .forum-hero-copy {
+  top: clamp(104px, 14vh, 132px);
+  width: min(35rem, 41vw);
+}
+
+body:has(#forumScreen.is-active) .forum-hero-kicker {
+  margin-bottom: 14px;
+}
+
+body:has(#forumScreen.is-active) .forum-hero-copy h2 {
+  font-size: clamp(4rem, 7vw, 6.7rem);
+}
+
+body:has(#forumScreen.is-active) .forum-hero-english {
+  margin: 12px 0 14px;
+}
+
+body:has(#forumScreen.is-active) .forum-title-rule {
+  height: var(--viewport-hairline);
+  margin-bottom: 14px;
+}
+
+body:has(#forumScreen.is-active) .forum-hero-description {
+  line-height: 1.65;
+}
+
+body:has(#forumScreen.is-active) .forum-write-button {
+  min-height: 40px;
+  margin-top: 17px;
+  padding-top: 9px;
+  padding-bottom: 10px;
+}
+
+body:has(#forumScreen.is-active) .forum-hero-art {
+  top: 22px;
+  right: clamp(-100px, -5vw, -40px);
+  bottom: -12px;
+}
+
+body:has(#forumScreen.is-active) .forum-hero-aside {
+  top: clamp(126px, 16vh, 164px);
+}
+
+body:has(#forumScreen.is-active) .forum-content-shell {
+  min-height: 0;
+  height: auto;
+  padding: 11px clamp(24px, 4.1vw, 64px) 16px;
+  overflow: hidden;
+}
+
+body:has(#forumScreen.is-active) .forum-category-grid {
+  height: 86px;
+  gap: 10px;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card {
+  min-height: 0;
+  height: 86px;
+  grid-template-columns: 25px minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-radius: 7px;
+}
+
+body:has(#forumScreen.is-active) .forum-category-icon {
+  width: 23px;
+  height: 23px;
+  font-size: 16px;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card p {
+  display: -webkit-box;
+  min-height: 0;
+  margin: 0 0 4px;
+  overflow: hidden;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card div > span {
+  font-size: 9px;
+}
+
+body:has(#forumScreen.is-active) .forum-lower-grid {
+  grid-template-columns: minmax(0, 1fr);
+  height: calc(100% - 96px);
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+body:has(#forumScreen.is-active) .forum-side-column {
+  display: none;
+}
+
+body:has(#forumScreen.is-active) .forum-discussion-column,
+body:has(#forumScreen.is-active) .forum-public-drawer,
+body:has(#forumScreen.is-active) .forum-thread-list {
+  min-height: 0;
+  overflow: hidden;
+}
+
+body:has(#forumScreen.is-active) .forum-section-heading {
+  min-height: 42px;
+  padding-bottom: 9px;
+}
+
+body:has(#forumScreen.is-active) .forum-section-heading h3 {
+  margin: 3px 0 2px;
+  font-size: clamp(21px, 2vw, 27px);
+}
+
+body:has(#forumScreen.is-active) .forum-section-heading p {
+  font-size: 11px;
+}
+
+body:has(#forumScreen.is-active) .forum-list-meta {
+  height: 27px;
+  padding: 6px 0 4px;
+  font-size: 11px;
+}
+
+body:has(#forumScreen.is-active) .forum-list-counts {
+  gap: 12px;
+  font-size: 9px;
+}
+
+body:has(#forumScreen.is-active) .forum-list-counts strong {
+  font-size: 14px;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-card {
+  grid-template-columns: 35px minmax(0, 1fr) minmax(170px, 0.34fr);
+  grid-template-rows: auto auto;
+  column-gap: 13px;
+  height: 57px;
+  min-height: 0;
+  padding: 7px 4px 6px 0;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-card:nth-child(n + 4) {
+  display: none;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-card::after {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  padding-top: 0;
+  font-size: 10px;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .tag-row {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0 0 2px;
+  font-size: 9px;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-title-button {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-title-button h4 {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-preview {
+  display: none;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .meta-row {
+  display: flex;
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 9px;
+  text-align: right;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .meta-row span::before {
+  display: none;
+}
+
+/* Events -------------------------------------------------------------- */
+
+body:has(#activitiesScreen.is-active) #activitiesScreen {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme {
+  display: flex;
+  width: var(--viewport-content-width);
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: var(--viewport-header-space) 0 16px;
+  overflow: hidden;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-header {
+  flex: 0 0 auto;
+  gap: 34px;
+  padding-bottom: 15px;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-heading h2 {
+  font-size: clamp(3.2rem, 6vw, 5rem);
+}
+
+body:has(#activitiesScreen.is-active) .events-wordmark {
+  margin-top: 8px;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-lede {
+  max-width: 30rem;
+  margin-top: 12px;
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  line-height: 1.4;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-intro {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-signature {
+  min-width: 118px;
+  gap: 5px;
+  padding-left: 15px;
+  font-size: 0.56rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-signature strong {
+  font-size: 0.88rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-programme-signature i {
+  width: 32px;
+  margin: 5px 0 2px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-event {
+  min-height: 0;
+  height: clamp(238px, 32vh, 292px);
+  margin-top: 18px;
+  flex: 0 0 auto;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-layout,
+body:has(#activitiesScreen.is-active) .events-featured-empty,
+body:has(#activitiesScreen.is-active) .events-featured-loading {
+  min-height: 0;
+  height: 100%;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-copy {
+  padding: 17px 30px 16px 0;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-meta {
+  padding-bottom: 7px;
+  font-size: 0.58rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-type {
+  margin-top: 9px;
+  font-size: 0.72rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-date {
+  gap: 8px;
+  margin: 5px 0 7px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-date strong {
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+  max-width: 18ch;
+  font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+  line-height: 1.05;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-description {
+  display: -webkit-box;
+  max-width: 48ch;
+  margin-top: 8px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-details {
+  gap: 10px;
+  padding-top: 9px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-details dt {
+  font-size: 0.54rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-details dd {
+  margin-top: 3px;
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-actions {
+  margin-top: 10px;
+}
+
+body:has(#activitiesScreen.is-active) .events-primary-button {
+  min-height: 34px;
+  padding: 7px 11px;
+  font-size: 0.7rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-image,
+body:has(#activitiesScreen.is-active) .events-featured-image img {
+  min-height: 0;
+  height: 100%;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-image figcaption {
+  right: 12px;
+  bottom: 10px;
+  left: 12px;
+  font-size: 0.5rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-section {
+  min-height: 0;
+  margin-top: 16px;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header {
+  min-height: 0;
+  padding-bottom: 8px;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header h3 {
+  font-size: clamp(1.35rem, 2.35vw, 2rem);
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header > div:first-child > p:last-child {
+  display: none;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-wordmark {
+  margin-top: 4px;
+  font-size: 0.55rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-filter-row {
+  display: none;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-list {
+  max-height: 100%;
+  overflow: hidden;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-list::before {
+  left: 80px;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-item {
+  grid-template-columns: 100px minmax(0, 1fr) auto;
+  gap: 22px;
+  min-height: 0;
+  height: 57px;
+  padding: 7px 0;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-item:nth-child(n + 4) {
+  display: none;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-date {
+  min-height: 43px;
+  padding-right: 12px;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-date strong {
+  font-size: 1.35rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-date span,
+body:has(#activitiesScreen.is-active) .events-timeline-date em,
+body:has(#activitiesScreen.is-active) .events-timeline-meta {
+  font-size: 0.54rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+  margin-top: 3px;
+  font-size: 1rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+  display: -webkit-box;
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-actions {
+  min-width: 65px;
+}
+
+body:has(#activitiesScreen.is-active) .events-detail-link {
+  min-height: 26px;
+  padding: 3px 0;
+  font-size: 0.64rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-archive-section,
+body:has(#activitiesScreen.is-active) .events-cta {
+  display: none !important;
+}
+
+/* Writing gallery ----------------------------------------------------- */
+
+body:has(#writingScreen.is-active) #writingScreen {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:has(#writingScreen.is-active) .writing-gallery {
+  display: flex;
+  width: var(--viewport-content-width);
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: var(--viewport-header-space) 0 16px;
+  overflow: hidden;
+}
+
+body:has(#writingScreen.is-active) .writing-gallery-header {
+  flex: 0 0 auto;
+  gap: 34px;
+  padding-bottom: 15px;
+}
+
+body:has(#writingScreen.is-active) .writing-gallery-heading h2 {
+  font-size: clamp(3.2rem, 6vw, 5rem);
+}
+
+body:has(#writingScreen.is-active) .writing-wordmark {
+  margin-top: 8px;
+}
+
+body:has(#writingScreen.is-active) .writing-lede {
+  margin-top: 10px;
+  font-size: clamp(1rem, 1.7vw, 1.3rem);
+  line-height: 1.4;
+}
+
+body:has(#writingScreen.is-active) .writing-page-index {
+  min-width: 118px;
+  gap: 5px;
+  font-size: 0.56rem;
+}
+
+body:has(#writingScreen.is-active) .writing-page-index strong {
+  font-size: 2rem;
+}
+
+body:has(#writingScreen.is-active) .writing-intro-rule {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-work {
+  flex: 0 0 clamp(230px, 31vh, 278px);
+  min-height: 0;
+  margin: 18px 0 0;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-copy {
+  justify-content: flex-start;
+  padding: 17px 30px 16px 0;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-kicker {
+  font-size: 0.56rem;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+  max-width: 16ch;
+  margin-top: 9px;
+  font-size: clamp(1.8rem, 3.4vw, 3.1rem);
+  line-height: 1.05;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-quote {
+  margin-top: 7px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-description {
+  display: -webkit-box;
+  margin-top: 5px;
+  overflow: hidden;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-meta {
+  gap: 10px 18px;
+  margin-top: 9px;
+  padding-top: 8px;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-meta dt {
+  font-size: 0.53rem;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-meta dd {
+  margin-top: 2px;
+  font-size: 0.65rem;
+  line-height: 1.3;
+}
+
+body:has(#writingScreen.is-active) .writing-read-button {
+  min-height: 32px;
+  margin-top: 10px;
+  padding: 6px 11px;
+  font-size: 0.66rem;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-date {
+  margin-top: 5px;
+  font-size: 0.59rem;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-media,
+body:has(#writingScreen.is-active) .writing-featured-media img {
+  min-height: 0;
+  height: 100%;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-media-note {
+  right: 16px;
+  bottom: 13px;
+  font-size: 0.5rem;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-media-number {
+  top: 13px;
+  right: 16px;
+  font-size: 1.7rem;
+}
+
+body:has(#writingScreen.is-active) .writing-recent-section {
+  min-height: 0;
+  margin-top: 14px;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+body:has(#writingScreen.is-active) .writing-section-header {
+  min-height: 0;
+  padding-bottom: 7px;
+}
+
+body:has(#writingScreen.is-active) .writing-section-header h3 {
+  margin-top: 4px;
+  font-size: clamp(1.35rem, 2.35vw, 2rem);
+}
+
+body:has(#writingScreen.is-active) .writing-section-header p {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-section-header > div > span {
+  font-size: 0.54rem;
+}
+
+body:has(#writingScreen.is-active) .writing-recent-meta strong {
+  font-size: 1.7rem;
+}
+
+body:has(#writingScreen.is-active) .writing-shelf {
+  min-height: 0;
+  height: calc(100% - 48px);
+  overflow: hidden;
+}
+
+body:has(#writingScreen.is-active) .writing-work-row:nth-child(n + 4) {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-work-row {
+  height: 58px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+body:has(#writingScreen.is-active) .writing-work-index {
+  font-size: 0.57rem;
+}
+
+body:has(#writingScreen.is-active) .writing-work-open {
+  grid-template-columns: minmax(145px, 0.75fr) minmax(0, 1.2fr) minmax(90px, 0.45fr) 20px;
+  gap: 15px;
+  min-height: 0;
+  height: 58px;
+  padding: 7px 0;
+}
+
+body:has(#writingScreen.is-active) .writing-work-title {
+  gap: 3px;
+}
+
+body:has(#writingScreen.is-active) .writing-work-title strong {
+  font-size: 0.95rem;
+}
+
+body:has(#writingScreen.is-active) .writing-work-title small,
+body:has(#writingScreen.is-active) .writing-work-meta,
+body:has(#writingScreen.is-active) .writing-work-excerpt {
+  font-size: 0.61rem;
+  line-height: 1.35;
+}
+
+body:has(#writingScreen.is-active) .writing-work-excerpt {
+  -webkit-line-clamp: 1;
+}
+
+body:has(#writingScreen.is-active) .writing-work-arrow {
+  font-size: 1rem;
+}
+
+body:has(#writingScreen.is-active) .writing-open-calls,
+body:has(#writingScreen.is-active) .writing-admin-panel {
+  display: none !important;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-band {
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  min-height: 66px;
+  margin-top: 13px;
+  padding: 14px 20px;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-band > div:first-child > span {
+  font-size: 0.52rem;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-band h3 {
+  max-width: none;
+  margin-top: 5px;
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  line-height: 1.2;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-band > div:first-child > p {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-details summary {
+  min-height: 34px;
+  padding: 7px 0;
+  font-size: 0.72rem;
+}
+
+/* Contact letter ------------------------------------------------------ */
+
+body:has(#mailboxScreen.is-active) #mailboxScreen {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:has(#mailboxScreen.is-active) .contact-page {
+  display: flex;
+  width: var(--viewport-content-width);
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: var(--viewport-header-space) 0 16px;
+  overflow: hidden;
+}
+
+body:has(#mailboxScreen.is-active) .contact-header {
+  flex: 0 0 auto;
+  gap: 34px;
+  padding-bottom: 15px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-heading h2 {
+  font-size: clamp(3.2rem, 6vw, 5rem);
+}
+
+body:has(#mailboxScreen.is-active) .contact-wordmark {
+  margin-top: 8px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-lede {
+  margin-top: 10px;
+  font-size: clamp(1rem, 1.7vw, 1.3rem);
+  line-height: 1.4;
+}
+
+body:has(#mailboxScreen.is-active) .contact-page-index {
+  min-width: 118px;
+  gap: 5px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-page-index strong {
+  font-size: 2rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-intro-rule {
+  flex: 0 0 auto;
+  padding: 10px 0 9px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-intro-rule p {
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+body:has(#mailboxScreen.is-active) .contact-intro-rule span {
+  font-size: 0.52rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-layout {
+  min-height: 0;
+  margin-top: 14px;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+body:has(#mailboxScreen.is-active) .contact-information {
+  min-height: 0;
+  padding: 17px 30px 14px 0;
+  overflow: hidden;
+}
+
+body:has(#mailboxScreen.is-active) .contact-section-heading h3 {
+  margin-top: 8px;
+  font-size: clamp(1.55rem, 2.6vw, 2.5rem);
+}
+
+body:has(#mailboxScreen.is-active) .contact-section-heading p {
+  display: -webkit-box;
+  margin-top: 7px;
+  overflow: hidden;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#mailboxScreen.is-active) .contact-ledger {
+  margin-top: 15px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-ledger > div {
+  min-height: 31px;
+  padding: 7px 0;
+}
+
+body:has(#mailboxScreen.is-active) .contact-ledger dt {
+  font-size: 0.52rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-ledger dd {
+  font-size: 0.78rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-ledger small {
+  font-size: 0.52rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-qr-placeholder,
+body:has(#mailboxScreen.is-active) .contact-counts {
+  display: none;
+}
+
+body:has(#mailboxScreen.is-active) .contact-letter-paper {
+  min-height: 0;
+  margin: -1px 0 -1px;
+  padding: 17px 30px 14px;
+  overflow: hidden;
+}
+
+body:has(#mailboxScreen.is-active) .contact-letter-topline {
+  padding-bottom: 8px;
+  font-size: 0.54rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+  margin-top: 12px;
+  font-size: clamp(1.55rem, 2.6vw, 2.5rem);
+}
+
+body:has(#mailboxScreen.is-active) .contact-form-heading p {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form {
+  gap: 9px;
+  margin-top: 14px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form-grid {
+  gap: 14px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form label {
+  gap: 4px;
+  font-size: 0.59rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form input,
+body:has(#mailboxScreen.is-active) .contact-form textarea {
+  padding: 5px 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form textarea {
+  min-height: 54px;
+  max-height: 72px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-choice-group,
+body:has(#mailboxScreen.is-active) .contact-attachment-field {
+  display: none;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form-footer {
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+  max-width: 26ch;
+  font-size: 0.54rem;
+  line-height: 1.4;
+}
+
+body:has(#mailboxScreen.is-active) .contact-submit-button {
+  min-height: 34px;
+  padding: 7px 11px;
+  font-size: 0.66rem;
+}
+
+body:has(#mailboxScreen.is-active) .contact-voices,
+body:has(#mailboxScreen.is-active) .contact-closing {
+  display: none !important;
+}
+
+/* The mobile layout is still a single composition: two compact columns in
+   the forum and stacked focal blocks elsewhere, with only the viewport
+   itself clipped. */
+
+@media (max-width: 900px) {
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    width: min(40rem, 48vw);
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .meta-row {
+    gap: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme,
+  body:has(#writingScreen.is-active) .writing-gallery,
+  body:has(#mailboxScreen.is-active) .contact-page {
+    width: min(calc(100% - 40px), 720px);
+  }
+}
+
+@media (max-width: 680px) {
+  :root {
+    --viewport-header-space: 126px;
+    --viewport-content-width: calc(100% - 36px);
+  }
+
+  /* Forum: keep all four category entrances, but make them a 2 x 2
+     index so the newest discussions still have a place on the same screen. */
+  body:has(#forumScreen.is-active) .forum-editorial-page {
+    grid-template-rows: 45% 55%;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    top: 118px;
+    left: 18px;
+    width: min(57%, 260px);
+  }
+
+  body:has(#forumScreen.is-active) .forum-back {
+    top: -28px;
+    font-size: 9px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-kicker {
+    margin-bottom: 10px;
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-copy h2 {
+    gap: 0.3em;
+    font-size: clamp(3rem, 15vw, 4.2rem);
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-english {
+    margin: 8px 0 9px;
+    font-size: 9px;
+    letter-spacing: 0.28em;
+  }
+
+  body:has(#forumScreen.is-active) .forum-title-rule {
+    width: 27px;
+    margin-bottom: 9px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-description {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  body:has(#forumScreen.is-active) .forum-write-button {
+    min-width: 112px;
+    min-height: 34px;
+    margin-top: 11px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-art {
+    top: 88px;
+    right: -35%;
+    bottom: -13px;
+    width: 86%;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-aside {
+    top: 125px;
+    right: 15px;
+    width: 78px;
+    font-size: 9px;
+    line-height: 1.55;
+  }
+
+  body:has(#forumScreen.is-active) .forum-aside-line {
+    height: 23px;
+    margin: 7px 0 7px 4px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-aside-index {
+    gap: 4px;
+    margin-left: 0;
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-aside-index i {
+    height: 7px;
+    margin-left: 3px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-content-shell {
+    padding: 8px 18px 10px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-grid {
+    height: 94px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card {
+    height: 94px;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 5px;
+    padding: 9px 9px 7px;
+    border-radius: 5px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card h3 {
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    display: none;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card div > span {
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-lower-grid {
+    height: calc(100% - 101px);
+    margin-top: 7px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-section-heading {
+    min-height: 36px;
+    padding-bottom: 6px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-section-heading h3 {
+    margin: 2px 0 0;
+    font-size: 18px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-section-heading p,
+  body:has(#forumScreen.is-active) .forum-outline-action {
+    display: none;
+  }
+
+  body:has(#forumScreen.is-active) .forum-list-meta {
+    height: 23px;
+    padding: 4px 0 2px;
+    font-size: 9px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-list-counts {
+    display: none;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card {
+    grid-template-columns: 25px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    height: 51px;
+    column-gap: 8px;
+    padding: 5px 0;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card::after {
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .tag-row {
+    margin-bottom: 1px;
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .tag {
+    padding: 1px 5px;
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-title-button h4 {
+    font-size: 12px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .meta-row {
+    display: none;
+  }
+
+  /* The three editorial views use one compact featured block followed by a
+     short index. Their archive/voice sections remain available in the DOM
+     for future detail surfaces, but do not compete with the first screen. */
+  body:has(#activitiesScreen.is-active) .events-programme,
+  body:has(#writingScreen.is-active) .writing-gallery,
+  body:has(#mailboxScreen.is-active) .contact-page {
+    width: calc(100% - 36px);
+    padding-top: 126px;
+    padding-bottom: 12px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-header,
+  body:has(#writingScreen.is-active) .writing-gallery-header,
+  body:has(#mailboxScreen.is-active) .contact-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-heading h2,
+  body:has(#writingScreen.is-active) .writing-gallery-heading h2,
+  body:has(#mailboxScreen.is-active) .contact-heading h2 {
+    max-width: none;
+    font-size: clamp(2.75rem, 13vw, 4.4rem);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-lede,
+  body:has(#writingScreen.is-active) .writing-lede,
+  body:has(#mailboxScreen.is-active) .contact-lede {
+    max-width: 23rem;
+    margin-top: 7px;
+    font-size: 0.95rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-intro {
+    font-size: 0.68rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature,
+  body:has(#writingScreen.is-active) .writing-page-index,
+  body:has(#mailboxScreen.is-active) .contact-page-index {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature i {
+    width: 22px;
+    margin: 0 2px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature strong,
+  body:has(#writingScreen.is-active) .writing-page-index strong,
+  body:has(#mailboxScreen.is-active) .contact-page-index strong {
+    font-size: 1.25rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature span:last-child,
+  body:has(#writingScreen.is-active) .writing-page-index span:last-child,
+  body:has(#mailboxScreen.is-active) .contact-page-index span:last-child {
+    display: none;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 282px;
+    margin-top: 12px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 112px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    padding: 13px 15px 10px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    max-width: 18ch;
+    font-size: 1.55rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    font-size: 0.64rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    min-height: 0;
+    height: 112px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header h3 {
+    font-size: 1.3rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-list::before {
+    left: 58px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    gap: 13px;
+    height: 54px;
+    padding: 6px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date {
+    min-height: 38px;
+    padding-right: 9px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date strong {
+    font-size: 1.15rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    font-size: 0.86rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    display: none;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-actions {
+    min-width: 45px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-detail-link {
+    font-size: 0.56rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-intro-rule {
+    display: none;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-columns: minmax(0, 1fr);
+    flex-basis: 290px;
+    margin-top: 12px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding: 13px 15px 10px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    font-size: 1.55rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 7px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-media,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    min-height: 0;
+    height: 112px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    margin-top: 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    height: 48px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-open {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    gap: 8px;
+    padding: 5px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-excerpt,
+  body:has(#writingScreen.is-active) .writing-work-meta {
+    display: none;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.82rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small {
+    font-size: 0.56rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    min-height: 76px;
+    margin-top: 9px;
+    padding: 10px 13px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band h3 {
+    font-size: 0.92rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-details summary {
+    min-height: 27px;
+    padding: 5px 0;
+    font-size: 0.65rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-intro-rule {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    margin-top: 12px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-information {
+    padding: 12px 14px 8px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3,
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    font-size: 1.35rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading p,
+  body:has(#mailboxScreen.is-active) .contact-form-heading p {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 12px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    min-height: 0;
+    padding: 6px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dd {
+    font-size: 0.7rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger small {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    margin: -1px 0;
+    padding: 12px 13px 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form {
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    min-height: 42px;
+    max-height: 56px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+    max-width: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-submit-button {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    width: 58%;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-aside {
+    right: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 274px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-rows: minmax(0, 1fr) 104px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    height: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(#homeView.is-active) #top > .view.is-active,
+  body:has(#forumScreen.is-active) #top > .view.is-active,
+  body:has(#activitiesScreen.is-active) #top > .view.is-active,
+  body:has(#writingScreen.is-active) #top > .view.is-active,
+  body:has(#mailboxScreen.is-active) #top > .view.is-active {
+    animation: none !important;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card,
+  body:has(#activitiesScreen.is-active) .events-featured-image img,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    transition: none !important;
+  }
+}
+
+/* Final fit pass ------------------------------------------------------
+   These rules resolve content's intrinsic minimum sizes. A preview is only
+   useful when its action and index remain inside the stage that contains it. */
+
+body:has(#activitiesScreen.is-active) .events-programme-header,
+body:has(#writingScreen.is-active) .writing-gallery-header,
+body:has(#mailboxScreen.is-active) .contact-header {
+  padding-bottom: 8px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-copy,
+body:has(#writingScreen.is-active) .writing-featured-copy,
+body:has(#mailboxScreen.is-active) .contact-letter-paper {
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-event {
+  height: clamp(258px, 35vh, 270px);
+  margin-top: 14px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+  max-width: none;
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem);
+  line-height: 1.08;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-type {
+  margin-top: 5px;
+  font-size: 0.7rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-date {
+  margin: 3px 0 4px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-date strong {
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-description {
+  margin-top: 5px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  -webkit-line-clamp: 1;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-details {
+  padding-top: 6px;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-actions {
+  margin-top: 7px;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header {
+  height: 42px;
+  min-height: 0 !important;
+  padding-bottom: 6px;
+  overflow: hidden;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header > div:first-child > p:last-child {
+  display: none;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-item {
+  height: 43px;
+  padding: 5px 0;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+  font-size: 0.92rem;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+  font-size: 0.62rem;
+}
+
+body:has(#forumScreen.is-active) .forum-section-heading {
+  height: 48px;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+body:has(#forumScreen.is-active) .forum-section-heading p {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-work {
+  flex-basis: 240px;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+  max-width: none;
+  font-size: clamp(1.7rem, 2.45vw, 2.25rem);
+  line-height: 1.08;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-description {
+  -webkit-line-clamp: 1;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-date {
+  display: none;
+}
+
+body:has(#writingScreen.is-active) .writing-recent-section {
+  flex: 0 0 145px;
+  margin-top: 10px;
+}
+
+body:has(#writingScreen.is-active) .writing-section-header {
+  display: flex;
+  height: 42px;
+  min-height: 0 !important;
+  align-items: end;
+  overflow: hidden;
+}
+
+body:has(#writingScreen.is-active) .writing-shelf {
+  height: 103px;
+}
+
+body:has(#writingScreen.is-active) .writing-work-row,
+body:has(#writingScreen.is-active) .writing-work-open {
+  height: 34px;
+}
+
+body:has(#writingScreen.is-active) .writing-submit-band {
+  min-height: 78px;
+  margin-top: 9px;
+}
+
+body:has(#mailboxScreen.is-active) .contact-heading h2 {
+  max-width: none !important;
+  white-space: nowrap;
+}
+
+body:has(#mailboxScreen.is-active) .contact-layout {
+  flex: 1 1 auto;
+}
+
+body:has(#mailboxScreen.is-active) .contact-form textarea {
+  min-height: 50px;
+  max-height: 66px;
+}
+
+@media (max-width: 680px) {
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 330px;
+    margin-top: 12px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-rows: minmax(0, 226px) 104px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    max-width: 100%;
+    font-size: 1.3rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    height: 40px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    height: 48px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-rows: 190px 90px;
+    flex-basis: 280px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    font-size: 1.35rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    display: none;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    margin-top: 6px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex-basis: 125px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-section-header {
+    height: 40px;
+    align-items: end;
+    flex-direction: row;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 85px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    height: 42px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-information {
+    padding: 11px 0 7px;
+    border-bottom: var(--viewport-hairline) solid var(--editorial-line);
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3,
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    font-size: 1.35rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 9px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    grid-template-columns: minmax(88px, 0.42fr) minmax(0, 1fr);
+    gap: 8px;
+    min-height: 0;
+    padding: 5px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger small {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    margin: 0;
+    padding: 11px 13px 7px;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    box-shadow: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form {
+    gap: 7px;
+    margin-top: 9px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    min-height: 48px;
+    max-height: 62px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer {
+    align-items: center;
+    flex-direction: row;
+    gap: 9px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+    max-width: 21ch;
+  }
+}
+
+/* Content completeness + proportional fill pass ---------------------
+   The first viewport pass protected the stage height, but a few intrinsic
+   children were still being clipped by their preview heights. These rules
+   keep the composition one-screen while letting important copy wrap and
+   allowing spare height to become useful rows instead of dead space. */
+
+@media (max-width: 900px) {
+  :root {
+    /* The shared header wraps once it no longer has room for all five links.
+       Keep every primary view below that real header box. */
+    --viewport-header-space: 126px;
+  }
+}
+
+/* Forum: the content shell must fill the grid track. Its mobile category
+   index has two actual rows, so the track height must account for both. */
+
+body:has(#forumScreen.is-active) .forum-content-shell {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+}
+
+body:has(#forumScreen.is-active) .forum-category-grid {
+  flex: 0 0 auto;
+  height: 104px;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card {
+  height: 104px;
+  box-sizing: border-box;
+}
+
+body:has(#forumScreen.is-active) .forum-category-card p {
+  display: -webkit-box;
+  max-height: 2.8em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#forumScreen.is-active) .forum-lower-grid {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+body:has(#forumScreen.is-active) .forum-discussion-column,
+body:has(#forumScreen.is-active) .forum-public-drawer {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+body:has(#forumScreen.is-active) .forum-public-drawer {
+  height: calc(100% - 48px);
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list .thread-card {
+  height: auto;
+}
+
+/* Do not force important programme and work names into a single clipped
+   line. Their size is reduced slightly so the common desktop composition
+   still keeps the title on one calm line at 1366px. */
+
+body:has(#activitiesScreen.is-active) .events-featured-copy h3,
+body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+  max-width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+  font-size: clamp(1.55rem, 2.3vw, 2.1rem);
+  line-height: 1.16;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-description {
+  flex: 0 0 auto;
+  height: 2.8em;
+  max-height: 2.8em;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-section {
+  display: flex;
+  flex-direction: column;
+}
+
+body:has(#activitiesScreen.is-active) .events-section-header {
+  flex: 0 0 42px;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-list {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+body:has(#activitiesScreen.is-active) .events-timeline-item {
+  height: auto;
+  min-height: 43px;
+  flex: 1 1 0;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-work {
+  flex-basis: 260px;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+  max-width: 20ch;
+  font-size: clamp(1.45rem, 2.15vw, 2rem);
+  line-height: 1.15;
+}
+
+body:has(#writingScreen.is-active) .writing-featured-description {
+  display: -webkit-box;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 2.7em;
+  max-height: 2.7em;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+body:has(#writingScreen.is-active) .writing-recent-section {
+  flex: 1 1 auto;
+  min-height: 125px;
+}
+
+body:has(#writingScreen.is-active) .writing-shelf {
+  display: grid !important;
+  height: calc(100% - 42px);
+  grid-auto-rows: minmax(34px, 1fr);
+}
+
+body:has(#writingScreen.is-active) .writing-work-row,
+body:has(#writingScreen.is-active) .writing-work-open {
+  height: auto;
+  min-height: 34px;
+}
+
+/* The contact paper is a grid child with long labels and form controls.
+   Explicit min/max widths prevent a child from creating an invisible
+   horizontal crop inside the paper. */
+
+body:has(#mailboxScreen.is-active) .contact-letter-paper,
+body:has(#mailboxScreen.is-active) .contact-letter-paper > *,
+body:has(#mailboxScreen.is-active) .contact-form,
+body:has(#mailboxScreen.is-active) .contact-form-grid,
+body:has(#mailboxScreen.is-active) .contact-form label,
+body:has(#mailboxScreen.is-active) .contact-form input,
+body:has(#mailboxScreen.is-active) .contact-form textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+body:has(#mailboxScreen.is-active) .contact-letter-topline,
+body:has(#mailboxScreen.is-active) .contact-form-footer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body:has(#mailboxScreen.is-active) .contact-letter-paper::before {
+  left: 0;
+}
+
+body:has(#mailboxScreen.is-active) .contact-letter-paper::after {
+  right: 0;
+}
+
+@media (min-height: 820px) and (min-width: 681px) {
+  /* Use the extra height present in 1440x900 for the focal work and the
+     recent-work shelf. The 1366x768 baseline remains compact. */
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    flex-basis: clamp(260px, calc(60dvh - 220px), 330px);
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    min-height: 125px;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 681px) {
+  /* Tablet/small-window forum: keep the two-column category index, but
+     calculate its two rows instead of allowing the second row to overlap
+     the feed. */
+  body:has(#forumScreen.is-active) .forum-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 82px));
+    height: 172px;
+    gap: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card {
+    height: 82px;
+    padding: 9px 10px 7px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    max-height: 1.4em;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    top: 126px;
+    width: min(48vw, 340px);
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-kicker {
+    margin-bottom: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-copy h2 {
+    gap: 0.24em;
+    font-size: clamp(3.1rem, 9vw, 4.6rem);
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-english {
+    margin: 7px 0 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-title-rule {
+    margin-bottom: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-description {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  body:has(#forumScreen.is-active) .forum-write-button {
+    min-height: 34px;
+    margin-top: 10px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    top: 126px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 94px);
+    height: 195px;
+    gap: 7px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card {
+    height: 94px;
+    min-height: 94px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    display: -webkit-box;
+    max-height: 1.3em;
+    margin-bottom: 2px;
+    font-size: 8px;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#forumScreen.is-active) .forum-lower-grid {
+    margin-top: 7px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-public-drawer {
+    height: calc(100% - 48px);
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list {
+    display: grid;
+    height: auto;
+    grid-auto-rows: 51px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-rows: 240px 90px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img,
+  body:has(#writingScreen.is-active) .writing-featured-media,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    height: 100%;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    max-height: 2.7em;
+    font-size: 0.66rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-list {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+    flex: 1 1 0;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    height: auto;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-actions {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    min-width: 63px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    display: -webkit-box;
+    max-height: 1.35em;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-rows: 205px 75px;
+    flex-basis: 280px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding: 10px 13px 8px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    max-width: 100%;
+    margin-top: 6px;
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-quote {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    display: -webkit-box;
+    max-height: 2.6em;
+    margin-top: 3px;
+    font-size: 0.62rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 2;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    gap: 5px 9px;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta dd {
+    font-size: 0.59rem;
+    line-height: 1.15;
+  }
+
+  body:has(#writingScreen.is-active) .writing-read-button {
+    min-height: 30px;
+    margin-top: 7px;
+    padding: 6px 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 145px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 105px;
+    grid-auto-rows: 35px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    height: 35px;
+    min-height: 35px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.76rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small {
+    font-size: 0.51rem;
+  }
+}
+
+/* Compact tablet / narrow desktop ------------------------------------
+   The in-app preview can expose a 680–900px content viewport even when the
+   surrounding device is a desktop. Treat that range as its own composition:
+   the shared header remains intact, while each primary view reduces its
+   vertical rhythm enough to keep its core action visible. */
+
+@media (max-width: 900px) and (min-width: 681px) {
+  body:has(#forumScreen.is-active) .forum-editorial-page {
+    grid-template-rows: clamp(320px, 44dvh, 400px) minmax(0, 1fr);
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-grid {
+    grid-template-rows: repeat(2, 65px);
+    height: 138px;
+    gap: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card {
+    height: 65px;
+    padding: 7px 9px 6px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card h3 {
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    max-height: 1.35em;
+    font-size: 8px;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card div > span {
+    font-size: 8px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-hero-copy {
+    top: 126px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-lower-grid {
+    margin-top: 8px;
+  }
+
+  /* Events programme */
+  body:has(#activitiesScreen.is-active) .events-programme {
+    padding-top: 126px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature {
+    display: none;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-heading h2 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-wordmark {
+    margin-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-lede {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-intro {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 220px;
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    padding: 12px 18px 10px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    height: 1.35em;
+    max-height: 1.35em;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    padding-top: 3px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-actions {
+    margin-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    height: 100%;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-actions {
+    min-width: 58px;
+  }
+
+  /* Writing gallery */
+  body:has(#writingScreen.is-active) .writing-gallery {
+    padding-top: 126px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-gallery-header {
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-gallery-heading h2 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-wordmark {
+    margin-top: 4px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-lede {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  body:has(#writingScreen.is-active) .writing-page-index strong {
+    font-size: 1.5rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    flex-basis: 220px;
+    margin-top: 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding: 12px 18px 10px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    margin-top: 6px;
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-quote {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    height: 1.35em;
+    min-height: 1.35em;
+    max-height: 1.35em;
+    margin-top: 3px;
+    font-size: 0.62rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    gap: 6px 10px;
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta dd {
+    font-size: 0.6rem;
+    line-height: 1.2;
+  }
+
+  body:has(#writingScreen.is-active) .writing-read-button {
+    min-height: 30px;
+    margin-top: 7px;
+    padding: 6px 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-media,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 105px;
+    margin-top: 8px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-section-header {
+    height: 32px;
+    padding-bottom: 5px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 73px;
+    grid-auto-rows: minmax(24px, 1fr);
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    min-height: 24px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.78rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small,
+  body:has(#writingScreen.is-active) .writing-work-excerpt {
+    font-size: 0.55rem;
+    line-height: 1.25;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band {
+    min-height: 68px;
+    margin-top: 8px;
+    padding: 10px 14px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band h3 {
+    margin-top: 4px;
+    font-size: 0.95rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-details summary {
+    min-height: 30px;
+    padding: 6px 0;
+    font-size: 0.65rem;
+  }
+
+  /* Contact letter */
+  body:has(#mailboxScreen.is-active) .contact-page {
+    padding-top: 126px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-header {
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-heading h2 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-wordmark {
+    margin-top: 4px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-lede {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-page-index strong {
+    font-size: 1.5rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-intro-rule {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    margin-top: 10px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-information {
+    padding: 10px 16px 8px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3,
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    font-size: 1.35rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading p,
+  body:has(#mailboxScreen.is-active) .contact-form-heading p {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 9px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    min-height: 0;
+    padding: 5px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dd {
+    font-size: 0.7rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger small {
+    display: none;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    padding: 12px 18px 9px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    margin-top: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form label {
+    gap: 3px;
+    font-size: 0.54rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form input,
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    padding: 4px 0;
+    font-size: 0.7rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    min-height: 44px;
+    max-height: 50px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer {
+    gap: 8px;
+    padding-top: 3px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+    font-size: 0.5rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-submit-button {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 0.62rem;
+  }
+}
+
+/* One-screen final cascade -------------------------------------------
+   This block is intentionally last: it resolves the final intrinsic-size
+   conflicts after the desktop, tablet, and mobile editorial rules above. */
+
+body:has(#forumScreen.is-active) .forum-public-drawer {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+body:has(#forumScreen.is-active) .forum-thread-list {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+body:has(#forumScreen.is-active) .thread-card.is-placeholder,
+body:has(#activitiesScreen.is-active) .events-timeline-item.is-placeholder,
+body:has(#writingScreen.is-active) .writing-work-row.is-placeholder {
+  color: var(--editorial-muted);
+}
+
+body:has(#activitiesScreen.is-active) .events-placeholder-link {
+  color: var(--events-muted);
+  cursor: default;
+}
+
+@media (max-width: 680px) {
+  body:has(#forumScreen.is-active) .forum-category-card p {
+    display: -webkit-box;
+    max-height: 1.35em;
+    margin: 0 0 2px;
+    overflow: hidden;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card {
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    height: auto;
+    min-height: 0;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-card::after {
+    grid-row: 1 / span 3;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list .thread-preview {
+    display: -webkit-box;
+    grid-column: 2;
+    grid-row: 3;
+    max-height: 1.25em;
+    margin-top: 3px;
+    overflow: hidden;
+    font-size: 0.56rem;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-header {
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-signature {
+    min-height: 0;
+    font-size: 0.46rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 258px;
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-columns: minmax(0, 1.12fr) minmax(116px, 0.88fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    padding: 10px 10px 8px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-meta {
+    gap: 6px;
+    padding-bottom: 4px;
+    font-size: 0.47rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-type {
+    margin-top: 3px;
+    font-size: 0.57rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date {
+    gap: 5px;
+    margin: 3px 0 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date span {
+    font-size: 0.49rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-date strong {
+    font-size: 1.1rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3 {
+    max-width: none;
+    font-size: 1.22rem;
+    line-height: 1.1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description {
+    height: 2.5em;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    margin-top: 3px;
+    font-size: 0.57rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details dt {
+    font-size: 0.44rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details dd {
+    margin-top: 2px;
+    font-size: 0.53rem;
+    line-height: 1.15;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-actions {
+    margin-top: 4px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-primary-button {
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 0.55rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image,
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    height: 38px;
+    flex: 0 0 38px;
+    padding-bottom: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 0;
+    padding: 4px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date {
+    min-height: 0;
+    padding-right: 7px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date strong {
+    font-size: 0.95rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    font-size: 0.72rem;
+    line-height: 1.15;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    display: -webkit-box;
+    max-height: 1.2em;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.5rem;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-actions {
+    min-width: 40px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-detail-link {
+    font-size: 0.49rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-open {
+    grid-template-columns: minmax(0, 1fr) 18px;
+    grid-template-rows: auto auto;
+    gap: 0 6px;
+    height: auto;
+    min-height: 0;
+    padding: 3px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    gap: 1px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.72rem;
+    line-height: 1.05;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small {
+    font-size: 0.49rem;
+    line-height: 1.05;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-excerpt {
+    display: -webkit-box;
+    grid-column: 1;
+    grid-row: 2;
+    max-height: 1.1em;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 0.48rem;
+    line-height: 1.1;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-meta {
+    display: none;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    font-size: 0.75rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    flex: 0 0 auto;
+    height: auto;
+    margin-top: 10px;
+    overflow: visible;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-information {
+    padding: 10px 0 8px;
+    border-bottom: var(--viewport-hairline) solid var(--editorial-line);
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3,
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger {
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger > div {
+    grid-template-columns: minmax(100px, 0.42fr) minmax(0, 1fr);
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-ledger dd {
+    font-size: 0.64rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder {
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-box {
+    width: 50px;
+    height: 50px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder > div:last-child {
+    gap: 2px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder > div:last-child > span,
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder strong {
+    font-size: 0.58rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-placeholder p {
+    font-size: 0.48rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 10px 13px 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-heading h3 {
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form {
+    gap: 6px;
+    margin-top: 7px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form textarea {
+    min-height: 44px;
+    max-height: 50px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-form-footer > small {
+    max-width: 17ch;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 9px;
+    padding: 9px 12px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.42rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 0.55rem;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    padding: 10px 14px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 4px;
+    font-size: 0.9rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.46rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 0.6rem;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+  :root {
+    --viewport-header-space: 96px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme,
+  body:has(#writingScreen.is-active) .writing-gallery,
+  body:has(#mailboxScreen.is-active) .contact-page {
+    padding-top: 96px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-header,
+  body:has(#writingScreen.is-active) .writing-gallery-header,
+  body:has(#mailboxScreen.is-active) .contact-header {
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-heading h2,
+  body:has(#writingScreen.is-active) .writing-gallery-heading h2,
+  body:has(#mailboxScreen.is-active) .contact-heading h2 {
+    font-size: 3.8rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-lede,
+  body:has(#writingScreen.is-active) .writing-lede,
+  body:has(#mailboxScreen.is-active) .contact-lede {
+    margin-top: 5px;
+    font-size: 0.95rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-programme-intro {
+    margin-top: 3px;
+    font-size: 0.7rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: 238px;
+    margin-top: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy,
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding-top: 12px;
+    padding-bottom: 10px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy h3,
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    font-size: 1.7rem;
+    line-height: 1.1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-description,
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    height: 1.35em;
+    min-height: 1.35em;
+    max-height: 1.35em;
+    margin-top: 4px;
+    font-size: 0.64rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    padding-top: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-actions {
+    margin-top: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header,
+  body:has(#writingScreen.is-active) .writing-section-header {
+    height: 36px;
+    flex-basis: 36px;
+    padding-bottom: 5px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+    padding: 4px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    font-size: 0.86rem;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    max-height: 1.25em;
+    font-size: 0.56rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 1;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    flex-basis: 230px;
+    margin-top: 10px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 110px;
+    margin-top: 8px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 74px;
+    grid-auto-rows: minmax(24px, 1fr);
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-row,
+  body:has(#writingScreen.is-active) .writing-work-open {
+    min-height: 24px;
+    height: auto;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-open {
+    padding: 3px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title strong {
+    font-size: 0.76rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-work-title small,
+  body:has(#writingScreen.is-active) .writing-work-excerpt,
+  body:has(#writingScreen.is-active) .writing-work-meta {
+    font-size: 0.52rem;
+    line-height: 1.15;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band {
+    min-height: 66px;
+    margin-top: 8px;
+    padding: 9px 14px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-submit-band h3 {
+    margin-top: 4px;
+    font-size: 0.98rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) and (min-height: 761px) {
+  body:has(#mailboxScreen.is-active) .contact-layout {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-paper {
+    height: auto;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 14px;
+    padding: 14px 20px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing h3 {
+    margin-top: 5px;
+    font-size: 1.25rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing > div > span {
+    font-size: 0.5rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing-button {
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 0.68rem;
+  }
+}
+
+/* Last-mile viewport fixes: keep every main view complete without page scroll. */
+/* EventsView reference lock: wide theatre programme with the supplied art. */
+body:has(#activitiesScreen.is-active) .events-programme {
+  width: min(1560px, calc(100% - clamp(36px, 8vw, 256px)));
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-image {
+  background: #e8ddc9;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-image img {
+  object-fit: cover;
+  object-position: 62% 58%;
+}
+
+body:has(#activitiesScreen.is-active) .events-featured-image figcaption {
+  display: none;
+}
+
+@media (min-width: 681px) {
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: clamp(270px, 36.5dvh, 438px);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    object-position: 72% 54%;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: clamp(246px, calc(100dvh - 508px), 270px);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    height: 46px;
+    flex: 0 0 46px;
+    padding-bottom: 6px;
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header h3 {
+    line-height: 1.12;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-wordmark {
+    margin-top: 3px;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#writingScreen.is-active) .writing-shelf {
+    gap: 0;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: end;
+    gap: 8px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-page-index {
+    width: auto;
+    min-width: 64px;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
+@media (min-width: 901px) and (min-height: 761px) and (max-height: 819px) {
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    min-height: 0;
+    padding: 2px 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-date {
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy h4 {
+    margin-top: 2px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-copy p {
+    margin-top: 1px;
+  }
+}
+
+/* Keep the calendar heading in its own vertical band at compact desktop heights. */
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    height: clamp(238px, calc(100dvh - 516px), 262px);
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    height: 54px;
+    flex-basis: 54px;
+    align-items: flex-start;
+    padding-bottom: 6px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header h3 {
+    line-height: 1.12;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-wordmark {
+    margin-top: 3px;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 680px) {
+  body:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-columns: minmax(0, 1.12fr) minmax(116px, 0.88fr);
+    grid-template-rows: minmax(0, 1fr);
+    flex-basis: 240px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy {
+    padding: 10px 10px 8px 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    margin-top: 5px;
+    font-size: 1.2rem;
+    line-height: 1.12;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-quote,
+  body:has(#writingScreen.is-active) .writing-featured-description {
+    margin-top: 5px;
+    font-size: 0.58rem;
+    line-height: 1.35;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-meta {
+    margin-top: 6px;
+    gap: 3px 8px;
+    font-size: 0.52rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-button {
+    min-height: 28px;
+    margin-top: 7px;
+    padding: 5px 10px;
+    font-size: 0.58rem;
+  }
+
+  body:has(#writingScreen.is-active) .writing-featured-media,
+  body:has(#writingScreen.is-active) .writing-featured-media img {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#writingScreen.is-active) .writing-recent-section {
+    flex: 0 0 185px;
+  }
+
+  body:has(#writingScreen.is-active) .writing-shelf {
+    height: 145px;
+    grid-auto-rows: minmax(47px, 1fr);
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-section-heading h3 {
+    margin-top: 4px;
+    font-size: 1.08rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-info-ledger {
+    margin-top: 4px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-info-row {
+    padding: 2px 0;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-info-row dt {
+    font-size: 0.48rem;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-info-row dd {
+    font-size: 0.6rem;
+    line-height: 1.25;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-area {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 6px;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-qr-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-form input {
+    height: 32px !important;
+    min-height: 32px !important;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-letter-form textarea {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body:has(#mailboxScreen.is-active) .contact-closing {
+    flex-direction: row;
+  }
+}
+
+/* Forum layout correction: the category index owns its full two-row track
+   before the public discussion begins. Keep the hero art untouched. */
+@media (min-width: 901px) {
+  body:has(#forumScreen.is-active) .forum-editorial-page {
+    grid-template-rows: minmax(0, 43%) minmax(0, 57%);
+    overflow: visible;
+  }
+
+  body:has(#forumScreen.is-active) .forum-content-shell {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 104px);
+    height: 218px;
+    min-height: 218px;
+    gap: 10px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-category-card {
+    height: 104px;
+    min-height: 104px;
+  }
+
+  body:has(#forumScreen.is-active) .forum-lower-grid {
+    height: auto;
+    min-height: 0;
+    margin-top: 28px;
+    overflow: visible;
+  }
+
+  body:has(#forumScreen.is-active) .forum-discussion-column,
+  body:has(#forumScreen.is-active) .forum-public-drawer {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  body:has(#forumScreen.is-active) .forum-thread-list {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+/* Activity timeline flow correction: the featured card must finish before the calendar starts. */
+@media (min-width: 901px) {
+  body:has(#activitiesScreen.is-active) #activitiesScreen,
+  body:has(#activitiesScreen.is-active) .events-programme {
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .scene-progress {
+    display: none !important;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event,
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    height: auto;
+    min-height: 260px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image {
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    margin-top: 24px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-section {
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    align-items: flex-start;
+    padding-top: 16px;
+    padding-bottom: 6px;
+    overflow: visible;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-list {
+    overflow-x: visible;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  body:has(#activitiesScreen.is-active) .events-featured-event,
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    min-height: 260px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    flex-basis: auto;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-list {
+    min-height: 45px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-timeline-item {
+    flex: 0 0 45px;
+    min-height: 45px;
+    height: auto;
+  }
+}
+
+/* Keep all three calendar rows visible in the shortest supported desktop viewport. */
+@media (min-width: 901px) and (max-height: 740px) {
+  body:has(#activitiesScreen.is-active) .events-featured-copy {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-details {
+    margin-top: 8px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-event {
+    min-height: 238px;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-featured-layout,
+  body:has(#activitiesScreen.is-active) .events-featured-empty {
+    min-height: 0;
+  }
+
+  body:has(#activitiesScreen.is-active) .events-section-header {
+    padding-bottom: 3px;
+  }
+}
+
+/* Keep the portrait replacement inside a bounded portrait frame. */
+body:has(#forumScreen.is-active) .forum-hero-art {
+  overflow: hidden;
+}
+
+@media (min-width: 901px) {
+  body:has(#forumScreen.is-active) .forum-hero-art {
+    top: 22px;
+    right: clamp(210px, 17vw, 250px) !important;
+    bottom: -12px;
+    width: min(38vw, 450px);
+    aspect-ratio: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  body:has(#forumScreen.is-active) .forum-hero-art {
+    top: 88px;
+    right: 0 !important;
+    bottom: -13px;
+    left: 48%;
+    width: auto !important;
+  }
+}
+
+body:has(#forumScreen.is-active) .forum-hero-art img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Forum shell safe area: the shared header is fixed, so the complete forum
+   composition starts below its measured height instead of hiding its back
+   action and hero copy under the header. This selector targets the actual
+   active child because the generic one-screen lock also targets #top > .view. */
+body[data-view="forum"] {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body[data-view="forum"] #top {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow: visible !important;
+}
+
+body[data-view="forum"] #top > .view#forumScreen.is-active {
+  height: auto !important;
+  min-height: 100dvh !important;
+  padding-top: calc(var(--header-height) + 28px) !important;
+  padding-right: 0 !important;
+  padding-bottom: 32px !important;
+  padding-left: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-view="forum"] .forum-editorial-page {
+  height: auto !important;
+  min-height: calc(100dvh - var(--header-height) - 28px) !important;
+  grid-template-rows: auto auto !important;
+  overflow: visible !important;
+}
+
+body[data-view="forum"]:has(#forumScreen.is-active) .forum-editorial-hero {
+  overflow: visible !important;
+}
+
+@media (min-width: 901px) {
+  body[data-view="forum"]:has(#forumScreen.is-active) .forum-editorial-hero {
+    /* The copy is internally positioned, so the hero must be tall enough to
+       contain its button before the normal-flow category block begins. */
+    height: clamp(430px, 42vh, 460px) !important;
+    min-height: clamp(430px, 42vh, 460px) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-view="forum"]:has(#forumScreen.is-active) .forum-editorial-hero {
+    height: clamp(520px, 78svh, 670px) !important;
+    min-height: clamp(520px, 78svh, 670px) !important;
+  }
+
+  body[data-view="forum"]:has(#forumScreen.is-active) .forum-category-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  body[data-view="forum"]:has(#forumScreen.is-active) .forum-category-card {
+    height: auto !important;
+    min-height: 112px !important;
+  }
+
+  body[data-view="forum"]:has(#forumScreen.is-active) .forum-lower-grid {
+    margin-top: 28px !important;
+  }
+}
+
+body[data-view="forum"] .forum-content-shell {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding-top: 40px !important;
+  overflow: visible !important;
+}
+
+body[data-view="forum"] .forum-lower-grid,
+body[data-view="forum"] .forum-discussion-column,
+body[data-view="forum"] .forum-thread-list {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-view="forum"] .forum-discussion-column {
+  display: block !important;
+}
+
+body[data-view="forum"] .forum-thread-list {
+  grid-auto-rows: 57px;
+}
+
+/* Writing gallery: archive-room redesign ---------------------------------
+   The writing view is a normal-flow editorial page.  The rules below are
+   intentionally scoped to the active view so the shared header and the
+   already-correct forum/activity layouts are left untouched. */
+body[data-view="writing"] {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body[data-view="writing"] #top {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow: visible !important;
+}
+
+body[data-view="writing"] #top > .view#writingScreen.is-active {
+  height: auto !important;
+  min-height: 100dvh !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) #writingScreen::before {
+  background:
+    radial-gradient(circle at 78% 7%, rgba(141, 48, 46, 0.08), transparent 24rem),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(244, 240, 233, 0.98)) !important;
+  opacity: 1 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery {
+  display: block !important;
+  width: min(1260px, calc(100% - clamp(40px, 8vw, 128px))) !important;
+  margin: 0 auto !important;
+  padding: 114px 0 56px !important;
+  overflow: visible !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery-header {
+  min-height: 154px !important;
+  padding-bottom: 22px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 40px !important;
+  align-items: end !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery-heading h2 {
+  max-width: none !important;
+  font-size: clamp(3.2rem, 5.3vw, 5.2rem) !important;
+  line-height: 0.94 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-wordmark {
+  margin-top: 8px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-lede {
+  max-width: 30rem !important;
+  margin-top: 10px !important;
+  font-size: clamp(1rem, 1.25vw, 1.2rem) !important;
+  line-height: 1.5 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-header-actions {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 28px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-header-submit {
+  min-height: 44px !important;
+  padding: 11px 18px !important;
+  border: 0.5px solid var(--editorial-accent) !important;
+  border-radius: 0 !important;
+  background: var(--editorial-accent) !important;
+  color: #fff8ee !important;
+  cursor: pointer !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-page-index {
+  min-width: 150px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-intro-rule,
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-open-calls,
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-admin-panel,
+body[data-view="writing"]:has(#writingScreen.is-active) .scene-progress {
+  display: none !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-work {
+  grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  grid-template-rows: 330px !important;
+  margin: 24px 0 0 !important;
+  border-top: 0.5px solid var(--editorial-ink) !important;
+  border-bottom: 0.5px solid var(--editorial-line) !important;
+  overflow: visible !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-copy {
+  justify-content: flex-start !important;
+  overflow: visible !important;
+  padding: 28px 34px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-copy h3 {
+  max-width: 100% !important;
+  margin: 13px 0 0 !important;
+  font-size: clamp(1.75rem, 2.5vw, 2.35rem) !important;
+  line-height: 1.16 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-quote {
+  max-width: 30ch !important;
+  margin: 10px 0 0 !important;
+  font-size: 1rem !important;
+  line-height: 1.45 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-description {
+  margin: 8px 0 0 !important;
+  font-size: 0.84rem !important;
+  line-height: 1.55 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-meta {
+  gap: 12px 22px !important;
+  margin: 18px 0 0 !important;
+  padding-top: 12px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-meta dd {
+  margin-top: 4px !important;
+  font-size: 0.78rem !important;
+  line-height: 1.35 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-read-button {
+  min-height: 40px !important;
+  margin-top: 16px !important;
+  padding: 8px 13px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-date {
+  display: none !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media,
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media img {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media {
+  overflow: hidden !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media img {
+  display: block !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media-note,
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media-number {
+  display: none !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-recent-section {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: none !important;
+  overflow: visible !important;
+  margin-top: 16px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-section-header {
+  height: auto !important;
+  min-height: 0 !important;
+  flex: none !important;
+  overflow: visible !important;
+  padding-bottom: 14px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-section-header h3 {
+  margin-top: 7px !important;
+  font-size: clamp(1.8rem, 2.8vw, 2.6rem) !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-recent-meta strong {
+  font-size: 1.8rem !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-shelf {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  height: auto !important;
+  gap: 24px !important;
+  min-height: 0 !important;
+  border-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-row {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  min-width: 0 !important;
+  min-height: 170px !important;
+  height: 170px !important;
+  border: 0.5px solid var(--editorial-line) !important;
+  background: rgba(251, 248, 242, 0.82) !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-index {
+  align-self: start !important;
+  padding: 18px 0 0 17px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-open {
+  display: grid !important;
+  grid-column: 2 !important;
+  grid-template-columns: minmax(0, 1fr) 22px !important;
+  grid-template-rows: auto auto 1fr !important;
+  align-content: stretch !important;
+  gap: 8px 10px !important;
+  min-width: 0 !important;
+  min-height: 170px !important;
+  height: 100% !important;
+  padding: 18px 16px 16px 0 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-title {
+  grid-column: 1 / -1 !important;
+  gap: 5px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-title strong {
+  font-size: 1.05rem !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-title small,
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-meta {
+  font-size: 0.7rem !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-excerpt {
+  grid-column: 1 / -1 !important;
+  align-self: start !important;
+  font-size: 0.77rem !important;
+  line-height: 1.55 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-meta {
+  grid-column: 1 !important;
+  align-self: end !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-arrow {
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  align-self: end !important;
+  justify-self: end !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-delete {
+  grid-column: 3 !important;
+  align-self: end !important;
+  margin: 0 12px 16px 0 !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-row:hover {
+  border-color: var(--editorial-accent) !important;
+  background: rgba(255, 253, 248, 0.96) !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-open:hover {
+  background: transparent !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-band {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  min-height: 104px !important;
+  margin-top: 32px !important;
+  padding: 20px 28px !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-band h3 {
+  max-width: none !important;
+  margin: 8px 0 0 !important;
+  font-size: clamp(1.4rem, 2.1vw, 2.1rem) !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-band > div:first-child > p {
+  display: none !important;
+}
+
+body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-details summary {
+  min-width: 190px !important;
+  min-height: 44px !important;
+  padding: 10px 0 !important;
+}
+
+@media (max-width: 680px) {
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery {
+    width: calc(100% - 36px) !important;
+    padding: 126px 0 44px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery-header {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+    gap: 18px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-gallery-heading h2 {
+    font-size: clamp(3rem, 14vw, 4.3rem) !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-header-actions {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-page-index {
+    justify-items: start !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-work {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 220px auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-media {
+    grid-row: 1 !important;
+    min-height: 220px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-copy {
+    grid-row: 2 !important;
+    padding: 24px 20px 28px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-copy h3 {
+    font-size: 1.75rem !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-featured-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-shelf {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    grid-auto-rows: minmax(156px, auto) !important;
+    gap: 14px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-row,
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-open {
+    height: 156px !important;
+    min-height: 156px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-work-open {
+    padding: 16px 16px 14px 0 !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-band {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    min-height: 0 !important;
+    padding: 22px 20px 24px !important;
+  }
+
+  body[data-view="writing"]:has(#writingScreen.is-active) .writing-submit-details summary {
+    min-width: 0 !important;
+  }
+}

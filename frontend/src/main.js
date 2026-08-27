@@ -1,6 +1,13 @@
 import { createApp, nextTick } from "vue";
 import App from "./App.vue";
 import "./reference-theme.css";
+import "./home-editorial.css";
+import "./home-editorial-lock.css";
+import "./forum-editorial.css";
+import "./single-page-shell.css";
+import "./events-editorial.css";
+import "./writing-contact-editorial.css";
+import "./viewport-editorial.css";
 
 createApp(App).mount("#app");
 
@@ -10,6 +17,16 @@ nextTick(async () => {
   const sceneVideos = [...document.querySelectorAll(".scene-video[data-scene]")];
   const homeClockTime = document.querySelector("#homeClockTime");
   const homeClockDate = document.querySelector("#homeClockDate");
+  const homeIndexDate = document.querySelector("#homeIndexDate");
+  const homeIndexMonth = document.querySelector("#homeIndexMonth");
+  const homeIndexDay = document.querySelector("#homeIndexDay");
+  const homeIndexYear = document.querySelector("#homeIndexYear");
+  const shanghaiDateFormatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    timeZone: "Asia/Shanghai",
+  });
   const hdViewport = window.matchMedia("(min-width: 900px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -31,14 +48,26 @@ nextTick(async () => {
   let homeClockTimer;
 
   const updateHomeClock = () => {
-    if (!homeClockTime) return;
     const now = new Date();
-    homeClockTime.textContent = new Intl.DateTimeFormat("zh-CN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Shanghai",
-    }).format(now);
+    if (homeClockTime) {
+      homeClockTime.textContent = new Intl.DateTimeFormat("zh-CN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Shanghai",
+      }).format(now);
+    }
+    const dateParts = Object.fromEntries(
+      shanghaiDateFormatter.formatToParts(now).map(({ type, value }) => [type, value])
+    );
+    if (homeIndexMonth) homeIndexMonth.textContent = dateParts.month;
+    if (homeIndexDay) homeIndexDay.textContent = dateParts.day;
+    if (homeIndexYear) homeIndexYear.textContent = dateParts.year;
+    if (homeIndexDate && dateParts.year && dateParts.month && dateParts.day) {
+      const isoDate = `${dateParts.year}-${dateParts.month.padStart(2, "0")}-${dateParts.day.padStart(2, "0")}`;
+      homeIndexDate.dateTime = isoDate;
+      homeIndexDate.setAttribute("aria-label", `${dateParts.year}年${dateParts.month}月${dateParts.day}日`);
+    }
     if (homeClockDate) {
       homeClockDate.textContent = new Intl.DateTimeFormat("zh-CN", {
         month: "2-digit",
@@ -219,6 +248,34 @@ nextTick(async () => {
     syncSceneMedia();
   });
 
+  const closeForumComposer = () => {
+    const panel = document.querySelector("#forumComposeDrawer");
+    if (!panel) return;
+    panel.classList.remove("is-open");
+    panel.setAttribute("aria-hidden", "true");
+    panel.inert = true;
+  };
+
+  const toggleForumComposer = () => {
+    const panel = document.querySelector("#forumComposeDrawer");
+    if (!panel) return;
+    const shouldOpen = !panel.classList.contains("is-open");
+    panel.classList.toggle("is-open", shouldOpen);
+    panel.setAttribute("aria-hidden", String(!shouldOpen));
+    panel.inert = !shouldOpen;
+  };
+
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-forum-compose]");
+    if (!trigger) return;
+    event.preventDefault();
+    toggleForumComposer();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeForumComposer();
+  });
+
   const enterButton = document.querySelector("#cinemaEnterButton");
   const dismissIntro = () => {
     if (!intro || intro.classList.contains("is-leaving")) return;
@@ -243,7 +300,10 @@ nextTick(async () => {
   const { initLegacyApp } = await import("./legacy-app.js");
   initLegacyApp();
 
-  const viewObserver = new MutationObserver(syncSceneMedia);
+  const viewObserver = new MutationObserver(() => {
+    if (document.body.dataset.view !== "forum") closeForumComposer();
+    syncSceneMedia();
+  });
   viewObserver.observe(document.body, { attributes: true, attributeFilter: ["data-view"] });
   document.addEventListener("visibilitychange", syncSceneMedia);
   window.addEventListener("pagehide", () => {

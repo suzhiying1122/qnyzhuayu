@@ -30,27 +30,10 @@
       <div class="cinema-grain"></div>
     </div>
 
-    <header class="site-header" aria-label="站点导航">
-      <button class="brand" data-view-target="home" type="button" aria-label="返回华煜话剧社首页">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>HUAYU / STUDIO</span>
-      </button>
-      <nav class="top-nav" aria-label="主导航">
-        <button class="nav-link" data-view-target="forum" data-label="论坛" type="button" aria-label="论坛">论坛</button>
-        <button class="nav-link" data-view-target="activities" data-label="活动" type="button" aria-label="活动">活动</button>
-        <button class="nav-link" data-view-target="mailbox" data-label="信箱" type="button" aria-label="信箱">信箱</button>
-        <button class="nav-link" data-view-target="writing" data-label="征文" type="button" aria-label="征文">征文</button>
-        <button class="nav-link admin-nav hidden" id="adminNavButton" data-view-target="admin" data-label="管理" type="button" aria-label="管理">管理</button>
-      </nav>
-      <div class="account-area">
-        <button class="account-avatar-button" id="accountAvatarButton" type="button" aria-label="打开个人主页">华</button>
-        <button class="account-name" id="accountName" type="button">未登录</button>
-        <button class="outline-button" id="authOpenButton" type="button">登录 / 注册</button>
-        <button class="ghost-button hidden" id="logoutButton" type="button">退出</button>
-      </div>
-    </header>
+    <!-- One persistent shell header. Views below never render their own navigation. -->
+    <GlobalHeader />
 
-    <main id="top">
+    <main id="top" data-view-shell="single-page" aria-label="华煜话剧社内容区域">
       <section class="view home-view is-active" id="homeView" data-view="home" aria-labelledby="heroTitle">
         <img class="hero-image" src="/assets/bg-main-stage.png" alt="红色幕布与暖色追光下的华煜话剧社舞台" />
         <div class="hero-shade"></div>
@@ -66,17 +49,38 @@
         <div class="cinema-scanline" aria-hidden="true"></div>
         <div class="stage-ribbon ribbon-one"></div>
         <div class="stage-ribbon ribbon-two"></div>
+        <div class="home-editorial-art" aria-hidden="true">
+          <img class="home-art-figure" src="/assets/home-stage-portrait.png" alt="" />
+        </div>
+        <time class="home-index" id="homeIndexDate" aria-label="当前日期">
+          <span id="homeIndexMonth">--</span>
+          <i></i>
+          <span id="homeIndexDay">--</span>
+          <i></i>
+          <span id="homeIndexYear">----</span>
+        </time>
         <div class="hero-content">
           <div class="hero-logo-card" aria-label="华煜话剧社社团标志">
             <img src="/assets/huayu-logo.png" alt="华煜话剧社 logo" />
           </div>
-          <p class="eyebrow">SCENE 01 / HUAYU DRAMA CLUB</p>
-          <h1 id="heroTitle"><span>欢迎来到，</span><span>华煜话剧社</span></h1>
-          <p class="hero-copy">社员交流、活动记录、公开来信与征文投稿，在同一个线上空间里展开。</p>
+          <h1 id="heroTitle"><span>戏如人生</span><span>人生如戏</span></h1>
+          <p class="home-club-label">话剧社</p>
+          <p class="hero-copy">在舞台上，我们演出另一个人生。</p>
           <div class="hero-actions">
-            <button class="primary-button" data-view-target="forum" type="button">进入社团论坛</button>
-            <button class="secondary-button" data-view-target="activities" type="button">观看活动档案</button>
+            <button class="primary-button" data-view-target="activities" type="button">了解更多</button>
           </div>
+          <div class="home-ghost-word" aria-hidden="true">THEATRE</div>
+        </div>
+        <div class="home-socials" aria-label="社交入口">
+          <button class="home-social home-social-qq" type="button" aria-label="QQ" title="QQ">
+            <img src="/assets/social-qq.svg" alt="" aria-hidden="true" width="20" height="20" />
+          </button>
+          <button class="home-social home-social-wechat" type="button" aria-label="微信" title="微信">
+            <img src="/assets/social-wechat.svg" alt="" aria-hidden="true" width="20" height="20" />
+          </button>
+          <button class="home-social home-social-douyin" type="button" aria-label="抖音" title="抖音">
+            <img src="/assets/social-douyin.svg" alt="" aria-hidden="true" width="20" height="20" />
+          </button>
         </div>
         <aside class="scene-profile-card" aria-label="华煜话剧社简介">
           <span class="scene-card-kicker">PROFILE</span>
@@ -133,80 +137,145 @@
       </section>
 
       <section class="view module-screen forum-screen" id="forumScreen" data-view="forum" aria-labelledby="forumTitle">
-        <div class="module-hero">
-          <button class="back-button" data-view-target="home" type="button">返回首页</button>
-          <div>
-            <p class="section-kicker">Forum</p>
-            <h2 id="forumTitle">社团论坛</h2>
-            <p>这里是社员自由交流的平台，学习、生活、兴趣、社团日常都可以聊；公开前会先由管理员审核。</p>
-          </div>
-          <div class="module-stats">
-            <span><strong id="forumPostMetric">0</strong> 公开帖</span>
-            <span><strong id="forumCommentMetric">0</strong> 公开留言</span>
-          </div>
-        </div>
+        <div class="forum-editorial-page">
+          <section class="forum-editorial-hero" aria-label="论坛引导">
+            <div class="forum-hero-copy">
+              <button class="back-button forum-back" data-view-target="home" type="button">返回首页</button>
+              <span class="forum-hero-kicker">THEATRE CLUB / 02</span>
+              <h2 id="forumTitle"><span>幕</span><span>间</span></h2>
+              <p class="forum-hero-english">INTERMISSION</p>
+              <span class="forum-title-rule" aria-hidden="true"></span>
+              <p class="forum-hero-description">戏落幕了，故事还没有。<br />分享排练、讨论剧本、寻找搭档。</p>
+              <button class="primary-button forum-write-button" type="button" data-forum-compose>
+                写下场记 <span aria-hidden="true">↗</span>
+              </button>
+            </div>
 
-        <div class="forum-layout module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-two" aria-label="论坛功能">
-            <button class="module-drawer-trigger" data-drawer-target="forumPublicDrawer" aria-controls="forumPublicDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>PUBLIC FEED</small>
-                <strong>公开交流</strong>
-                <em>浏览已发布帖子与实时留言</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="forumComposeDrawer" aria-controls="forumComposeDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
-              <span class="module-drawer-copy">
-                <small>NEW TOPIC</small>
-                <strong>发起话题</strong>
-                <em>提交后进入管理员审核</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-          </div>
+            <div class="forum-hero-art" aria-hidden="true">
+              <img src="/assets/forum-hero-character.png" alt="" />
+            </div>
 
-          <div class="module-drawer-stack">
-            <section class="module-drawer-panel" id="forumPublicDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <div class="thread-list-wrap">
-                  <div class="list-title">
-                    <h3>公开交流</h3>
-                    <span id="currentUserHint">注册账号后可参与讨论</span>
-                  </div>
-                  <div class="thread-list masonry-list" id="threadList"></div>
+            <aside class="forum-hero-aside" aria-label="论坛提示">
+              <p>人生如戏，<br />我们都是故事里的<br />演员与观众。</p>
+              <span class="forum-aside-line" aria-hidden="true"></span>
+              <div class="forum-aside-index"><span>01</span><i></i><span>03</span></div>
+            </aside>
+          </section>
+
+          <div class="forum-content-shell">
+            <section class="forum-category-grid" aria-label="论坛分类">
+              <article class="forum-category-card forum-category-reading">
+                <span class="forum-category-icon" aria-hidden="true">✦</span>
+                <div>
+                  <h3>文艺圆谈</h3>
+                  <p>聚集观演心得，聊聊那些让你记住的舞台与故事。</p>
+                  <span>128 帖子</span>
                 </div>
-              </div>
+              </article>
+              <article class="forum-category-card forum-category-club">
+                <span class="forum-category-icon" aria-hidden="true">⌂</span>
+                <div>
+                  <h3>社团事务</h3>
+                  <p>回顾活动、发布通知，把社团里的重要时刻留档。</p>
+                  <span>72 帖子</span>
+                </div>
+              </article>
+              <article class="forum-category-card forum-category-cast">
+                <span class="forum-category-icon" aria-hidden="true">◌</span>
+                <div>
+                  <h3>寻找搭档</h3>
+                  <p>找演员、编剧、摄影与舞台伙伴，让灵感找到同路人。</p>
+                  <span>102 帖子</span>
+                </div>
+              </article>
+              <article class="forum-category-card forum-category-chat">
+                <span class="forum-category-icon" aria-hidden="true">•••</span>
+                <div>
+                  <h3>幕间闲聊</h3>
+                  <p>社员日常、排练碎片，以及每一次轻松的幕间碰面。</p>
+                  <span>189 帖子</span>
+                </div>
+              </article>
             </section>
 
-            <section class="module-drawer-panel" id="forumComposeDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="compose-panel forum-compose" id="postForm">
-                  <h3>提交论坛内容</h3>
-                  <label>
-                    标题
-                    <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
-                  </label>
-                  <label>
-                    内容
-                    <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
-                  </label>
-                  <label>
-                    标签
-                    <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
-                  </label>
-                  <label>
-                    附件
-                    <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-                    <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
-                  </label>
-                  <button class="primary-button" type="submit">提交审核</button>
-                </form>
-              </div>
-            </section>
+            <div class="forum-lower-grid">
+              <section class="forum-discussion-column" id="forumPosts">
+                <div class="forum-section-heading">
+                  <div>
+                    <span class="forum-section-kicker">PUBLIC FEED</span>
+                    <h3>大家都在聊</h3>
+                    <p>把排练场里的话题，留在幕间继续。</p>
+                  </div>
+                  <span class="forum-outline-action">全部公开内容 <span aria-hidden="true">→</span></span>
+                </div>
+
+                <section class="forum-public-drawer" id="forumPublicDrawer" aria-label="公开交流">
+                  <div class="forum-list-meta">
+                    <span id="currentUserHint">注册账号后可参与讨论</span>
+                    <div class="forum-list-counts" aria-label="论坛统计">
+                      <span><strong id="forumPostMetric">0</strong> 公开帖</span>
+                      <span><strong id="forumCommentMetric">0</strong> 条留言</span>
+                    </div>
+                  </div>
+                  <div class="thread-list forum-thread-list" id="threadList"></div>
+                </section>
+              </section>
+
+              <aside class="forum-side-column" aria-label="论坛侧栏">
+                <section class="forum-live-card">
+                  <span class="forum-side-kicker">NOW IN THE HOUSE</span>
+                  <h3>此刻，剧场里还有</h3>
+                  <div class="forum-live-number"><strong id="forumAudienceMetric">128</strong><span>人</span></div>
+                  <div class="forum-avatar-row" aria-hidden="true"><i>林</i><i>苏</i><i>阿</i><i>陈</i><i>+</i><span>他们正在幕间</span></div>
+                </section>
+
+                <section class="forum-side-card forum-notice-card">
+                  <div class="forum-side-heading"><h3>场务公告</h3><span>更多 →</span></div>
+                  <ul>
+                    <li><span>话剧社第十二届招新开始啦!</span><time>05-20</time></li>
+                    <li><span>原创话剧《浮生》公演通知</span><time>05-18</time></li>
+                    <li><span>本周排练时间调整通知</span><time>05-15</time></li>
+                  </ul>
+                </section>
+
+                <section class="forum-side-card forum-tags-card">
+                  <div class="forum-side-heading"><h3>热门标签</h3><span>更多 →</span></div>
+                  <div class="forum-tag-cloud">
+                    <span>#排练日常</span><span>#剧本分享</span><span>#演出资讯</span><span>#台词分享</span><span>#戏剧电影</span><span>#找搭档</span>
+                  </div>
+                </section>
+              </aside>
+            </div>
           </div>
+
+          <section class="forum-compose-drawer" id="forumComposeDrawer" aria-hidden="true" inert>
+            <div class="forum-compose-backdrop" data-forum-compose></div>
+            <form class="compose-panel forum-compose" id="postForm">
+              <div class="forum-compose-header">
+                <div><span>NEW TOPIC</span><h3>写下场记</h3></div>
+                <button type="button" class="forum-compose-close" data-forum-compose aria-label="关闭">×</button>
+              </div>
+              <p class="forum-compose-intro">把此刻想说的话留下来，提交后会先进入管理员审核。</p>
+              <label>
+                标题
+                <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
+              </label>
+              <label>
+                内容
+                <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
+              </label>
+              <label>
+                标签
+                <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
+              </label>
+              <label>
+                附件
+                <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
+              </label>
+              <button class="primary-button" type="submit">提交审核</button>
+            </form>
+          </section>
         </div>
       </section>
 
@@ -215,88 +284,104 @@
       </section>
 
       <section class="view module-screen activities-screen" id="activitiesScreen" data-view="activities" aria-labelledby="activitiesTitle">
-        <div class="module-hero">
-          <button class="back-button" data-view-target="home" type="button">返回首页</button>
-          <div>
-            <p class="section-kicker">Events</p>
-            <h2 id="activitiesTitle">活动档案馆</h2>
-            <p>把已经发生的演出留下，也把即将到来的现场点亮；新活动会先进入管理员审核。</p>
-          </div>
-          <div class="module-stats">
-            <span><strong id="briefingMetric">0</strong> 简报</span>
-            <span><strong id="previewMetric">0</strong> 预告</span>
-          </div>
-        </div>
+        <div class="events-programme">
+          <header class="events-programme-header">
+            <div class="events-programme-heading">
+              <h2 id="activitiesTitle">活动资讯</h2>
+              <p class="events-wordmark">WHAT’S ON</p>
+              <p class="events-programme-lede">灯光亮起之前，故事已经开始。</p>
+              <p class="events-programme-intro">演出、排练、分享与招募，这里记录话剧社正在发生的一切。</p>
+            </div>
+            <div class="events-programme-signature" aria-hidden="true">
+              <span>THEATRE</span>
+              <strong>PROGRAMME</strong>
+              <i></i>
+              <span>OPEN STAGE</span>
+            </div>
+            <div class="events-programme-data-hooks" aria-hidden="true">
+              <span id="briefingMetric">0</span>
+              <span id="previewMetric">0</span>
+            </div>
+          </header>
 
-        <div class="activity-grid module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-two" aria-label="活动功能">
-            <button class="module-drawer-trigger" data-drawer-target="activityArchiveDrawer" aria-controls="activityArchiveDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>EVENT ARCHIVE</small>
-                <strong>活动档案</strong>
-                <em>查看简报、预告与社团记录</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="activityComposeDrawer" aria-controls="activityComposeDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
-              <span class="module-drawer-copy">
-                <small>SUBMIT EVENT</small>
-                <strong>提交活动</strong>
-                <em>上传简报、预告与活动附件</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-          </div>
+          <article class="events-featured-event" id="activityFeatured" aria-live="polite">
+            <div class="events-loading-state">正在读取活动记录…</div>
+          </article>
 
-          <div class="module-drawer-stack">
-            <section class="module-drawer-panel" id="activityArchiveDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <div class="activity-board">
-                  <div class="filter-row" aria-label="活动筛选">
-                    <button class="filter-button is-active" data-activity-filter="all" type="button">全部</button>
-                    <button class="filter-button" data-activity-filter="briefing" type="button">简报</button>
-                    <button class="filter-button" data-activity-filter="preview" type="button">预告</button>
-                  </div>
-                  <div class="activity-list masonry-list" id="activityList"></div>
+          <section class="events-timeline-section" aria-labelledby="eventsTimelineTitle">
+            <header class="events-section-header">
+              <div>
+                <h3 id="eventsTimelineTitle">日历 / 旧线</h3>
+                <p class="events-section-wordmark">ON THE CALENDAR</p>
+                <p>沿着每一次排练、分享与相遇，读出剧场正在发生的事。</p>
+              </div>
+              <div class="events-filter-row" aria-label="活动筛选">
+                <span>筛选</span>
+                <button class="events-filter-button is-active" data-activity-filter="all" type="button">全部</button>
+                <button class="events-filter-button" data-activity-filter="briefing" type="button">简报</button>
+                <button class="events-filter-button" data-activity-filter="preview" type="button">预告</button>
+              </div>
+            </header>
+            <div class="events-timeline-list" id="activityList" aria-live="polite"></div>
+          </section>
+
+          <section class="events-archive-section" aria-labelledby="eventsArchiveTitle">
+            <header class="events-section-header events-archive-header">
+              <div>
+                <h3 id="eventsArchiveTitle">已经发生</h3>
+                <p class="events-section-wordmark">ARCHIVE</p>
+                <p>把舞台亮起过的片刻，留在下一次开场之前。</p>
+              </div>
+              <details class="events-submit-panel">
+                <summary>
+                  <span>提交活动审核</span>
+                  <span aria-hidden="true">SUBMIT EVENT&nbsp;＋</span>
+                </summary>
+                <div class="events-submit-body">
+                  <form class="compose-panel activity-compose" id="activityForm">
+                    <h4>把一场活动写进节目单</h4>
+                    <label>
+                      类型
+                      <select id="activityType" required>
+                        <option value="briefing">活动简报</option>
+                        <option value="preview">活动预告</option>
+                      </select>
+                    </label>
+                    <label>
+                      标题
+                      <input id="activityTitle" type="text" maxlength="52" placeholder="例如：《雷雨》片段展演复盘" required />
+                    </label>
+                    <label>
+                      日期
+                      <input id="activityDate" type="date" required />
+                    </label>
+                    <label>
+                      摘要
+                      <textarea id="activitySummary" rows="5" maxlength="520" placeholder="简要记录活动内容、亮点或报名信息" required></textarea>
+                    </label>
+                    <label>
+                      附件
+                      <input id="activityFile" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                      <small class="field-note">简报、预告海报、排练照片、视频和文档都可以一起提交。</small>
+                    </label>
+                    <button class="primary-button" type="submit">提交审核</button>
+                  </form>
                 </div>
-              </div>
-            </section>
+              </details>
+            </header>
+            <div class="events-archive-grid" id="activityArchiveList" aria-live="polite"></div>
+          </section>
 
-            <section class="module-drawer-panel" id="activityComposeDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="compose-panel activity-compose" id="activityForm">
-                  <h3>提交活动审核</h3>
-                  <label>
-                    类型
-                    <select id="activityType" required>
-                      <option value="briefing">活动简报</option>
-                      <option value="preview">活动预告</option>
-                    </select>
-                  </label>
-                  <label>
-                    标题
-                    <input id="activityTitle" type="text" maxlength="52" placeholder="例如：《雷雨》片段展演复盘" required />
-                  </label>
-                  <label>
-                    日期
-                    <input id="activityDate" type="date" required />
-                  </label>
-                  <label>
-                    摘要
-                    <textarea id="activitySummary" rows="5" maxlength="520" placeholder="简要记录活动内容、亮点或报名信息" required></textarea>
-                  </label>
-                  <label>
-                    附件
-                    <input id="activityFile" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-                    <small class="field-note">简报、预告海报、排练照片、视频和文档都可以一起提交。</small>
-                  </label>
-                  <button class="primary-button" type="submit">提交审核</button>
-                </form>
-              </div>
-            </section>
-          </div>
+          <section class="events-cta" aria-labelledby="eventsCtaTitle">
+            <div>
+              <h3 id="eventsCtaTitle">每一次活动，都是我们与观众相遇的方式。</h3>
+              <p>故事还在继续，下一次开场见。</p>
+            </div>
+            <div class="events-cta-actions">
+              <button class="events-cta-button events-cta-button-secondary" data-view-target="home" type="button">了解话剧社 <span aria-hidden="true">↗</span></button>
+              <button class="events-cta-button events-cta-button-primary" data-view-target="mailbox" type="button">加入我们 <span aria-hidden="true">↗</span></button>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -305,87 +390,145 @@
       </section>
 
       <section class="view module-screen mailbox-screen" id="mailboxScreen" data-view="mailbox" aria-labelledby="mailboxTitle">
-        <div class="module-hero">
-          <button class="back-button" data-view-target="home" type="button">返回首页</button>
-          <div>
-            <p class="section-kicker">Mailbox</p>
-            <h2 id="mailboxTitle">社团信箱</h2>
-            <p>公开来信会贴上回声墙，私密来信只交给社团内部阅读。</p>
-          </div>
-          <div class="module-stats">
-            <span><strong id="visibleLetterMetric">0</strong> 公开</span>
-            <span><strong id="privateLetterMetric">0</strong> 私密</span>
-          </div>
-        </div>
+        <div class="contact-page">
+          <header class="contact-header">
+            <div class="contact-heading">
+              <h2 id="mailboxTitle">联系我们</h2>
+              <p class="contact-wordmark">GET IN TOUCH</p>
+              <p class="contact-lede">故事不会只发生在舞台上。</p>
+            </div>
+            <div class="contact-page-index" aria-label="页面编号 05 / 05">
+              <span>THEATRE CLUB</span>
+              <strong>05 / 05</strong>
+              <span>OPEN CHANNEL</span>
+            </div>
+          </header>
 
-        <div class="mailbox-layout module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-two" aria-label="信箱功能">
-            <button class="module-drawer-trigger" data-drawer-target="mailboxPublicDrawer" aria-controls="mailboxPublicDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>OPEN LETTERS</small>
-                <strong>公开回信</strong>
-                <em>查看公开来信与社团回复</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="mailboxComposeDrawer" aria-controls="mailboxComposeDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
-              <span class="module-drawer-copy">
-                <small>WRITE A LETTER</small>
-                <strong>投递信件</strong>
-                <em>可选择公开或仅社团内部阅读</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
+          <div class="contact-intro-rule">
+            <p>如果你有故事、想上台，或者只是想和我们聊聊，欢迎留下你的声音。</p>
+            <span aria-hidden="true">A LETTER CAN BEGIN THE NEXT SCENE</span>
           </div>
 
-          <div class="module-drawer-stack">
-            <section class="module-drawer-panel" id="mailboxPublicDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <div class="letter-board">
-                  <div class="list-title">
-                    <h3>公开信件与回复</h3>
-                    <span id="mailboxAdminHint"></span>
-                  </div>
-                  <div class="letter-list masonry-list" id="letterList"></div>
+          <div class="contact-layout">
+            <section class="contact-information" aria-labelledby="contactInfoTitle">
+              <div class="contact-section-heading">
+                <span>THEATRE OFFICE</span>
+                <h3 id="contactInfoTitle">写给话剧社</h3>
+                <p>一封信可以从舞台之外抵达这里。公开来信会留下回声，私密来信只交给社团内部阅读。</p>
+              </div>
+
+              <dl class="contact-ledger">
+                <div>
+                  <dt>EMAIL</dt>
+                  <dd>邮箱待补充</dd>
+                  <small>资料占位</small>
+                </div>
+                <div>
+                  <dt>OFFICIAL ACCOUNT</dt>
+                  <dd>官方账号待补充</dd>
+                  <small>资料占位</small>
+                </div>
+                <div>
+                  <dt>VENUE</dt>
+                  <dd>活动地点待补充</dd>
+                  <small>资料占位</small>
+                </div>
+                <div>
+                  <dt>CONTACT</dt>
+                  <dd>负责人待补充</dd>
+                  <small>资料占位</small>
+                </div>
+              </dl>
+
+              <div class="contact-qr-placeholder">
+                <div class="contact-qr-box" aria-label="二维码占位">
+                  <span>QR</span>
+                  <small>待补充</small>
+                </div>
+                <div>
+                  <span>SCENE / 05</span>
+                  <strong>二维码</strong>
+                  <p>官方账号资料确认后，将在这里放置二维码。</p>
                 </div>
               </div>
-            </section>
 
-            <section class="module-drawer-panel" id="mailboxComposeDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="compose-panel letter-compose" id="letterForm">
-                  <h3>投递信件</h3>
-                  <label>
-                    主题
-                    <input id="letterSubject" type="text" maxlength="48" placeholder="例如：关于招新面试的小建议" required />
-                  </label>
-                  <label>
-                    内容
-                    <textarea id="letterBody" rows="7" maxlength="760" placeholder="写给华煜话剧社的话" required></textarea>
-                  </label>
-                  <fieldset class="choice-group">
-                    <legend>公开方式</legend>
-                    <label>
-                      <input type="radio" name="letterVisibility" value="public" checked />
-                      公开
-                    </label>
-                    <label>
-                      <input type="radio" name="letterVisibility" value="private" />
-                      不公开
-                    </label>
-                  </fieldset>
-                  <label>
-                    附件
-                    <input id="letterAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-                    <small class="field-note">可附上图片、视频、文档或日报材料。</small>
-                  </label>
-                  <button class="primary-button" type="submit">投递</button>
-                </form>
+              <div class="contact-counts" aria-label="信箱统计">
+                <span><strong id="visibleLetterMetric">0</strong><small>公开来信</small></span>
+                <span><strong id="privateLetterMetric">0</strong><small>私密来信</small></span>
               </div>
             </section>
+
+            <section class="contact-letter-paper" aria-labelledby="contactFormTitle">
+              <div class="contact-letter-topline">
+                <span>LETTER TO HUAYU</span>
+                <span>05—05</span>
+              </div>
+              <div class="contact-form-heading">
+                <h3 id="contactFormTitle">联系话剧社</h3>
+                <p>留下你愿意分享的内容，我们会在下一次排练或演出前读到它。</p>
+              </div>
+              <form class="contact-form" id="letterForm">
+                <div class="contact-form-grid">
+                  <label>
+                    你的名字
+                    <input id="letterContactName" type="text" maxlength="40" autocomplete="name" placeholder="登录后显示社员昵称" required />
+                  </label>
+                  <label>
+                    联系方式
+                    <input id="letterContact" type="text" maxlength="80" autocomplete="email" placeholder="可选，如邮箱或微信号" />
+                  </label>
+                </div>
+                <label>
+                  联系主题
+                  <input id="letterSubject" type="text" maxlength="48" placeholder="例如：想了解幕后岗位" required />
+                </label>
+                <label>
+                  想对我们说的话
+                  <textarea id="letterBody" rows="7" maxlength="760" placeholder="写给华煜话剧社的话" required></textarea>
+                </label>
+                <fieldset class="contact-choice-group">
+                  <legend>这封信希望如何被阅读？</legend>
+                  <label>
+                    <input type="radio" name="letterVisibility" value="public" checked />
+                    公开，贴在回声墙上
+                  </label>
+                  <label>
+                    <input type="radio" name="letterVisibility" value="private" />
+                    不公开，只交给社团
+                  </label>
+                </fieldset>
+                <label class="contact-attachment-field">
+                  附件（可选）
+                  <input id="letterAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
+                  <small class="field-note">可附上图片、视频、文档或排练材料；公开信请确认附件适合公开展示。</small>
+                </label>
+                <div class="contact-form-footer">
+                  <small>未登录时可以先浏览信箱；发送消息前请先登录或注册。</small>
+                  <button class="contact-submit-button" type="submit">发送消息 <span aria-hidden="true">↗</span></button>
+                </div>
+              </form>
+            </section>
           </div>
+
+          <section class="contact-voices" aria-labelledby="contactVoicesTitle">
+            <div class="contact-voices-heading">
+              <div>
+                <span>PUBLIC VOICES</span>
+                <h3 id="contactVoicesTitle">来自观众的声音</h3>
+                <p>一些已经抵达的来信，以及社团留给它们的回声。</p>
+              </div>
+              <span id="mailboxAdminHint"></span>
+            </div>
+            <div class="letter-list contact-letter-list" id="letterList"></div>
+          </section>
+
+          <section class="contact-closing" aria-label="加入话剧社">
+            <div>
+              <span>A NOTE FOR THE NEXT SCENE</span>
+              <h3>期待在下一次灯光亮起时，<br />与你在剧场相遇。</h3>
+            </div>
+            <button class="contact-closing-button" data-contact-focus="letterSubject" type="button">加入我们 <span aria-hidden="true">↗</span></button>
+          </section>
         </div>
       </section>
 
@@ -394,128 +537,108 @@
       </section>
 
       <section class="view module-screen writing-screen" id="writingScreen" data-view="writing" aria-labelledby="writingTitle">
-        <div class="module-hero writing-hero">
-          <button class="back-button" data-view-target="home" type="button">返回首页</button>
-          <div>
-            <p class="section-kicker">投稿中心</p>
-            <h2 id="writingTitle">征文投稿</h2>
-            <p>这里用于发布征文通知和收集文章。社员可按活动提交内容，管理员可查看、整理和删除不合适的文章。</p>
-          </div>
-          <div class="module-stats">
-            <span><strong id="writingEventMetric">0</strong> 征文活动</span>
-            <span><strong id="essayMetric">0</strong> 篇文章</span>
-          </div>
-        </div>
-
-        <div class="writing-layout module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-four" aria-label="征文功能">
-            <button class="module-drawer-trigger" data-drawer-target="writingEventsDrawer" aria-controls="writingEventsDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>OPEN CALLS</small>
-                <strong>征文活动</strong>
-                <em>长期征文与新增主题</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="writingShelfDrawer" aria-controls="writingShelfDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
-              <span class="module-drawer-copy">
-                <small>ESSAY SHELF</small>
-                <strong>文章书架</strong>
-                <em>按征文活动浏览文章</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="essayComposeDrawer" aria-controls="essayComposeDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">03</span>
-              <span class="module-drawer-copy">
-                <small>SUBMIT ESSAY</small>
-                <strong>提交文章</strong>
-                <em>选择活动并添加正文与附件</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="writingEventComposeDrawer" aria-controls="writingEventComposeDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">04</span>
-              <span class="module-drawer-copy">
-                <small>MANAGE CALLS</small>
-                <strong>活动管理</strong>
-                <em>添加新的征文活动</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-          </div>
-
-          <div class="module-drawer-stack">
-            <section class="module-drawer-panel" id="writingEventsDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <aside class="writing-taskbar">
-                  <div class="list-title">
-                    <h3>征文活动</h3>
-                    <span>固定活动与新增活动</span>
-                  </div>
-                  <div class="writing-event-list" id="writingEventList"></div>
-                </aside>
+        <div class="writing-gallery">
+          <header class="writing-gallery-header">
+            <div class="writing-gallery-heading">
+              <h2 id="writingTitle">投稿作品</h2>
+              <p class="writing-wordmark">SUBMIT YOUR STORY</p>
+              <p class="writing-lede">让一个故事，找到愿意听见它的人。</p>
+            </div>
+            <div class="writing-header-actions">
+              <button class="writing-header-submit" data-writing-open-submit type="button">
+                我要投稿 <span aria-hidden="true">↗</span>
+              </button>
+              <div class="writing-page-index" aria-label="页面编号 04 / 05">
+                <span>THEATRE CLUB / WORKS 04</span>
+                <strong>04 / 05</strong>
+                <span>WORKS GALLERY</span>
               </div>
-            </section>
+            </div>
+          </header>
 
-            <section class="module-drawer-panel" id="writingShelfDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <section class="writing-library" aria-label="征文书架">
-                  <div class="list-title">
-                    <h3 id="writingShelfTitle">文章列表</h3>
-                    <span id="writingShelfHint">点击条目查看文章</span>
-                  </div>
-                  <div class="writing-event-intro" id="writingEventIntro"></div>
-                  <div class="writing-shelf" id="writingShelf"></div>
-                </section>
+          <div class="writing-intro-rule">
+            <p>让还没有登上舞台的故事，先被看见。</p>
+            <span aria-hidden="true">A STORY BEFORE THE STAGE</span>
+          </div>
+
+          <article class="writing-featured-work" id="writingFeatured" aria-live="polite"></article>
+
+          <section class="writing-recent-section" aria-labelledby="writingRecentTitle">
+            <header class="writing-section-header">
+              <div>
+                <span>RECENT WORKS</span>
+                <h3 id="writingRecentTitle">最新投稿</h3>
+                <p id="writingShelfTitle">正在展开当前征文主题</p>
               </div>
-            </section>
+              <div class="writing-recent-meta">
+                <strong id="essayMetric">0</strong>
+                <span id="writingShelfHint">篇文章</span>
+              </div>
+            </header>
+            <div class="writing-shelf" id="writingShelf" aria-live="polite"></div>
+          </section>
 
-            <section class="module-drawer-panel" id="essayComposeDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="compose-panel essay-compose" id="essayForm">
-                  <h3>添加文章</h3>
+          <section class="writing-open-calls" aria-labelledby="writingCallsTitle">
+            <header class="writing-section-header writing-calls-header">
+              <div>
+                <span>OPEN CALLS</span>
+                <h3 id="writingCallsTitle">当前征文主题</h3>
+                <p>选择一个主题，查看它正在收集的文字。</p>
+              </div>
+              <div class="writing-calls-count"><strong id="writingEventMetric">0</strong><span>个主题</span></div>
+            </header>
+            <div class="writing-event-intro" id="writingEventIntro"></div>
+            <div class="writing-event-list" id="writingEventList"></div>
+          </section>
+
+          <section class="writing-submit-band" aria-labelledby="writingSubmitTitle">
+            <div>
+              <span>OPEN THE PAGE</span>
+              <h3 id="writingSubmitTitle">你也有一个想被听见的故事吗？</h3>
+              <p>从一段独白、一页剧本，或一次观后感开始。</p>
+            </div>
+            <details class="writing-submit-details">
+              <summary>我要投稿 <span>SUBMIT A WORK <b aria-hidden="true">↗</b></span></summary>
+              <div class="writing-submit-form-wrap">
+                <form class="writing-submit-form" id="essayForm">
+                  <h4>把故事放上书架</h4>
                   <label>
                     文章标题
-                    <input id="essayTitle" type="text" maxlength="52" placeholder="例如：2026 招新征文投稿" required />
+                    <input id="essayTitle" type="text" maxlength="52" placeholder="例如：一束灯光落下之前" required />
                   </label>
                   <label>
                     正文
                     <textarea id="essayBody" rows="7" maxlength="1800" placeholder="输入文章正文，可按段落填写" required></textarea>
                   </label>
                   <label>
-                    附件
+                    附件（可选）
                     <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
                     <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
                   </label>
-                  <button class="primary-button" type="submit">提交文章</button>
+                  <button class="writing-form-submit" type="submit">阅读前，先提交 <span aria-hidden="true">↗</span></button>
                 </form>
               </div>
-            </section>
+            </details>
+          </section>
 
-            <section class="module-drawer-panel" id="writingEventComposeDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="compose-panel writing-event-form" id="writingEventForm">
-                  <h3>添加征文活动</h3>
-                  <label>
-                    活动名称
-                    <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：招新主题征文" required />
-                  </label>
-                  <label>
-                    征文说明
-                    <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="填写主题、字数要求、投稿范围、截止时间说明" required></textarea>
-                  </label>
-                  <label>
-                    截止时间
-                    <input id="writingEventDeadline" type="date" />
-                  </label>
-                  <button class="primary-button" type="submit">添加活动</button>
-                </form>
-              </div>
-            </section>
-          </div>
+          <details class="writing-admin-panel">
+            <summary><span>社团内部：添加征文活动</span><small>MANAGE OPEN CALLS +</small></summary>
+            <form class="writing-admin-form" id="writingEventForm">
+              <label>
+                活动名称
+                <input id="writingEventTitle" type="text" maxlength="36" placeholder="例如：招新主题征文" required />
+              </label>
+              <label>
+                征文说明
+                <textarea id="writingEventPrompt" rows="4" maxlength="260" placeholder="填写主题、字数要求、投稿范围、截止时间说明" required></textarea>
+              </label>
+              <label>
+                截止时间
+                <input id="writingEventDeadline" type="date" />
+              </label>
+              <button class="writing-form-submit" type="submit">添加活动 <span aria-hidden="true">↗</span></button>
+            </form>
+          </details>
         </div>
       </section>
 
@@ -819,5 +942,9 @@
 
     <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 </template>
+
+<script setup>
+import GlobalHeader from "./components/GlobalHeader.vue";
+</script>
 
 

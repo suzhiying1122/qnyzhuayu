@@ -17,15 +17,12 @@ const VALID_VIEWS = new Set([
   "letterDetail",
   "essayDetail",
 ]);
-const VIEW_ROUTES = {
-  home: "/",
-  forum: "/forum/",
-  activities: "/activities/",
-  mailbox: "/mailbox/",
-  writing: "/writing/",
-  profile: "/profile/",
-  admin: "/admin-panel/",
-};
+const VIEW_NAV_TARGETS = Object.freeze({
+  postDetail: "forum",
+  activityDetail: "activities",
+  letterDetail: "mailbox",
+  essayDetail: "writing",
+});
 
 const initialState = {
   users: [
@@ -238,6 +235,12 @@ const elements = {
   accountAvatarButton: document.querySelector("#accountAvatarButton"),
   accountName: document.querySelector("#accountName"),
   authOpenButton: document.querySelector("#authOpenButton"),
+  globalSearchButton: document.querySelector("#globalSearchButton"),
+  globalSearchPanel: document.querySelector("#globalSearchPanel"),
+  globalSearchForm: document.querySelector("#globalSearchForm"),
+  globalSearchInput: document.querySelector("#globalSearchInput"),
+  globalSearchCloseButton: document.querySelector("#globalSearchCloseButton"),
+  globalSearchResults: document.querySelector("#globalSearchResults"),
   authCloseButton: document.querySelector("#authCloseButton"),
   authModal: document.querySelector("#authModal"),
   authForm: document.querySelector("#authForm"),
@@ -252,7 +255,6 @@ const elements = {
   authMessage: document.querySelector("#authMessage"),
   authSubmitButton: document.querySelector("#authSubmitButton"),
   logoutButton: document.querySelector("#logoutButton"),
-  adminNavButton: document.querySelector("#adminNavButton"),
   adminHomeGate: document.querySelector("#adminHomeGate"),
   threadList: document.querySelector("#threadList"),
   postDetailContent: document.querySelector("#postDetailContent"),
@@ -270,8 +272,12 @@ const elements = {
   activityDate: document.querySelector("#activityDate"),
   activitySummary: document.querySelector("#activitySummary"),
   activityFile: document.querySelector("#activityFile"),
+  activityFeatured: document.querySelector("#activityFeatured"),
   activityList: document.querySelector("#activityList"),
+  activityArchiveList: document.querySelector("#activityArchiveList"),
   letterForm: document.querySelector("#letterForm"),
+  letterContactName: document.querySelector("#letterContactName"),
+  letterContact: document.querySelector("#letterContact"),
   letterSubject: document.querySelector("#letterSubject"),
   letterBody: document.querySelector("#letterBody"),
   letterAttachments: document.querySelector("#letterAttachments"),
@@ -279,6 +285,7 @@ const elements = {
   mailboxAdminHint: document.querySelector("#mailboxAdminHint"),
   writingEventMetric: document.querySelector("#writingEventMetric"),
   essayMetric: document.querySelector("#essayMetric"),
+  writingFeatured: document.querySelector("#writingFeatured"),
   writingEventList: document.querySelector("#writingEventList"),
   writingEventIntro: document.querySelector("#writingEventIntro"),
   writingShelfTitle: document.querySelector("#writingShelfTitle"),
@@ -344,7 +351,9 @@ const elements = {
 };
 
 export function initLegacyApp() {
-  applyHashView();
+  // View state is intentionally session-local. A fresh load always opens Home,
+  // regardless of an old pathname, hash, or the last view stored in local data.
+  state.activeView = "home";
   bindEvents();
   syncStateFromApi().finally(() => {
     isStateHydrating = false;
@@ -352,16 +361,6 @@ export function initLegacyApp() {
   });
   syncUsersFromApi({ silent: true });
   render();
-
-  window.addEventListener("popstate", () => {
-    applyHashView();
-    render();
-  });
-
-  window.addEventListener("hashchange", () => {
-    applyHashView();
-    render();
-  });
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) syncUsersFromApi({ silent: true });
@@ -392,6 +391,8 @@ async function syncStateFromApi() {
     state.pendingPosts = Array.isArray(data.pendingPosts) ? data.pendingPosts : state.pendingPosts;
     state.activities = Array.isArray(data.activities) ? data.activities : state.activities;
     state.pendingActivities = Array.isArray(data.pendingActivities) ? data.pendingActivities : state.pendingActivities;
+    state.activities.forEach((activity) => normalizeActivityRecord(activity));
+    state.pendingActivities.forEach((activity) => normalizeActivityRecord(activity));
     state.letters = Array.isArray(data.letters) ? data.letters : state.letters;
     state.writingEvents = Array.isArray(data.writingEvents) ? mergeFixedWritingEvents(data.writingEvents) : state.writingEvents;
     state.essays = Array.isArray(data.essays) ? data.essays : state.essays;
@@ -523,6 +524,41 @@ function bindEvents() {
     setView(button.dataset.viewTarget);
   });
 
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-contact-focus]");
+    if (!trigger) return;
+    const target = document.getElementById(trigger.dataset.contactFocus || "");
+    if (!target) return;
+    event.preventDefault();
+    if (target.disabled) {
+      openAuthModal();
+      return;
+    }
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => target.focus({ preventScroll: true }), 220);
+  });
+
+  elements.globalSearchButton.addEventListener("click", () => {
+    if (elements.globalSearchPanel.classList.contains("hidden")) {
+      openGlobalSearch();
+    } else {
+      closeGlobalSearch();
+    }
+  });
+  elements.globalSearchCloseButton.addEventListener("click", closeGlobalSearch);
+  elements.globalSearchForm.addEventListener("submit", handleGlobalSearchSubmit);
+  elements.globalSearchResults.addEventListener("click", handleGlobalSearchResult);
+  document.addEventListener("click", (event) => {
+    if (elements.globalSearchPanel.classList.contains("hidden")) return;
+    if (event.target.closest("#globalSearchPanel, #globalSearchButton")) return;
+    closeGlobalSearch();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !elements.globalSearchPanel.classList.contains("hidden")) {
+      closeGlobalSearch();
+    }
+  });
+
   document.querySelectorAll("[data-auth-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       authMode = button.dataset.authMode;
@@ -574,6 +610,7 @@ function bindEvents() {
   elements.letterForm.addEventListener("submit", handleLetterSubmit);
   elements.writingEventForm.addEventListener("submit", handleWritingEventSubmit);
   elements.essayForm.addEventListener("submit", handleEssaySubmit);
+  document.querySelector(".writing-header-submit")?.addEventListener("click", openWritingSubmit);
   elements.profileForm.addEventListener("submit", handleProfileSubmit);
   elements.passwordForm.addEventListener("submit", handlePasswordSubmit);
   elements.friendSearchForm.addEventListener("submit", handleFriendSearchSubmit);
@@ -640,7 +677,7 @@ function loadState() {
     const merged = {
       ...structuredClone(initialState),
       ...saved,
-      activeView: saved.activeView || saved.activeTab || "home",
+      activeView: "home",
       activePostId: saved.activePostId || "post-1",
       activeActivityId: saved.activeActivityId || "activity-1",
       activeLetterId: saved.activeLetterId || "letter-1",
@@ -697,12 +734,8 @@ function normalizeLoadedState(targetState) {
     comment.attachments = normalizeAttachments(comment);
   });
   migratePendingComments(targetState);
-  targetState.activities.forEach((activity) => {
-    activity.attachments = normalizeAttachments(activity);
-  });
-  targetState.pendingActivities.forEach((activity) => {
-    activity.attachments = normalizeAttachments(activity);
-  });
+  targetState.activities.forEach((activity) => normalizeActivityRecord(activity));
+  targetState.pendingActivities.forEach((activity) => normalizeActivityRecord(activity));
   targetState.letters.forEach((letter) => {
     letter.attachments = normalizeAttachments(letter);
   });
@@ -834,7 +867,23 @@ function normalizeSeedForumContent(targetState) {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Persist content and account data, but never persist the current view.
+  // Reloading the single-page shell must always start at Home.
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, activeView: "home" }));
+}
+
+function normalizeActivityRecord(activity) {
+  activity.type = activity.type || "briefing";
+  activity.title = activity.title || "未命名活动";
+  activity.date = activity.date || "";
+  activity.description = activity.description || activity.summary || "";
+  activity.summary = activity.summary || activity.description;
+  activity.time = activity.time || "";
+  activity.venue = activity.venue || "";
+  activity.image = activity.image || "";
+  activity.status = activity.status || "";
+  activity.attachments = normalizeAttachments(activity);
+  return activity;
 }
 
 function render() {
@@ -886,118 +935,137 @@ function setView(viewName) {
   if (viewName === "activityDetail") renderActivityDetail();
   if (viewName === "letterDetail") renderLetterDetail();
   if (viewName === "essayDetail") renderEssayDetail();
-  updateHash(viewName);
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 
-function applyHashView() {
-  const routeView = getViewFromPath(window.location.pathname);
-  if (routeView) {
-    state.activeView = routeView.view;
-    if (routeView.postId) state.activePostId = routeView.postId;
-    if (routeView.activityId) state.activeActivityId = routeView.activityId;
-    if (routeView.letterId) state.activeLetterId = routeView.letterId;
-    if (routeView.essayId) state.activeEssayId = routeView.essayId;
-    return;
-  }
-
-  const viewName = decodeURIComponent(window.location.hash.replace("#", ""));
-  if (viewName.startsWith("post/")) {
-    state.activePostId = viewName.slice(5);
-    state.activeView = "postDetail";
-    return;
-  }
-  if (viewName.startsWith("activity/")) {
-    state.activeActivityId = viewName.slice(9);
-    state.activeView = "activityDetail";
-    return;
-  }
-  if (viewName.startsWith("letter/")) {
-    state.activeLetterId = viewName.slice(7);
-    state.activeView = "letterDetail";
-    return;
-  }
-  if (viewName.startsWith("essay/")) {
-    state.activeEssayId = viewName.slice(6);
-    state.activeView = "essayDetail";
-    return;
-  }
-  if (VALID_VIEWS.has(viewName)) {
-    state.activeView = viewName;
-  }
+function openGlobalSearch() {
+  elements.globalSearchPanel.classList.remove("hidden");
+  elements.globalSearchButton.setAttribute("aria-expanded", "true");
+  renderGlobalSearchResults("");
+  window.requestAnimationFrame(() => elements.globalSearchInput.focus());
 }
 
-function updateHash(viewName) {
-  const nextPath = getPathForView(viewName);
-  if (window.location.pathname === nextPath && !window.location.hash) return;
-  const nextUrl = `${nextPath}${window.location.search}`;
-  window.history.pushState(null, "", nextUrl);
+function closeGlobalSearch() {
+  elements.globalSearchPanel.classList.add("hidden");
+  elements.globalSearchButton.setAttribute("aria-expanded", "false");
+  elements.globalSearchInput.value = "";
+  elements.globalSearchResults.innerHTML = "";
 }
 
-function getPathForView(viewName) {
-  if (viewName === "postDetail") return `/forum/${encodeURIComponent(state.activePostId || "")}/`;
-  if (viewName === "activityDetail") return `/activities/${encodeURIComponent(state.activeActivityId || "")}/`;
-  if (viewName === "letterDetail") return `/mailbox/${encodeURIComponent(state.activeLetterId || "")}/`;
-  if (viewName === "essayDetail") return `/writing/${encodeURIComponent(state.activeEssayId || "")}/`;
-  return VIEW_ROUTES[viewName] || "/";
+function handleGlobalSearchSubmit(event) {
+  event.preventDefault();
+  renderGlobalSearchResults(elements.globalSearchInput.value);
 }
 
-function getViewFromPath(pathname) {
-  const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent);
-  if (!parts.length) return { view: "home" };
-  if (parts[0] === "forum") {
-    return parts[1] ? { view: "postDetail", postId: parts[1] } : { view: "forum" };
+function handleGlobalSearchResult(event) {
+  const button = event.target.closest("[data-global-search-kind]");
+  if (!button) return;
+  closeGlobalSearch();
+  openDetailView(button.dataset.globalSearchKind, button.dataset.globalSearchId);
+}
+
+function getGlobalSearchEntries() {
+  return [
+    ...state.posts.map((post) => ({
+      kind: "post",
+      id: post.id,
+      title: post.title,
+      excerpt: post.body,
+      meta: `论坛 · ${post.author || "匿名社员"}`,
+      searchText: [post.title, post.body, post.tag, post.author].join(" "),
+    })),
+    ...state.activities.map((activity) => ({
+      kind: "activity",
+      id: activity.id,
+      title: activity.title,
+      excerpt: activity.summary,
+      meta: `活动资讯 · ${activity.author || "华煜话剧社"}`,
+      searchText: [activity.title, activity.summary, activity.type, activity.author].join(" "),
+    })),
+    ...state.letters
+      .filter((letter) => letter.visibility === "public")
+      .map((letter) => ({
+        kind: "letter",
+        id: letter.id,
+        title: letter.subject,
+        excerpt: letter.body,
+        meta: `联系我们 · ${letter.author || "匿名来信"}`,
+        searchText: [letter.subject, letter.body, letter.author, letter.reply].join(" "),
+      })),
+    ...state.essays.map((essay) => ({
+      kind: "essay",
+      id: essay.id,
+      title: essay.title,
+      excerpt: essay.body,
+      meta: `投稿作品 · ${essay.author || "匿名社员"}`,
+      searchText: [essay.title, essay.body, essay.author].join(" "),
+    })),
+  ];
+}
+
+function renderGlobalSearchResults(value) {
+  const query = String(value || "").trim();
+  if (!query) {
+    elements.globalSearchResults.innerHTML = `<p class="global-search-hint">输入关键词，查找论坛、活动、投稿作品或公开来信。</p>`;
+    return;
   }
-  if (parts[0] === "activities") {
-    return parts[1] ? { view: "activityDetail", activityId: parts[1] } : { view: "activities" };
+
+  const normalizedQuery = query.toLocaleLowerCase("zh-CN");
+  const matches = getGlobalSearchEntries()
+    .filter((entry) => entry.searchText.toLocaleLowerCase("zh-CN").includes(normalizedQuery))
+    .slice(0, 8);
+  if (!matches.length) {
+    elements.globalSearchResults.innerHTML = `<p class="global-search-empty">没有找到与“${escapeHtml(query)}”相关的内容。</p>`;
+    return;
   }
-  if (parts[0] === "mailbox") {
-    return parts[1] ? { view: "letterDetail", letterId: parts[1] } : { view: "mailbox" };
-  }
-  if (parts[0] === "writing") {
-    return parts[1] ? { view: "essayDetail", essayId: parts[1] } : { view: "writing" };
-  }
-  if (parts[0] === "profile") return { view: "profile" };
-  if (parts[0] === "admin-panel") return { view: "admin" };
-  return null;
+
+  elements.globalSearchResults.innerHTML = matches
+    .map(
+      (entry) => `
+        <button class="global-search-result" data-global-search-kind="${entry.kind}" data-global-search-id="${escapeHtml(entry.id)}" type="button">
+          <strong>${escapeHtml(entry.title)}</strong>
+          <small>${escapeHtml(entry.meta)}${entry.excerpt ? ` · ${escapeHtml(String(entry.excerpt).replace(/\s+/g, " ").slice(0, 56))}` : ""}</small>
+        </button>
+      `,
+    )
+    .join("");
 }
 
 function renderView() {
   if (state.activeView === "admin" && !isAdmin()) {
     state.activeView = "home";
-    updateHash("home");
   }
   if (state.activeView === "profile" && !currentUser()) {
     state.activeView = "home";
-    updateHash("home");
   }
   if (state.activeView === "postDetail" && !state.posts.some((post) => post.id === state.activePostId)) {
     state.activeView = "forum";
-    updateHash("forum");
   }
   if (state.activeView === "activityDetail" && !state.activities.some((activity) => activity.id === state.activeActivityId)) {
     state.activeView = "activities";
-    updateHash("activities");
   }
   if (state.activeView === "letterDetail" && !state.letters.some((letter) => letter.id === state.activeLetterId && letter.visibility === "public")) {
     state.activeView = "mailbox";
-    updateHash("mailbox");
   }
   if (state.activeView === "essayDetail" && !state.essays.some((essay) => essay.id === state.activeEssayId)) {
     state.activeView = "writing";
-    updateHash("writing");
   }
 
   document.body.dataset.view = state.activeView;
   document.querySelectorAll(".view").forEach((view) => {
-    view.classList.toggle("is-active", view.dataset.view === state.activeView);
+    const isActive = view.dataset.view === state.activeView;
+    view.classList.toggle("is-active", isActive);
+    view.setAttribute("aria-hidden", String(!isActive));
+    view.toggleAttribute("inert", !isActive);
   });
 
   document.querySelectorAll("[data-view-target]").forEach((button) => {
-    const isActive = button.dataset.viewTarget === state.activeView;
+    const navTarget = VIEW_NAV_TARGETS[state.activeView] || state.activeView;
+    const isActive = button.dataset.viewTarget === (button.classList.contains("nav-link") ? navTarget : state.activeView);
     button.classList.toggle("is-active", isActive);
     if (button.classList.contains("nav-link")) {
-      button.setAttribute("aria-current", isActive ? "page" : "false");
+      if (isActive) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
     }
   });
 }
@@ -1013,7 +1081,6 @@ function renderAccount() {
   elements.accountAvatarButton.classList.toggle("is-logged-in", Boolean(user));
   elements.authOpenButton.classList.toggle("hidden", Boolean(user));
   elements.logoutButton.classList.toggle("hidden", !user);
-  elements.adminNavButton.classList.toggle("hidden", !admin);
   elements.adminHomeGate.classList.toggle("hidden", !admin);
   elements.currentUserHint.textContent = user ? `${getUserDisplayName(user)}（编号 ${user.accountNo}）可自由交流，公开前需审核` : "注册账号后可提交话题不限的内容";
 }
@@ -1078,17 +1145,20 @@ function renderForum() {
   elements.postBody.disabled = !user;
   elements.postTag.disabled = !user;
   elements.postAttachments.disabled = !user;
-  elements.postForm.querySelector("button").disabled = !user;
+  elements.postForm.querySelector('button[type="submit"]').disabled = !user;
 
   elements.threadList.setAttribute("aria-busy", String(isStateHydrating));
+  const orderedPosts = state.posts
+    .slice()
+    .sort((a, b) => new Date(b.approvedAt || b.createdAt) - new Date(a.approvedAt || a.createdAt));
+  const forumPreviewItems = orderedPosts.slice(0, 3);
+  while (forumPreviewItems.length > 0 && forumPreviewItems.length < 3) {
+    forumPreviewItems.push(null);
+  }
   elements.threadList.innerHTML = isStateHydrating
     ? renderSkeletonList("forum", 3)
-    : state.posts.length
-    ? state.posts
-        .slice()
-        .sort((a, b) => new Date(b.approvedAt || b.createdAt) - new Date(a.approvedAt || a.createdAt))
-        .map(renderPostCard)
-        .join("")
+    : forumPreviewItems.length
+    ? forumPreviewItems.map((post, index) => post ? renderPostCard(post) : renderForumPreviewPlaceholder(index)).join("")
     : `<div class="empty-state">还没有公开帖子。</div>`;
 
   elements.threadList.querySelectorAll("[data-open-post]").forEach((button) => {
@@ -1121,8 +1191,6 @@ function renderPostCard(post) {
     <article class="thread-card ${post.id === state.activePostId ? "is-active" : ""}" data-post-id="${post.id}">
       <div class="tag-row">
         <span class="tag">${escapeHtml(post.tag || "讨论")}</span>
-        <span>${commentCount} 条留言</span>
-        <span class="post-card-like-count" aria-label="${likeCount} 个赞">♡ ${likeCount}</span>
         ${attachmentText}
       </div>
       <button class="thread-title-button" type="button" data-open-post="${post.id}">
@@ -1131,6 +1199,7 @@ function renderPostCard(post) {
       <div class="thread-preview">${escapeHtml(getExcerpt(post.body, 96))}</div>
       <div class="meta-row">
         <span>${escapeHtml(post.author)}</span>
+        <span>${commentCount} / ${likeCount}</span>
         <span>${formatDateTime(post.approvedAt || post.createdAt)}</span>
       </div>
       ${
@@ -1227,51 +1296,326 @@ function renderActivities() {
     .filter((activity) => state.activityFilter === "all" || activity.type === state.activityFilter)
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
+  const featured = filtered[0] || null;
+  const archive = filtered.slice(1, 5);
+
+  elements.activityFeatured.setAttribute("aria-busy", String(isStateHydrating));
   elements.activityList.setAttribute("aria-busy", String(isStateHydrating));
-  elements.activityList.innerHTML = isStateHydrating
-    ? renderSkeletonList("activity", 3)
-    : filtered.length
-    ? filtered.map(renderActivityCard).join("")
-    : `<div class="empty-state">当前筛选下暂无公开活动。</div>`;
+  elements.activityArchiveList.setAttribute("aria-busy", String(isStateHydrating));
 
-  elements.activityList.querySelectorAll("[data-open-activity]").forEach((button) => {
-    button.addEventListener("click", () => openDetailView("activity", button.dataset.openActivity));
-  });
+  if (isStateHydrating) {
+    elements.activityFeatured.innerHTML = renderActivityFeaturedLoading();
+    elements.activityList.innerHTML = renderActivityTimelineLoading();
+    elements.activityArchiveList.innerHTML = renderActivityArchiveLoading();
+    return;
+  }
 
-  elements.activityList.querySelectorAll("[data-delete-activity]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      deleteActivity(button.dataset.deleteActivity);
+  const activityPreviewItems = filtered.slice(0, 3);
+  while (activityPreviewItems.length > 0 && activityPreviewItems.length < 3) {
+    activityPreviewItems.push(null);
+  }
+
+  elements.activityFeatured.innerHTML = renderActivityFeatured(featured);
+  elements.activityList.innerHTML = activityPreviewItems.length
+    ? activityPreviewItems.map((activity, index) => activity ? renderActivityTimelineItem(activity, index) : renderActivityTimelinePlaceholder(index)).join("")
+    : `<div class="events-empty-state"><span>NO ENTRIES YET</span><p>当前筛选下暂无公开活动记录。</p></div>`;
+  elements.activityArchiveList.innerHTML = renderActivityArchive(archive);
+
+  [elements.activityFeatured, elements.activityList, elements.activityArchiveList].forEach((scope) => {
+    scope.querySelectorAll("[data-open-activity]").forEach((button) => {
+      button.addEventListener("click", () => openDetailView("activity", button.dataset.openActivity));
     });
-  });
 
-  elements.activityList.querySelectorAll("[data-activity-id]").forEach((card) => {
-    card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-open-activity], [data-delete-activity], button, input, textarea, select, a")) return;
-      openDetailView("activity", card.dataset.activityId);
+    scope.querySelectorAll("[data-delete-activity]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        deleteActivity(button.dataset.deleteActivity);
+      });
+    });
+
+    scope.querySelectorAll("[data-activity-id]").forEach((card) => {
+      card.addEventListener("click", (event) => {
+        if (event.target.closest("[data-open-activity], [data-delete-activity], button, input, textarea, select, a")) return;
+        openDetailView("activity", card.dataset.activityId);
+      });
     });
   });
 }
 
-function renderActivityCard(activity) {
-  const isPreview = activity.type === "preview";
-  const typeText = isPreview ? "活动预告" : "活动简报";
-  const attachmentText = renderAttachmentCount(activity) || `<span>暂无附件</span>`;
+const EVENTS_FEATURED_IMAGE = "/assets/events-featured-red-curtain.png";
+const ACTIVITY_IMAGE_FALLBACKS = [
+  EVENTS_FEATURED_IMAGE,
+  "/assets/card-activities-designed.webp",
+  "/assets/detail-stage-texture.png",
+  "/assets/bg-main-stage.png",
+];
+
+function getActivityPresentation(activity, fallbackIndex = 0) {
+  const date = String(activity?.date || "").slice(0, 10);
+  const dateParts = getProgrammeDateParts(date);
+  const typeText = activity?.type === "preview"
+    ? "活动预告"
+    : activity?.type === "briefing"
+    ? "活动简报"
+    : activity?.typeText || "活动记录";
+  const dateTimestamp = dateParts ? new Date(`${date}T23:59:59`).getTime() : Number.NaN;
+  const statusLabel = {
+    upcoming: "即将发生",
+    published: "已发布",
+    approved: "已发布",
+    archived: "已归档",
+    draft: "待审核",
+  }[activity?.status] || activity?.status || (dateTimestamp >= Date.now() ? "即将发生" : "已归档");
+
+  return {
+    ...activity,
+    date,
+    dateParts,
+    typeText,
+    description: String(activity?.description || activity?.summary || "暂无活动说明。").trim(),
+    time: String(activity?.time || "时间待公布"),
+    venue: String(activity?.venue || "地点待公布"),
+    statusText: String(statusLabel),
+    image: getActivityImage(activity, fallbackIndex),
+  };
+}
+
+function getActivityImage(activity, fallbackIndex = 0) {
+  const directImage = activity?.image || activity?.imageUrl;
+  if (directImage) return String(directImage);
+
+  const imageAttachment = normalizeAttachments(activity).find((attachment) => {
+    const type = inferAttachmentType(attachment.name, attachment.data || attachment.type);
+    return type.startsWith("image/") && attachment.data;
+  });
+  return imageAttachment?.data || ACTIVITY_IMAGE_FALLBACKS[fallbackIndex % ACTIVITY_IMAGE_FALLBACKS.length];
+}
+
+function getProgrammeDateParts(value) {
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(String(value || ""));
+  if (!match) return null;
+  return {
+    year: match[1],
+    month: match[2].padStart(2, "0"),
+    day: match[3].padStart(2, "0"),
+  };
+}
+
+function programmeDateLabel(value) {
+  const parts = getProgrammeDateParts(value);
+  return parts ? `${parts.year}.${parts.month}.${parts.day}` : "日期待补充";
+}
+
+function programmeDateMarkup(value, className = "events-date-block") {
+  const parts = getProgrammeDateParts(value);
+  if (!parts) {
+    return `<time class="${className}"><span>DATE</span><strong>待补充</strong></time>`;
+  }
   return `
-    <article class="activity-card" data-activity-id="${activity.id}">
+    <time class="${className}" datetime="${escapeAttribute(value)}">
+      <span>${parts.year}</span>
+      <strong>${parts.month}.${parts.day}</strong>
+    </time>
+  `;
+}
+
+function renderForumPreviewPlaceholder(index) {
+  return `
+    <article class="thread-card is-placeholder" aria-label="第 ${index + 1} 条讨论占位">
       <div class="tag-row">
-        <span class="type-pill ${isPreview ? "preview" : ""}">${typeText}</span>
-        <span>${formatDate(activity.date)}</span>
+        <span class="tag">等待发起</span>
       </div>
-      <button class="card-title-button" type="button" data-open-activity="${activity.id}">
-        <h3>${escapeHtml(activity.title)}</h3>
-      </button>
-      <div class="activity-summary">${escapeHtml(activity.summary)}</div>
-      <footer>
-        <span>${escapeHtml(activity.author || "华煜话剧社")}</span>
-        ${attachmentText}
-      </footer>
-      ${isAdmin() ? `<div class="post-admin-actions"><button class="reject-button" data-delete-activity="${activity.id}" type="button">删除活动</button></div>` : ""}
+      <div class="thread-title-button thread-placeholder-title">
+        <h4>下一条讨论，等你写下</h4>
+      </div>
+      <div class="thread-preview">学习、排练与观演心得，都可以成为下一场幕间对话。</div>
+      <div class="meta-row">
+        <span>公开广场</span>
+        <span>待补充</span>
+        <span>—</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderActivityFeaturedLoading() {
+  return `
+    <div class="events-featured-loading" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+}
+
+function renderActivityTimelineLoading() {
+  return `
+    <div class="events-timeline-loading" role="status">
+      <span class="events-loading-dot" aria-hidden="true"></span>
+      <span>正在读取活动时间线…</span>
+    </div>
+  `;
+}
+
+function renderActivityArchiveLoading() {
+  return Array.from({ length: 3 }, () => `<div class="events-archive-loading" aria-hidden="true"><span></span><span></span></div>`).join("");
+}
+
+function renderActivityFeatured(activity) {
+  if (!activity) {
+    return `
+      <div class="events-featured-empty">
+        <div>
+          <span class="events-featured-mark">FEATURED PROGRAMME</span>
+          <h3>下一场记录，等待被写下</h3>
+          <p>这里会呈现即将发生或最新公开的活动。活动资料补齐后，节目单会在此展开。</p>
+          <span class="events-empty-note">暂无公开活动</span>
+        </div>
+        <div class="events-featured-image events-featured-image-empty">
+          <img src="${escapeAttribute(EVENTS_FEATURED_IMAGE)}" alt="红色幕布下的舞台人物插画" loading="eager" decoding="async" />
+        </div>
+      </div>
+    `;
+  }
+
+  const item = getActivityPresentation(activity, 0);
+  const adminAction = isAdmin()
+    ? `<button class="events-delete-button" data-delete-activity="${escapeAttribute(item.id)}" type="button">删除记录</button>`
+    : "";
+  return `
+    <div class="events-featured-layout" data-activity-id="${escapeAttribute(item.id)}" data-activity-status="${escapeAttribute(item.statusText)}">
+      <div class="events-featured-copy">
+        <div class="events-featured-meta">
+          <span>FEATURED PROGRAMME</span>
+          <span class="events-status">${escapeHtml(item.statusText)}</span>
+        </div>
+        <p class="events-featured-type">${escapeHtml(item.typeText)}</p>
+        ${programmeDateMarkup(item.date, "events-featured-date")}
+        <h3>${escapeHtml(item.title)}</h3>
+        <p class="events-featured-description">${escapeHtml(item.description)}</p>
+        <dl class="events-featured-details">
+          <div><dt>DATE</dt><dd>${escapeHtml(programmeDateLabel(item.date))}</dd></div>
+          <div><dt>TIME</dt><dd>${escapeHtml(item.time)}</dd></div>
+          <div><dt>VENUE</dt><dd>${escapeHtml(item.venue)}</dd></div>
+        </dl>
+        <div class="events-featured-actions">
+          <button class="events-primary-button" data-open-activity="${escapeAttribute(item.id)}" type="button">查看活动详情 <span aria-hidden="true">↗</span></button>
+          ${adminAction}
+        </div>
+      </div>
+      <figure class="events-featured-image">
+        <img src="${escapeAttribute(EVENTS_FEATURED_IMAGE)}" alt="红色幕布下的舞台人物插画" loading="eager" decoding="async" />
+        <figcaption><span>THE STAGE IS READY</span><span>${escapeHtml(item.typeText)}</span></figcaption>
+      </figure>
+    </div>
+  `;
+}
+
+function renderActivityTimelineItem(activity, index) {
+  const item = getActivityPresentation(activity, index + 1);
+  const adminAction = isAdmin()
+    ? `<button class="events-delete-button" data-delete-activity="${escapeAttribute(item.id)}" type="button">删除</button>`
+    : "";
+  return `
+    <article class="events-timeline-item" data-activity-id="${escapeAttribute(item.id)}" data-activity-status="${escapeAttribute(item.statusText)}">
+      ${programmeDateMarkup(item.date, "events-timeline-date")}
+      <div class="events-timeline-copy">
+        <div class="events-timeline-meta">
+          <span>${escapeHtml(item.typeText)}</span>
+          <span class="events-status">${escapeHtml(item.statusText)}</span>
+        </div>
+        <h4>${escapeHtml(item.title)}</h4>
+        <p>${escapeHtml(item.description)}</p>
+      </div>
+      <div class="events-timeline-actions">
+        <button class="events-detail-link" data-open-activity="${escapeAttribute(item.id)}" type="button">查看详情 <span aria-hidden="true">↗</span></button>
+        ${adminAction}
+      </div>
+    </article>
+  `;
+}
+
+function renderActivityTimelinePlaceholder(index) {
+  return `
+    <article class="events-timeline-item is-placeholder" aria-label="第 ${index + 1} 条活动占位">
+      ${programmeDateMarkup("", "events-timeline-date")}
+      <div class="events-timeline-copy">
+        <div class="events-timeline-meta">
+          <span>活动占位</span>
+          <span class="events-status">待补充</span>
+        </div>
+        <h4>下一场活动，等待被写下</h4>
+        <p>活动资料补齐后，这里会显示日期、地点与现场说明。</p>
+      </div>
+      <div class="events-timeline-actions">
+        <span class="events-detail-link events-placeholder-link">资料待补充</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderActivityArchive(activities) {
+  const archiveItems = activities.map((activity, index) => ({
+    ...getActivityPresentation(activity, index + 1),
+    isPlaceholder: false,
+  }));
+  const placeholderItems = [
+    {
+      title: "下一场舞台记录",
+      description: "活动图片与现场笔记将在资料补齐后显示。",
+      typeText: "档案占位",
+      date: "",
+      statusText: "待补充",
+      image: ACTIVITY_IMAGE_FALLBACKS[2],
+      isPlaceholder: true,
+    },
+    {
+      title: "更多排练片段",
+      description: "这里预留给排练、分享与招募活动的公开记录。",
+      typeText: "档案占位",
+      date: "",
+      statusText: "待补充",
+      image: ACTIVITY_IMAGE_FALLBACKS[3],
+      isPlaceholder: true,
+    },
+    {
+      title: "待归档的现场",
+      description: "当一场活动结束，它会在这里留下图像与一句话。",
+      typeText: "档案占位",
+      date: "",
+      statusText: "待补充",
+      image: ACTIVITY_IMAGE_FALLBACKS[0],
+      isPlaceholder: true,
+    },
+  ];
+
+  while (archiveItems.length < 3 && archiveItems.length < 4) {
+    archiveItems.push(placeholderItems[archiveItems.length % placeholderItems.length]);
+  }
+  return archiveItems.slice(0, 4).map(renderActivityArchiveItem).join("");
+}
+
+function renderActivityArchiveItem(item, index) {
+  const itemAttributes = item.isPlaceholder
+    ? ""
+    : ` data-activity-id="${escapeAttribute(item.id)}" data-activity-status="${escapeAttribute(item.statusText)}"`;
+  const action = item.isPlaceholder
+    ? `<span class="events-archive-placeholder-label">资料待补充</span>`
+    : `<button class="events-detail-link" data-open-activity="${escapeAttribute(item.id)}" type="button">查看详情 <span aria-hidden="true">↗</span></button>`;
+  const adminAction = !item.isPlaceholder && isAdmin()
+    ? `<button class="events-delete-button" data-delete-activity="${escapeAttribute(item.id)}" type="button">删除</button>`
+    : "";
+  return `
+    <article class="events-archive-item${item.isPlaceholder ? " is-placeholder" : ""}"${itemAttributes}>
+      <div class="events-archive-image">
+        <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.title)}" loading="lazy" decoding="async" />
+        <span aria-hidden="true">0${index + 1}</span>
+      </div>
+      <div class="events-archive-copy">
+        <div class="events-archive-meta"><span>${escapeHtml(item.typeText)}</span><span>${escapeHtml(item.statusText)}</span></div>
+        <time${item.date ? ` datetime="${escapeAttribute(item.date)}"` : ""}>${escapeHtml(programmeDateLabel(item.date))}</time>
+        <h4>${escapeHtml(item.title)}</h4>
+        <p>${escapeHtml(item.description)}</p>
+        <div class="events-archive-actions">${action}${adminAction}</div>
+      </div>
     </article>
   `;
 }
@@ -1281,6 +1625,10 @@ async function handleLetterSubmit(event) {
   if (!requireLogin()) return;
 
   const visibility = new FormData(elements.letterForm).get("letterVisibility");
+  const author = elements.letterContactName?.value.trim() || getUserDisplayName(currentUser());
+  const contact = elements.letterContact?.value.trim();
+  const message = elements.letterBody.value.trim();
+  const body = [contact ? `联系方式：${contact}` : "", message].filter(Boolean).join("\n\n");
   let attachments = [];
   try {
     attachments = await readFilesAsAttachments(elements.letterAttachments.files);
@@ -1294,9 +1642,9 @@ async function handleLetterSubmit(event) {
       method: "POST",
       body: JSON.stringify({
         subject: elements.letterSubject.value.trim(),
-        body: elements.letterBody.value.trim(),
+        body,
         visibility,
-        author: visibility === "public" ? getUserDisplayName(currentUser()) : "匿名来信",
+        author: visibility === "public" ? author : "匿名来信",
         attachments,
       }),
     });
@@ -1313,6 +1661,9 @@ async function handleLetterSubmit(event) {
 
 function renderMailbox() {
   const user = currentUser();
+  if (elements.letterContactName) {
+    elements.letterContactName.value = user ? getUserDisplayName(user) : "";
+  }
   elements.letterForm.querySelectorAll("input, textarea, button").forEach((field) => {
     field.disabled = !user;
   });
@@ -1401,7 +1752,12 @@ function renderWriting() {
   ensureActiveWriting();
   const user = currentUser();
   const activeEvent = getActiveWritingEvent();
-  const essays = getEssaysForActiveWritingEvent();
+  const activeEventEssays = getEssaysForActiveWritingEvent();
+  const recentEssays = [...state.essays].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const writingPreviewItems = recentEssays.slice(0, 3);
+  while (writingPreviewItems.length > 0 && writingPreviewItems.length < 3) {
+    writingPreviewItems.push(null);
+  }
 
   elements.writingEventForm.querySelectorAll("input, textarea, button").forEach((field) => {
     field.disabled = !user;
@@ -1409,6 +1765,9 @@ function renderWriting() {
   elements.essayForm.querySelectorAll("input, textarea, button").forEach((field) => {
     field.disabled = !user || !activeEvent;
   });
+
+  elements.writingEventMetric.textContent = String(state.writingEvents.length);
+  elements.essayMetric.textContent = String(recentEssays.length);
 
   elements.writingEventList.setAttribute("aria-busy", String(isStateHydrating));
   elements.writingShelf.setAttribute("aria-busy", String(isStateHydrating));
@@ -1418,9 +1777,9 @@ function renderWriting() {
     ? state.writingEvents.map(renderWritingEventCard).join("")
     : `<div class="empty-state">暂无征文活动。</div>`;
 
-  elements.writingShelfTitle.textContent = activeEvent ? activeEvent.title : "文章列表";
+  elements.writingShelfTitle.textContent = activeEvent ? `当前主题：${activeEvent.title}` : "等待新的征文主题";
   elements.writingShelfHint.textContent = activeEvent
-    ? `${essays.length} 篇文章，点击条目阅读`
+    ? `${recentEssays.length} 篇投稿 · 点击条目阅读`
     : "先选择一个征文活动";
   elements.writingEventIntro.innerHTML = activeEvent
     ? `
@@ -1432,10 +1791,16 @@ function renderWriting() {
     `
     : `<div class="empty-state">还没有可展示的征文活动。</div>`;
 
+  elements.writingFeatured.innerHTML = isStateHydrating
+    ? renderSkeletonList("writing", 1)
+    : activeEvent
+    ? renderWritingFeatured(activeEventEssays[0], activeEvent)
+    : `<div class="writing-featured-empty"><span>FEATURED</span><h3>故事正在等候下一束灯光。</h3><p>登录后可以选择征文主题，把新的文字放上书架。</p><button class="writing-inline-action" data-writing-open-submit type="button">打开投稿入口 <span aria-hidden="true">↗</span></button></div>`;
+
   elements.writingShelf.innerHTML = isStateHydrating
     ? renderSkeletonList("essay", 4)
-    : essays.length
-    ? essays.map(renderEssayBook).join("")
+    : writingPreviewItems.length
+    ? writingPreviewItems.map((essay, index) => essay ? renderEssayBook(essay, index) : renderEssayBookPlaceholder(index)).join("")
     : `<div class="empty-state writing-empty-state">这个活动还没有文章，可以登录后提交。</div>`;
 
   elements.writingEventList.querySelectorAll("[data-writing-event]").forEach((button) => {
@@ -1448,8 +1813,20 @@ function renderWriting() {
     });
   });
 
+  elements.writingFeatured.querySelectorAll("[data-open-essay]").forEach((button) => {
+    button.addEventListener("click", () => openDetailView("essay", button.dataset.openEssay));
+  });
+
+  elements.writingFeatured.querySelectorAll("[data-writing-open-submit]").forEach((button) => {
+    button.addEventListener("click", () => openWritingSubmit());
+  });
+
   elements.writingShelf.querySelectorAll("[data-open-essay]").forEach((button) => {
     button.addEventListener("click", () => openDetailView("essay", button.dataset.openEssay));
+  });
+
+  elements.writingShelf.querySelectorAll("[data-writing-open-submit]").forEach((button) => {
+    button.addEventListener("click", () => openWritingSubmit());
   });
 
   elements.writingShelf.querySelectorAll("[data-delete-essay]").forEach((button) => {
@@ -1458,6 +1835,44 @@ function renderWriting() {
       deleteEssay(button.dataset.deleteEssay);
     });
   });
+}
+
+function renderWritingFeatured(essay, event) {
+  const title = essay?.title || event.title;
+  const description = essay?.body || event.prompt;
+  const author = essay?.author || event.author || "匿名";
+  const date = essay?.createdAt
+    ? formatDateTime(essay.createdAt)
+    : event.deadline
+    ? `截止 ${formatDate(event.deadline)}`
+    : "长期开放";
+  return `
+    <div class="writing-featured-copy">
+      <span class="writing-featured-kicker">本期选读 / FEATURED</span>
+      <h3>${escapeHtml(title)}</h3>
+      <p class="writing-featured-quote">一段仍在纸面上生长的舞台想象。</p>
+      <p class="writing-featured-description">${escapeHtml(getExcerpt(description, 128))}</p>
+      <dl class="writing-featured-meta">
+        <div><dt>作者</dt><dd>${escapeHtml(author)}</dd></div>
+        <div><dt>类型</dt><dd>剧本 / 独白 / 观后感</dd></div>
+        <div><dt>来自</dt><dd>${escapeHtml(event.title)}</dd></div>
+      </dl>
+      ${essay ? `<button class="writing-read-button" data-open-essay="${escapeAttribute(essay.id)}" type="button">阅读作品 <span aria-hidden="true">↗</span></button>` : `<button class="writing-read-button" data-writing-open-submit type="button">加入作品展厅 <span aria-hidden="true">↗</span></button>`}
+      <span class="writing-featured-date">${escapeHtml(date)}</span>
+    </div>
+    <div class="writing-featured-media">
+      <img src="/assets/writing-featured-stage.png" alt="舞台灯光下的写作者与剧本" loading="eager" decoding="async" />
+      <span class="writing-featured-media-note">THE STAGE<br />BEGINS ON PAPER</span>
+      <span class="writing-featured-media-number">04</span>
+    </div>
+  `;
+}
+
+function openWritingSubmit() {
+  const details = document.querySelector(".writing-submit-details");
+  if (details) details.open = true;
+  elements.essayForm?.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => elements.essayTitle?.focus({ preventScroll: true }), 220);
 }
 
 function renderWritingEventCard(event) {
@@ -1476,21 +1891,21 @@ function renderWritingEventCard(event) {
 
 function renderEssayBook(essay, index) {
   const event = state.writingEvents.find((item) => item.id === essay.eventId);
-  const tone = index % 5;
   return `
-    <article class="essay-book essay-book-tone-${tone}" style="--book-index:${index}" data-essay-id="${essay.id}">
-      <button class="essay-book-open" type="button" data-open-essay="${essay.id}" aria-label="阅读 ${escapeAttribute(essay.title)}">
-        <span class="book-spine"></span>
-        <span class="book-cover">
-          <span class="book-label">${escapeHtml(event?.title || "征文")}</span>
+    <article class="writing-work-row" data-essay-id="${essay.id}">
+      <span class="writing-work-index">${String(index + 1).padStart(2, "0")}</span>
+      <button class="writing-work-open" type="button" data-open-essay="${essay.id}" aria-label="阅读 ${escapeAttribute(essay.title)}">
+        <span class="writing-work-title">
           <strong>${escapeHtml(essay.title)}</strong>
-          <small>${escapeHtml(essay.author)} · ${formatDateTime(essay.createdAt)}</small>
-          <em>${escapeHtml(getExcerpt(essay.body, 52))}</em>
+          <small>${escapeHtml(event?.title || "征文活动")}</small>
         </span>
+        <span class="writing-work-excerpt">${escapeHtml(getExcerpt(essay.body, 64))}</span>
+        <span class="writing-work-meta">${escapeHtml(essay.author || "匿名社员")}<br />${escapeHtml(formatDateTime(essay.createdAt))}</span>
+        <span class="writing-work-arrow" aria-hidden="true">↗</span>
       </button>
       ${
         isAdmin()
-          ? `<button class="reject-button essay-delete-button" data-delete-essay="${essay.id}" type="button">删除</button>`
+          ? `<button class="writing-work-delete reject-button" data-delete-essay="${essay.id}" type="button">删除</button>`
           : ""
       }
     </article>
@@ -2134,7 +2549,6 @@ async function deletePost(id) {
     state.activePostId = state.posts[0]?.id || "";
     if (state.activeView === "postDetail") {
       state.activeView = "forum";
-      updateHash("forum");
     }
   }
   saveState();
@@ -2163,7 +2577,6 @@ async function deleteActivity(id) {
     state.activeActivityId = state.activities[0]?.id || "";
     if (state.activeView === "activityDetail") {
       state.activeView = "activities";
-      updateHash("activities");
     }
   }
   saveState();
@@ -2192,7 +2605,6 @@ async function deleteLetter(id) {
     state.activeLetterId = state.letters.find((item) => item.visibility === "public")?.id || "";
     if (state.activeView === "letterDetail") {
       state.activeView = "mailbox";
-      updateHash("mailbox");
     }
   }
   saveState();
@@ -2224,7 +2636,6 @@ async function deleteEssay(id) {
     state.activeEssayId = nextEssay?.id || "";
     if (state.activeView === "essayDetail") {
       state.activeView = state.activeEssayId ? "essayDetail" : "writing";
-      updateHash(state.activeView);
     }
   }
   saveState();
@@ -2509,6 +2920,7 @@ function renderPostDetail() {
     return;
   }
   const comments = Array.isArray(post.comments) ? post.comments : [];
+  post.comments = comments;
   const commentCount = countCommentThreads(comments);
   const likeCount = Math.max(0, Number(post.likeCount) || 0);
   const isLiked = Boolean(post.liked);
@@ -2516,84 +2928,135 @@ function renderPostDetail() {
     ? comments.map((comment) => renderCommentThread(comment, post.id, 1)).join("")
     : `<p class="detail-fold-empty">暂无留言，展开后即可开始讨论。</p>`;
   const user = currentUser();
+  const author = post.author || "匿名社员";
+  const authorUser = state.users.find(
+    (item) => getUserDisplayName(item) === author || item.username === author,
+  );
+  const authorAvatarStyle = authorUser ? avatarStyle(authorUser) : "";
+  const publishedAt = formatDateTime(post.approvedAt || post.createdAt);
 
   elements.postDetailContent.innerHTML = `
-    <div class="wechat-detail-layout forum-chat-layout">
-      ${renderDetailSidebar("forum")}
-      <section class="wechat-reader">
-        <header class="reader-topbar">
-          <button class="back-button" data-view-target="forum" type="button">返回论坛</button>
-          <div>
-            <p class="section-kicker">Huayu Forum</p>
-            <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
-            <p>${escapeHtml(post.author)} · ${formatDateTime(post.approvedAt || post.createdAt)} · ${commentCount} 条留言</p>
+    <div class="post-detail-product-page">
+      <header class="post-detail-hero">
+        <div class="post-detail-hero-inner">
+          <div class="post-detail-hero-copy">
+            <div class="post-detail-hero-kicker">
+              <span class="post-detail-hero-index">01</span>
+              <span>HUAYU / FORUM</span>
+            </div>
+            <div class="post-detail-hero-row">
+              <button class="post-detail-back" data-view-target="forum" type="button">
+                <span class="post-detail-back-arrow" aria-hidden="true">←</span>
+                <span>回到论坛</span>
+              </button>
+              <div class="post-detail-title-block">
+                <div class="post-detail-title-meta">
+                  <span class="post-detail-hero-tag">${escapeHtml(post.tag || "交流")}</span>
+                  <span>公开讨论</span>
+                </div>
+                <h2 id="postDetailTitle">${escapeHtml(post.title)}</h2>
+                <p>${escapeHtml(author)} · ${publishedAt} · ${commentCount} 条留言</p>
+              </div>
+            </div>
           </div>
-          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
-        </header>
-        <div class="reader-scroll">
-          <article class="message-card host-message">
-            <aside class="message-author">
-              <div class="floor-avatar">${escapeHtml((post.author || "华").slice(0, 1))}</div>
-              <strong>${escapeHtml(post.author || "匿名社员")}</strong>
-              <span>楼主</span>
-            </aside>
-            <div class="message-body">
-              <div class="tag-row">
-                <span class="tag">${escapeHtml(post.tag || "交流")}</span>
+          <div class="post-detail-hero-tools">
+            <span class="post-detail-publish-state"><i aria-hidden="true"></i>已公开</span>
+            ${isAdmin() ? `<button class="post-detail-delete" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
+          </div>
+        </div>
+      </header>
+
+      <div class="post-detail-main-grid">
+        <aside class="post-detail-rail" aria-label="帖子导航">
+          <div class="post-detail-rail-intro">
+            <span>THREAD INDEX</span>
+            <strong>帖子导航</strong>
+            <p>在这里切换其他公开讨论。</p>
+          </div>
+          ${renderDetailSidebar("forum")}
+          <div class="post-detail-rail-note">
+            <span class="post-detail-rail-note-mark" aria-hidden="true">✦</span>
+            <p>每一条留言都会实时进入讨论区。</p>
+          </div>
+        </aside>
+
+        <section class="post-detail-reading">
+          <article class="post-detail-article">
+            <header class="post-detail-author-row">
+              <div class="post-detail-author">
+                <div class="post-detail-avatar"${authorAvatarStyle ? ` style="${authorAvatarStyle}"` : ""} aria-hidden="true">${escapeHtml(author.slice(0, 1))}</div>
+                <div>
+                  <strong>${escapeHtml(author)}</strong>
+                  <span>楼主 · ${publishedAt}</span>
+                </div>
+              </div>
+              <div class="post-detail-author-side">
+                <span class="post-detail-author-label">社员发帖</span>
                 ${renderAttachmentCount(post)}
               </div>
-              <div class="detail-body post-reading-copy">${escapeHtml(post.body)}</div>
-              <div class="post-social-bar" role="group" aria-label="帖子互动">
-                <button class="post-social-action ${isLiked ? "is-liked" : ""}" data-post-like="${post.id}" type="button" aria-pressed="${isLiked ? "true" : "false"}" title="${currentUser() ? "给这篇帖子点赞" : "登录后点赞"}">
-                  <span class="post-social-icon" aria-hidden="true">${isLiked ? "♥" : "♡"}</span>
-                  <span>${isLiked ? "已赞" : "点赞"}</span>
-                  <strong>${likeCount}</strong>
-                </button>
-                <button class="post-social-action" data-open-post-comments="${post.id}" type="button">
-                  <span class="post-social-icon" aria-hidden="true">▱</span>
-                  <span>评论</span>
-                  <strong>${commentCount}</strong>
-                </button>
-                <button class="post-social-action" data-open-post-composer="${post.id}" type="button">
-                  <span class="post-social-icon" aria-hidden="true">✎</span>
-                  <span>写评论</span>
-                </button>
-                <button class="post-social-action" data-share-post="${post.id}" type="button">
-                  <span class="post-social-icon" aria-hidden="true">↗</span>
-                  <span>分享</span>
-                </button>
-              </div>
-              ${renderAttachmentList(post, "full")}
-            </div>
+            </header>
+            <div class="post-detail-copy">${escapeHtml(post.body)}</div>
+            ${renderAttachmentList(post, "full")}
+            <footer class="post-detail-action-bar" role="group" aria-label="帖子互动">
+              <button class="post-detail-action ${isLiked ? "is-liked" : ""}" data-post-like="${post.id}" type="button" aria-pressed="${isLiked ? "true" : "false"}" title="${user ? "给这篇帖子点赞" : "登录后点赞"}">
+                <span class="post-detail-action-icon" aria-hidden="true">${isLiked ? "♥" : "♡"}</span>
+                <span>${isLiked ? "已赞" : "点赞"}</span>
+                <strong>${likeCount}</strong>
+              </button>
+              <button class="post-detail-action" data-open-post-comments="${post.id}" type="button">
+                <span class="post-detail-action-icon" aria-hidden="true">▱</span>
+                <span>评论</span>
+                <strong>${commentCount}</strong>
+              </button>
+              <button class="post-detail-action" data-open-post-composer="${post.id}" type="button">
+                <span class="post-detail-action-icon" aria-hidden="true">✎</span>
+                <span>写评论</span>
+              </button>
+              <button class="post-detail-action" data-share-post="${post.id}" type="button">
+                <span class="post-detail-action-icon" aria-hidden="true">↗</span>
+                <span>分享</span>
+              </button>
+            </footer>
           </article>
-          <details class="reader-comments detail-fold detail-fold-comments"${comments.length ? " open" : ""}>
-            <summary class="detail-fold-summary">
-              <span class="detail-fold-title">留言讨论</span>
-              <span class="detail-fold-meta">${countCommentThreads(comments)} 条</span>
-              <span class="detail-fold-caret" aria-hidden="true"></span>
-            </summary>
-            <div class="detail-fold-body">
-              <div class="list-title">
-                <h3>全部留言</h3>
-                <span>点击任意留言下方输入框即可回复</span>
+
+          <section class="post-detail-discussion" aria-label="留言讨论">
+            <details class="detail-fold post-detail-fold detail-fold-comments">
+              <summary class="post-detail-fold-summary">
+                <span class="post-detail-fold-heading">
+                  <strong>留言讨论</strong>
+                  <small>实时回复 · 支持楼中楼</small>
+                </span>
+                <span class="post-detail-fold-count">${commentCount}<small>条</small></span>
+                <span class="post-detail-fold-caret" aria-hidden="true"></span>
+              </summary>
+              <div class="post-detail-fold-body">
+                <div class="post-detail-fold-intro">
+                  <span>DISCUSSION</span>
+                  <p>点开任意留言下方的回复入口，就可以继续接话。</p>
+                </div>
+                <div class="comment-thread-list">${commentsHtml}</div>
               </div>
-              <div class="comment-thread-list">${commentsHtml}</div>
-            </div>
-          </details>
+            </details>
+          </section>
+
           ${renderDetailStageFooter()}
-        </div>
-        <details class="detail-fold detail-fold-composer reader-composer">
-          <summary class="detail-fold-summary">
-            <span class="detail-fold-title">写留言</span>
-            <span class="detail-fold-meta">${user ? "参与这场讨论" : "登录后参与讨论"}</span>
-            <span class="detail-fold-caret" aria-hidden="true"></span>
-          </summary>
-          <form class="comment-form" data-comment-form data-post-id="${post.id}">
-            <textarea name="commentBody" rows="2" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
-            <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布</button>
-          </form>
-        </details>
-      </section>
+
+          <details class="detail-fold post-detail-fold detail-fold-composer">
+            <summary class="post-detail-fold-summary">
+              <span class="post-detail-fold-heading">
+                <strong>参与讨论</strong>
+                <small>${user ? "写下你的看法，发布后立即可见" : "登录后参与讨论"}</small>
+              </span>
+              <span class="post-detail-composer-cta">${user ? "写留言" : "登录参与"}</span>
+              <span class="post-detail-fold-caret" aria-hidden="true"></span>
+            </summary>
+            <form class="comment-form post-detail-composer-form" data-comment-form data-post-id="${post.id}">
+              <textarea name="commentBody" rows="3" maxlength="420" placeholder="${user ? "写下你的留言，按发布立即进入讨论" : "登录后可以留言"}" ${user ? "" : "disabled"} required></textarea>
+              <button class="primary-button" type="submit" ${user ? "" : "disabled"}>发布留言</button>
+            </form>
+          </details>
+        </section>
+      </div>
     </div>
   `;
   bindViewTargetButtons(elements.postDetailContent);
@@ -3029,7 +3492,7 @@ function openPostDetailFold(kind, focusComposer = false) {
 async function sharePost(postId) {
   const post = state.posts.find((item) => item.id === postId);
   if (!post) return;
-  const url = new URL(`/forum/${encodeURIComponent(postId)}/`, window.location.origin).href;
+  const url = new URL("/", window.location.origin).href;
   const shareData = {
     title: post.title,
     text: `${post.title}｜华煜话剧社论坛`,
@@ -3137,6 +3600,23 @@ function renderCommentThread(comment, postId, level = 1) {
         </form>
       </details>
       ${nested ? `<details class="comment-replies-fold"><summary class="comment-replies-summary"><span>${replyCountLabel}</span><small>展开讨论</small></summary><div class="nested-replies">${nested}</div></details>` : ""}
+    </article>
+  `;
+}
+
+function renderEssayBookPlaceholder(index) {
+  return `
+    <article class="writing-work-row is-placeholder" aria-label="第 ${index + 1} 条投稿占位">
+      <span class="writing-work-index">${String(index + 1).padStart(2, "0")}</span>
+      <button class="writing-work-open" type="button" data-writing-open-submit>
+        <span class="writing-work-title">
+          <strong>下一篇作品，等待你写下</strong>
+          <small>投稿入口常开</small>
+        </span>
+        <span class="writing-work-excerpt">一段独白、一页剧本，或一次观演记录，都可以先被看见。</span>
+        <span class="writing-work-meta">待补充<br />—</span>
+        <span class="writing-work-arrow" aria-hidden="true">↗</span>
+      </button>
     </article>
   `;
 }
