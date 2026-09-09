@@ -14,6 +14,7 @@ import "./interaction-polish.css";
 import "./profile-editorial.css";
 import "./site-refinement.css";
 import "./essay-reading.css";
+import "./programme-welcome.css";
 import { initInteractionPolish } from "./interaction-polish.js";
 
 createApp(App).mount("#app");
@@ -402,31 +403,50 @@ nextTick(async () => {
   });
 
   const enterButton = document.querySelector("#cinemaEnterButton");
+  let entering = false;
+  const backgroundElements = intro ? [...intro.parentElement.children].filter(el => el !== intro) : [];
+  const originalInert = new Map(backgroundElements.map(el => [el, el.inert]));
+  const unlockBackground = () => {
+    backgroundElements.forEach(el => { el.inert = originalInert.get(el); });
+    document.body.classList.remove("welcome-open");
+  };
+  const trapWelcomeFocus = (event) => {
+    if (introActive && event.key === "Tab") {
+      event.preventDefault();
+      enterButton?.focus({ preventScroll: true });
+    }
+  };
   const dismissIntro = () => {
-    if (!intro || intro.classList.contains("is-leaving")) return;
+    if (!intro || entering) return;
+    entering = true;
     intro.classList.add("is-entering");
     if (enterButton) enterButton.disabled = true;
-    window.sessionStorage.setItem(introSeenKey, "1");
-
-    // Let the doorway transition complete before revealing the page behind it.
-    // This keeps the second still frame visible long enough to read as a step in.
-    const transitionDuration = 1280;
+    try { window.sessionStorage.setItem(introSeenKey, "1"); } catch { /* Entry still works when storage is blocked. */ }
+    const transitionDuration = reducedMotion.matches ? 0 : 420;
     window.setTimeout(() => {
-      intro.classList.add("is-leaving");
       introActive = false;
       introVideo?.pause();
-      syncSceneMedia();
-    }, transitionDuration);
-    window.setTimeout(() => {
-      releaseVideo(introVideo);
+      unlockBackground();
+      document.removeEventListener("keydown", trapWelcomeFocus);
       intro.remove();
-    }, transitionDuration + 760);
+      const homeTitle = document.querySelector("#heroTitle");
+      homeTitle?.setAttribute("tabindex", "-1");
+      homeTitle?.focus({ preventScroll: true });
+      syncSceneMedia();
+      releaseVideo(introVideo);
+    }, transitionDuration);
   };
   const skipIntro = constrainedConnection || reducedMotion.matches;
-  if (skipIntro || window.sessionStorage.getItem(introSeenKey) === "1") {
+  let introSeen = false;
+  try { introSeen = window.sessionStorage.getItem(introSeenKey) === "1"; } catch { /* Storage is optional. */ }
+  if (skipIntro || introSeen) {
     intro?.remove();
     introActive = false;
   } else {
+    backgroundElements.forEach(el => { el.inert = true; });
+    document.body.classList.add("welcome-open");
+    document.addEventListener("keydown", trapWelcomeFocus);
+    intro?.focus({ preventScroll: true });
     enterButton?.addEventListener("click", dismissIntro, { once: true });
   }
 

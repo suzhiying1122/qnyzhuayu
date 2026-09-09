@@ -1,18 +1,36 @@
 ﻿<template>
 
-    <div class="intro-overlay" id="cinemaIntro" aria-label="进入华煜话剧社网站">
-      <div class="intro-bg-picture intro-bg-before" aria-hidden="true">
-        <img src="/assets/intro-stage-before.png" alt="" />
+    <div class="programme-welcome" id="cinemaIntro" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeDescription" tabindex="-1">
+      <div class="programme-page">
+        <svg class="programme-watermark" aria-hidden="true" viewBox="0 0 720 1000" fill="none">
+          <g transform="translate(612 164) rotate(-22)">
+            <path d="M-112 0h224v48h-224zM-128-12h256M-128-20h256" />
+            <path d="M-156 24a156 156 0 0 0 312 0M-192 24a192 192 0 0 0 384 0M-228 24a228 228 0 0 0 456 0M-264 24a264 264 0 0 0 528 0M-300 24a300 300 0 0 0 600 0M-336 24a336 336 0 0 0 672 0" />
+            <g class="programme-seat-rows" stroke-dasharray="2 12">
+              <path d="M-172 24a172 172 0 0 0 344 0M-208 24a208 208 0 0 0 416 0M-244 24a244 244 0 0 0 488 0M-280 24a280 280 0 0 0 560 0M-316 24a316 316 0 0 0 632 0" />
+            </g>
+            <path d="M0 78v295M-110 74l-136 202M110 74l136 202" />
+          </g>
+          <path d="M-120 840c170-250 310-290 490-180S580 974 800 700M-120 852c170-250 310-290 490-180S580 986 800 712" />
+        </svg>
+        <div class="programme-imprint" aria-hidden="true">
+          <img src="/assets/huayu-logo.png" alt="" width="44" height="44" />
+          <span>HUAYU<br /><span class="programme-brand-sub">DRAMA CLUB</span></span>
+        </div>
+        <div class="programme-invitation">
+          <h2 id="welcomeTitle"><span>华煜</span><span>话剧社</span></h2>
+          <p id="welcomeDescription">台上是角色，台下是我们。</p>
+          <button class="programme-enter" id="cinemaEnterButton" type="button" aria-label="进入华煜话剧社网站">
+            <span class="programme-ticket-copy"><span>进入网站</span><small aria-hidden="true">入场 · ADMISSION</small></span>
+            <span class="programme-ticket-stub" aria-hidden="true"><svg width="32" height="20" viewBox="0 0 32 20" fill="none"><path d="M1 10h28M21 2l8 8-8 8" stroke="currentColor" stroke-width="1.2" /></svg></span>
+          </button>
+        </div>
+        <div class="programme-footnote"><span>欢迎入场</span><span aria-hidden="true">HUAYU · THEATRE</span></div>
       </div>
-      <div class="intro-bg-picture intro-bg-after" aria-hidden="true">
-        <img src="/assets/intro-stage-after.png" alt="" />
+      <div class="programme-stage" aria-hidden="true">
+        <img src="/assets/intro-theatre-programme.webp" alt="" width="1024" height="1536" fetchpriority="high" />
+        <span class="programme-stage-caption">灯亮了，戏就开始了。</span>
       </div>
-      <div class="intro-threshold-light" aria-hidden="true"></div>
-      <div class="intro-atmosphere" aria-hidden="true"></div>
-      <button class="intro-enter-button" id="cinemaEnterButton" type="button" aria-label="进入网站">
-        <span>进入网站</span>
-        <small>ENTER SITE</small>
-      </button>
     </div>
 
     <div class="scene-video-stage" aria-hidden="true">

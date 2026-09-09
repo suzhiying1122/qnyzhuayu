@@ -78,4 +78,12 @@ Don't:
 
 ## Agent Prompt Guide
 
+### Welcome entrance — approved 2026-09-09
+
+The welcome screen follows the user's C composition: warm paper on the left (58%), a full-height theatre image on the right (42%). After rejecting generic components and then the overly bare revision, the user requested subtle patterns and deliberate UI details. The implemented surface uses an offset two-line club title, a faint engraved theatre seating plan, a thin inset rule and a single burgundy admission-ticket button with semicircular notches and a perforated stub. Hover lifts the ticket slightly and brightens the stage. No pill CTA, feature list or generic card shell. Keep this exception scoped to `#cinemaIntro`; the website header appears after entry.
+
+On mobile the identity and ticket come before the theatre image; the image fills the remaining height. The paper is `#f5f0e7`, the burgundy is `#753842`, and body text is `#514b44`. The seating plan is decorative SVG geometry rather than a raster texture or a literal venue map. The club emblem remains an existing asset. `intro-theatre-programme.webp` is generated decorative theatre imagery, not a claim that it depicts the club's own venue. Text and controls stay in HTML.
+
+The overlay isolates keyboard focus from the underlying page. Entry takes 420ms, then focus moves to the homepage title. The existing session-level skip, reduced-motion skip and constrained-connection skip remain. Session storage failure must not prevent entry. Existing intro PNGs remain on disk but are no longer loaded by this screen.
+
 Before editing a page, read this file as the visual source of truth. Preserve the scene media already mapped to the route. Reuse the existing state, API, event bindings, and route identifiers. When adding a surface, first decide whether it is primary content, supporting context, or an expandable interaction. Verify the result at desktop and mobile widths, and check readable contrast over the actual wallpaper.

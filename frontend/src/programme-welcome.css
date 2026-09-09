@@ -1,0 +1,144 @@
+/* C composition, revised into an engraved theatre programme after user feedback.
+ * Warm paper, a quiet seating-plan watermark, offset title, and a working ticket.
+ * The admission ticket is the one primary action; the stage responds to its hover.
+ */
+body.welcome-open { overflow: hidden !important; }
+#cinemaIntro.programme-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: 58% 42%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #f5f0e7;
+  color: #753842;
+  isolation: isolate;
+  transition: opacity 420ms ease;
+}
+#cinemaIntro.programme-welcome.is-entering { opacity: 0; pointer-events: none; }
+#cinemaIntro.programme-welcome:focus { outline: none; }
+#cinemaIntro *, #cinemaIntro *::before, #cinemaIntro *::after { box-sizing: border-box; }
+#cinemaIntro .programme-page {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 100svh;
+  padding: clamp(28px, 4vw, 64px) clamp(32px, 5.6vw, 96px);
+  overflow: hidden;
+}
+#cinemaIntro .programme-page::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  z-index: -1;
+  border: 1px solid #a78c681f;
+  pointer-events: none;
+}
+#cinemaIntro .programme-watermark {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: #9d7b54;
+  stroke: currentColor;
+  stroke-width: 0.85;
+  opacity: 0.17;
+  pointer-events: none;
+}
+#cinemaIntro .programme-seat-rows { stroke-width: 5; }
+#cinemaIntro .programme-imprint { display: flex; align-items: center; gap: 14px; }
+#cinemaIntro .programme-imprint img { width: 48px; height: 48px; object-fit: contain; border-radius: 50%; }
+#cinemaIntro .programme-imprint span {
+  color: #514b44;
+  font: 15px/1.5 Georgia, "Times New Roman", serif;
+  letter-spacing: 0.14em;
+}
+#cinemaIntro .programme-imprint .programme-brand-sub { font: 9px/1.5 "Segoe UI", sans-serif; letter-spacing: 0.22em; }
+#cinemaIntro .programme-invitation { padding: 48px 0 44px; }
+#cinemaIntro h2 {
+  margin: 0;
+  color: #753842;
+  font: 600 clamp(64px, 7.2vw, 100px)/1.15 "Noto Serif SC", "Songti SC", "SimSun", serif;
+  letter-spacing: 0.08em;
+}
+#cinemaIntro h2 span { display: block; }
+#cinemaIntro h2 span:last-child { margin: 12px 0 0 0.65em; }
+#cinemaIntro .programme-invitation p {
+  margin: 32px 0 38px 4px;
+  color: #514b44;
+  font: 400 clamp(16px, 1.5vw, 21px)/1.9 "Noto Serif SC", "Songti SC", "SimSun", serif;
+  letter-spacing: 0;
+}
+#cinemaIntro .programme-enter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  width: min(100%, 332px);
+  min-height: 86px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: #753842;
+  box-shadow: 0 10px 20px #46242a18;
+  color: #fff8e9;
+  font: 400 22px/1.5 "Noto Serif SC", "Songti SC", "SimSun", serif;
+  cursor: pointer;
+  transition: background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+#cinemaIntro .programme-enter::before,
+#cinemaIntro .programme-enter::after {
+  content: "";
+  position: absolute;
+  right: 71px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f5f0e7;
+  z-index: 1;
+}
+#cinemaIntro .programme-enter::before { top: -7px; }
+#cinemaIntro .programme-enter::after { bottom: -7px; }
+#cinemaIntro .programme-ticket-copy { display: grid; gap: 2px; padding: 14px 28px; text-align: left; }
+#cinemaIntro .programme-ticket-copy > span { letter-spacing: 0.12em; }
+#cinemaIntro .programme-ticket-copy small { font: 10px/1.6 "Segoe UI", sans-serif; letter-spacing: 0.1em; color: #ebd9cb; }
+#cinemaIntro .programme-ticket-stub { align-self: stretch; display: grid; place-items: center; flex: 0 0 78px; border-left: 1px dashed #dbc0ac88; transition: transform 200ms ease; }
+#cinemaIntro .programme-enter:hover { background: #612732; transform: translateY(-2px) rotate(-0.4deg); box-shadow: 0 15px 26px #46242a24; }
+#cinemaIntro .programme-enter:active { transform: translateY(0); }
+#cinemaIntro .programme-enter:focus-visible { outline: 2px solid #753842; outline-offset: 8px; }
+#cinemaIntro .programme-enter:disabled { cursor: wait; }
+#cinemaIntro .programme-enter svg { flex: 0 0 auto; transition: transform 160ms ease; }
+#cinemaIntro .programme-enter:hover svg { transform: translateX(5px); }
+#cinemaIntro .programme-footnote { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 16px; border-top: 1px solid #a78c684d; color: #766650; font: 13px/1.6 "Songti SC", "SimSun", serif; letter-spacing: 0.12em; }
+#cinemaIntro .programme-footnote span:last-child { font: 9px/1.6 "Segoe UI", sans-serif; letter-spacing: 0.18em; }
+#cinemaIntro .programme-stage { position: relative; min-height: 100%; overflow: hidden; background: #4f3024; }
+#cinemaIntro .programme-stage img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: filter 500ms ease, transform 650ms cubic-bezier(0.22, 1, 0.36, 1); }
+#cinemaIntro:has(.programme-enter:hover) .programme-stage img { filter: brightness(1.08); transform: scale(1.025); }
+#cinemaIntro .programme-stage-caption { position: absolute; bottom: 36px; left: 8%; color: #fff8e9; padding: 10px 14px; background: #291c18b8; font: 15px/1.7 "Songti SC", "SimSun", serif; letter-spacing: 0.1em; }
+@media (max-width: 700px) {
+  #cinemaIntro.programme-welcome { display: flex; flex-direction: column; }
+  #cinemaIntro .programme-page { flex: 0 0 auto; min-height: 0; padding: 28px 28px 24px; }
+  #cinemaIntro .programme-page::before { inset: 12px; }
+  #cinemaIntro .programme-imprint img { width: 36px; height: 36px; }
+  #cinemaIntro .programme-imprint span { font-size: 10px; }
+  #cinemaIntro .programme-invitation { padding: 32px 0 16px; }
+  #cinemaIntro h2 { font-size: clamp(48px, 13vw, 72px); }
+  #cinemaIntro h2 span:last-child { margin-top: 6px; }
+  #cinemaIntro .programme-invitation p { margin: 24px 0 26px; font-size: 15px; }
+  #cinemaIntro .programme-enter { width: min(100%, 310px); min-height: 78px; font-size: 19px; }
+  #cinemaIntro .programme-ticket-copy { padding: 12px 22px; }
+  #cinemaIntro .programme-footnote { display: none; }
+  #cinemaIntro .programme-stage { flex: 1 0 280px; min-height: 280px; }
+  #cinemaIntro .programme-stage img { object-position: 50% 60%; }
+  #cinemaIntro .programme-stage-caption { left: 24px; bottom: 24px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #cinemaIntro.programme-welcome, #cinemaIntro .programme-enter, #cinemaIntro .programme-enter svg, #cinemaIntro .programme-stage img { transition: none; }
+}
