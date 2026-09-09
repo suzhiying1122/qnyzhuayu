@@ -3094,60 +3094,40 @@ function renderLetterDetail() {
 function renderEssayDetail() {
   const essay = state.essays.find((item) => item.id === state.activeEssayId);
   if (!essay) {
-    elements.essayDetailContent.innerHTML = renderDetailMissing("writing", "文章不存在或尚未放上书架。");
+    elements.essayDetailContent.innerHTML = `<div class="essay-reading-article"><header class="essay-reading-heading"><h2 id="essayDetailTitle">文章暂不可用</h2><p>文章不存在或尚未放上书架。</p></header><button class="essay-reading-back" data-view-target="writing" type="button">返回征文</button></div>`;
     bindViewTargetButtons(elements.essayDetailContent);
     return;
   }
   const event = state.writingEvents.find((item) => item.id === essay.eventId);
   elements.essayDetailContent.innerHTML = `
-    <div class="wechat-detail-layout writing-chat-layout">
-      ${renderDetailSidebar("writing")}
-      <section class="wechat-reader essay-reader">
-        <header class="reader-topbar essay-reader-topbar">
-          <button class="back-button" data-view-target="writing" type="button">返回征文</button>
-          <div>
-            <p class="section-kicker">Huayu Writing</p>
-            <h2 id="essayDetailTitle">${escapeHtml(essay.title)}</h2>
-            <p>${escapeHtml(essay.author || "匿名社员")} · ${formatDateTime(essay.createdAt)} · ${escapeHtml(event?.title || "征文活动")}</p>
-          </div>
-          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-essay="${essay.id}" type="button">删除文章</button>` : ""}
-        </header>
-        <div class="reader-scroll essay-reader-scroll">
-          <article class="message-card host-message essay-paper-card">
-            <aside class="message-author">
-              <div class="floor-avatar">${escapeHtml((essay.author || "文").slice(0, 1))}</div>
-              <strong>${escapeHtml(essay.author || "匿名社员")}</strong>
-              <span>作者</span>
-            </aside>
-            <div class="message-body">
-              <div class="tag-row">
-                <span class="tag">征文</span>
-                ${event?.deadline ? `<span>截止 ${formatDate(event.deadline)}</span>` : `<span>长期开放</span>`}
-                ${renderAttachmentCount(essay)}
-              </div>
-              <div class="detail-body essay-detail-body">${escapeHtml(essay.body)}</div>
-              ${renderAttachmentList(essay, "full")}
-            </div>
-          </article>
-          ${event ? `
-            <article class="message-card writing-event-note">
-              <aside class="message-author">
-                <div class="floor-avatar">征</div>
-                <strong>${escapeHtml(event.title)}</strong>
-                <span>${event.fixed ? "固定活动" : "征文活动"}</span>
-              </aside>
-              <div class="message-body">
-                <div class="detail-body">${escapeHtml(event.prompt)}</div>
-              </div>
-            </article>
-          ` : ""}
-          ${renderDetailStageFooter()}
+    <nav class="essay-reading-nav" aria-label="作品导航">
+      <button class="essay-reading-back" data-view-target="writing" type="button"><span aria-hidden="true">←</span> 返回征文</button>
+      <span>投稿作品 / 正文</span>
+      ${isAdmin() ? `<button class="essay-reading-delete" data-delete-essay="${escapeAttribute(essay.id)}" type="button">删除文章</button>` : ""}
+    </nav>
+    <article class="essay-reading-article">
+      <header class="essay-reading-heading">
+        <h2 id="essayDetailTitle">${escapeHtml(essay.title)}</h2>
+        <div class="essay-reading-byline">
+          <span class="essay-reading-avatar" aria-hidden="true">${escapeHtml(Array.from(essay.author || "文")[0])}</span>
+          <span><strong>${escapeHtml(essay.author || "匿名社员")}</strong><span class="essay-reading-author-label">作者</span></span>
+          <time>${formatDateTime(essay.createdAt)}</time>
         </div>
-      </section>
-    </div>
+      </header>
+      <div class="essay-reading-body">${escapeHtml(essay.body)}</div>
+      <div class="essay-reading-attachments">${renderAttachmentList(essay, "full")}</div>
+      ${event ? `
+        <aside class="essay-reading-event" aria-label="所属征文活动">
+          <h3>${escapeHtml(event.title)}</h3>
+          <p class="essay-reading-deadline">${event.deadline ? `投稿截止 ${formatDate(event.deadline)}` : "长期开放投稿"}</p>
+          <div class="essay-reading-prompt">${escapeHtml(event.prompt)}</div>
+          <button class="essay-reading-back" data-view-target="writing" type="button">查看征文与更多作品 <span aria-hidden="true">↗</span></button>
+        </aside>
+      ` : ""}
+      <footer class="essay-reading-footer"><span>华煜话剧社 · 投稿作品</span><button class="essay-reading-back" data-view-target="writing" type="button">返回征文 <span aria-hidden="true">↗</span></button></footer>
+    </article>
   `;
   bindViewTargetButtons(elements.essayDetailContent);
-  bindDetailSidebar(elements.essayDetailContent);
   elements.essayDetailContent.querySelectorAll("[data-delete-essay]").forEach((button) => {
     button.addEventListener("click", () => deleteEssay(button.dataset.deleteEssay));
   });

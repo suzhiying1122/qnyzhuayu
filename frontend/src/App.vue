@@ -714,8 +714,8 @@
         </div>
       </section>
 
-      <section class="view module-screen writing-detail-screen" id="essayDetailScreen" data-view="essayDetail" aria-labelledby="essayDetailTitle">
-        <div class="detail-page-shell" id="essayDetailContent"></div>
+      <section class="view essay-reading-screen" id="essayDetailScreen" data-view="essayDetail" aria-labelledby="essayDetailTitle">
+        <div class="essay-reading-shell" id="essayDetailContent"></div>
       </section>
 
       <MemberProfile />

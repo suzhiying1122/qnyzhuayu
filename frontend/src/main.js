@@ -13,6 +13,7 @@ import "./auth-modal.css";
 import "./interaction-polish.css";
 import "./profile-editorial.css";
 import "./site-refinement.css";
+import "./essay-reading.css";
 import { initInteractionPolish } from "./interaction-polish.js";
 
 createApp(App).mount("#app");
