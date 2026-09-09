@@ -372,12 +372,7 @@ def robots_txt(request):
 
 def sitemap_xml(request):
     base_url = request.build_absolute_uri("/").rstrip("/")
-    urls = [
-        ("", "1.0"),
-        ("/forum/", "0.9"),
-        ("/activities/", "0.9"),
-        ("/mailbox/", "0.8"),
-    ]
+    urls = [("", "1.0")]
     body = ['<?xml version="1.0" encoding="UTF-8"?>']
     body.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
     for path, priority in urls:

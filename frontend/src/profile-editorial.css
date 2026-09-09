@@ -1,0 +1,252 @@
+/* The profile owns its composition; shared cinematic module grids do not apply. */
+body[data-view="profile"] {
+  background: #faf9f5;
+  --member-ink: #302c29;
+  --member-muted: #706a62;
+  --member-line: #dedbd4;
+  --member-accent: #753842;
+}
+body[data-view="profile"] .scene-video-stage,
+body[data-view="profile"] .scene-progress { display: none !important; }
+
+#profileScreen {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  width: 100%;
+  margin: 0;
+  color: var(--member-ink);
+  background: #faf9f5;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+#profileScreen.is-active { display: block !important; }
+#profileScreen *, #profileScreen *::before, #profileScreen *::after { box-sizing: border-box; letter-spacing: 0; }
+#profileScreen .member-art {
+  position: fixed;
+  inset: 88px 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/assets/profile-theatre-archive.webp") center / cover no-repeat;
+}
+#profileScreen .member-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #faf9f5 0%, #faf9f5 43%, rgba(250,249,245,.94) 48%, rgba(250,249,245,.3) 64%, transparent 76%);
+}
+#profileScreen .member-content {
+  width: min(660px, 48%);
+  margin-left: 6%;
+  padding: 118px 0 28px;
+}
+#profileScreen h2, #profileScreen h3, #profileScreen h4, #profileScreen p { margin: 0; color: var(--member-ink); }
+#profileScreen button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--member-ink);
+  font: 500 14px/1.4 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  text-transform: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+#profileScreen button:hover { background-color: #eeeae2; }
+#profileScreen button:active { transform: translateY(1px); }
+#profileScreen button:focus-visible, #profileScreen [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--member-accent);
+  outline-offset: 4px;
+}
+#profileScreen button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+#profileScreen svg { flex-shrink: 0; stroke-width: 1.6; }
+#profileScreen .member-breadcrumb { display: flex; align-items: center; gap: 16px; color: var(--member-muted); font-size: 12px; }
+#profileScreen .member-back { padding-left: 0; color: var(--member-muted); font-size: 12px; }
+#profileScreen .member-back:hover { background: transparent; color: var(--member-accent); }
+#profileScreen .member-heading { margin: 24px 0 32px; }
+#profileScreen .member-heading h2 {
+  font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  font-size: 38px;
+  line-height: 1.35;
+  font-weight: 500;
+  text-wrap: balance;
+}
+#profileScreen .member-heading p { margin-top: 8px; color: var(--member-muted); font-size: 14px; }
+#profileScreen .member-identity { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 21px; align-items: center; margin-bottom: 30px; }
+#profileScreen .member-avatar-edit { position: relative; width: 96px; height: 96px; padding: 0; border-radius: 50%; }
+#profileScreen .member-avatar {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background-color: #70464c;
+  background-position: center;
+  background-size: cover;
+  color: white;
+  font: 500 30px/1 "Songti SC", serif;
+  box-shadow: 0 6px 18px #342a2317;
+}
+#profileScreen .member-camera { position: absolute; right: 0; bottom: 2px; display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #faf9f5; border-radius: 50%; background: #fff; color: var(--member-accent); }
+#profileScreen .member-identity-copy { min-width: 0; }
+#profileScreen .member-identity-copy h3 { font-size: 25px; line-height: 1.35; font-weight: 650; overflow-wrap: anywhere; }
+#profileScreen .member-identity-copy > p { margin-top: 5px; font-size: 13px; color: var(--member-muted); overflow-wrap: anywhere; }
+#profileScreen .member-account-line { display: flex; align-items: center; gap: 6px; min-height: 32px; color: var(--member-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+#profileScreen .member-icon-button { min-height: 32px; width: 32px; padding: 0; color: var(--member-muted); }
+#profileScreen .member-edit-button { border: 1px solid #d1cbc1; background: #fff9; padding-inline: 12px; font-size: 12px; }
+#profileScreen .member-tabs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; border-bottom: 1px solid var(--member-line); }
+#profileScreen .member-tab { position: relative; min-height: 56px; padding: 12px 6px; border-radius: 0; color: var(--member-muted); font-size: 13px; white-space: nowrap; }
+#profileScreen .member-tab::after { content: ""; position: absolute; bottom: -1px; left: 12%; right: 12%; height: 2px; background: var(--member-accent); transform: scaleX(0); transition: transform 200ms ease; }
+#profileScreen .member-tab.is-active { color: var(--member-accent); font-weight: 650; }
+#profileScreen .member-tab.is-active::after { transform: scaleX(1); }
+#profileScreen .member-tab:hover { background: #ede9e14d; }
+#profileScreen .member-panels { min-height: 332px; }
+#profileScreen .member-panel { display: none; padding: 26px 0 0; }
+#profileScreen .member-panel.is-open { display: block; animation: member-reveal 240ms ease-out; }
+@keyframes member-reveal { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+#profileScreen h4 { font-size: 15px; font-weight: 650; line-height: 1.5; }
+#profileScreen .member-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; min-height: 32px; }
+#profileScreen .member-section-heading > span { color: var(--member-muted); font-size: 12px; }
+#profileScreen .member-text-button { width: 34px; min-height: 34px; padding: 0; color: var(--member-muted); }
+#profileScreen .member-bio { max-width: 65ch; font-size: 14px; line-height: 1.9; color: #625d56; overflow-wrap: anywhere; white-space: pre-wrap; }
+#profileScreen .member-contributions { margin-top: 26px; }
+#profileScreen .member-contributions dl { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); margin: 16px 0 0; }
+#profileScreen .member-contributions dl > div { display: flex; align-items: center; gap: 20px; }
+#profileScreen .member-contributions dl > div + div { border-left: 1px solid var(--member-line); padding-left: 28px; }
+#profileScreen .member-contributions dt { color: var(--member-muted); font-size: 13px; }
+#profileScreen .member-contributions dd { margin: 0; font-size: 27px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--member-ink); font-weight: 500; }
+#profileScreen .member-activity-link { display: grid; grid-template-columns: 44px 1fr 24px; gap: 14px; width: 100%; margin-top: 30px; padding: 17px 0; border-radius: 0; border-block: 1px solid var(--member-line); text-align: left; }
+#profileScreen .member-activity-link:hover { background: #eeeae266; }
+#profileScreen .member-activity-symbol { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 6px; color: #527166; background: #e5ece5; }
+#profileScreen .member-activity-link strong { display: block; font-size: 14px; font-weight: 550; }
+#profileScreen .member-activity-link small { display: block; margin-top: 4px; font-size: 12px; color: var(--member-muted); }
+#profileScreen .member-footer { display: flex; align-items: center; gap: 9px; margin-top: 24px; color: var(--member-muted); font-size: 11px; }
+#profileScreen .member-footer img { border-radius: 50%; opacity: .8; }
+#profileScreen .member-footer-note { margin-left: auto; color: #857b6c; font-family: "Songti SC", "SimSun", serif; font-size: 12px; }
+#profileScreen .member-art-caption { position: fixed; right: 5%; bottom: 8%; color: #fffbf0; font-family: "Songti SC", "SimSun", serif; font-size: 23px; line-height: 1.8; text-shadow: 0 2px 18px #20171188; pointer-events: none; }
+
+#profileScreen .member-form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+#profileScreen .member-form h4, #profileScreen .member-full, #profileScreen .member-form-footer { grid-column: 1 / -1; }
+#profileScreen label { display: grid; gap: 8px; color: #575149; font: 500 13px/1.5 "Segoe UI", "Microsoft YaHei", sans-serif; }
+#profileScreen input, #profileScreen textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 11px 13px;
+  border: 1px solid #d7d1c7;
+  border-radius: 6px;
+  color: #302c29;
+  background: #fffefa;
+  font: 400 14px/1.6 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  caret-color: var(--member-accent);
+  outline: none;
+  box-shadow: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+#profileScreen input::placeholder, #profileScreen textarea::placeholder { color: #777169; opacity: 1; }
+#profileScreen input:focus, #profileScreen textarea:focus { border-color: var(--member-accent); box-shadow: 0 0 0 3px #75384213; }
+#profileScreen textarea { resize: vertical; }
+#profileScreen input[type="file"] { padding: 8px; font-size: 12px; }
+#profileScreen input::file-selector-button { margin-right: 12px; border: 0; border-radius: 4px; background: #eae5db; color: #484038; padding: 8px 12px; cursor: pointer; }
+#profileScreen label small { font-size: 11px; font-weight: 400; color: var(--member-muted); }
+#profileScreen .member-primary { background: var(--member-accent); color: #fff; border-radius: 6px; min-height: 44px; padding-inline: 19px; }
+#profileScreen .member-primary:hover { background: #5e2832; }
+#profileScreen .member-form-footer { display: flex; justify-content: flex-end; padding-top: 5px; }
+#profileScreen .member-password-form { grid-template-columns: minmax(0,1fr); max-width: 440px; }
+#profileScreen .member-friend-search label { margin-bottom: 12px; font-size: 15px; font-weight: 650; }
+#profileScreen .member-friend-search > div { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+#profileScreen .member-friend-section { margin-top: 25px; }
+#profileScreen .friend-list { display: grid; gap: 8px; }
+#profileScreen .empty-state { min-height: 68px; padding: 18px; border: 1px dashed #d7d1c7 !important; border-radius: 6px; background: #f4f1ea !important; color: #706a62 !important; font-size: 13px; box-shadow: none; }
+#profileScreen .empty-state::before { display: none; }
+#profileScreen .friend-row { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 10px; padding: 12px 0; border: 0; border-bottom: 1px solid var(--member-line); border-radius: 0; background: transparent; box-shadow: none; }
+#profileScreen .friend-row strong, #profileScreen .chat-header strong { color: var(--member-ink); }
+#profileScreen .friend-row span, #profileScreen .chat-header span { color: var(--member-muted); font-size: 12px; }
+#profileScreen .friend-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+#profileScreen .friend-actions button { border: 1px solid var(--member-line); font-size: 12px; padding: 8px 10px; }
+#profileScreen .mini-avatar { width: 38px; height: 38px; border-radius: 50%; background-color: #e5ece5; background-size: cover; background-position: center; color: #40665a; }
+#profileScreen .member-chat { margin-top: 22px; }
+#profileScreen .member-chat-empty { display: flex; align-items: center; gap: 12px; padding: 20px 0; color: var(--member-muted); font-size: 13px; }
+#profileScreen .chat-header { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+#profileScreen .chat-header span { display: block; }
+#profileScreen .chat-messages { display: flex; min-height: 160px; max-height: 300px; gap: 12px; padding: 14px; overflow-y: auto; border: 1px solid var(--member-line); border-radius: 6px; background: #f1eee8; }
+#profileScreen .chat-bubble { max-width: 85%; border-radius: 6px; padding: 10px 14px; box-shadow: none; }
+#profileScreen .chat-bubble.from-friend { align-self: flex-start; background: white; color: #302c29; }
+#profileScreen .chat-bubble.from-me { align-self: flex-end; background: #e3ece4; color: #2c4e43; }
+#profileScreen .chat-bubble p, #profileScreen .chat-bubble span { color: inherit; overflow-wrap: anywhere; }
+#profileScreen .chat-compose { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; margin-top: 12px; }
+#profileScreen .hidden { display: none !important; }
+
+@media (min-width: 1600px) {
+  #profileScreen .member-content { padding-top: 145px; }
+  #profileScreen .member-heading { margin-block: 35px 40px; }
+  #profileScreen .member-heading h2 { font-size: 44px; }
+  #profileScreen .member-identity { margin-bottom: 36px; }
+  #profileScreen .member-panel { padding-top: 30px; }
+}
+@media (min-width: 901px) and (max-width: 1180px) {
+  #profileScreen .member-content { width: 57%; margin-left: 4%; }
+  #profileScreen .member-art::after { background: linear-gradient(90deg,#faf9f5 0%,#faf9f5 51%,rgba(250,249,245,.9) 58%,transparent 85%); }
+  #profileScreen .member-heading h2 { font-size: 32px; }
+  #profileScreen .member-tab { gap: 6px; font-size: 12px; }
+}
+@media (max-width: 900px) {
+  body[data-view="profile"]:has(#globalHeader) #globalHeader {
+    min-height: 64px !important;
+    height: 64px !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: 1fr !important;
+    padding: 10px 20px !important;
+  }
+  body[data-view="profile"]:has(#globalHeader) #globalHeader .top-nav,
+  body[data-view="profile"]:has(#globalHeader) #globalHeader .search-button,
+  body[data-view="profile"]:has(#globalHeader) #globalHeader .account-name { display: none !important; }
+  body[data-view="profile"]:has(#globalHeader) #globalHeader .header-actions { grid-column: 2 !important; grid-row: 1 !important; }
+  body[data-view="profile"]:has(#globalHeader) #globalHeader .account-area { grid-column: auto !important; min-width: 0 !important; }
+  #profileScreen .member-art { position: absolute; inset: 64px 0 auto; height: 260px; background-size: auto 410px; background-position: right 58%; }
+  #profileScreen .member-art::after { background: linear-gradient(180deg, transparent 45%, #faf9f5 100%); }
+  #profileScreen .member-art-caption { display: none; }
+  #profileScreen .member-content { width: min(620px, calc(100% - 40px)); margin-inline: auto; padding: 85px 0 24px; }
+  #profileScreen .member-breadcrumb { width: max-content; border-radius: 6px; padding: 0 10px; background: #fffdf4e8; color: #4f493f; gap: 12px; }
+  #profileScreen .member-heading { margin: 139px 0 26px; }
+  #profileScreen .member-heading h2 { font-size: 30px; }
+  #profileScreen .member-heading p { font-size: 13px; }
+  #profileScreen .member-identity { grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; margin-bottom: 24px; }
+  #profileScreen .member-avatar-edit, #profileScreen .member-avatar { width: 76px; height: 76px; }
+  #profileScreen .member-identity-copy h3 { font-size: 22px; }
+  #profileScreen .member-identity-copy > p { font-size: 12px; }
+  #profileScreen .member-edit-button { width: 40px; padding: 8px; }
+  #profileScreen .member-edit-button span { display: none; }
+  #profileScreen .member-tab { flex-direction: column; gap: 5px; min-height: 64px; font-size: 12px; padding: 9px 2px; }
+  #profileScreen .member-tabs { position: sticky; top: 64px; z-index: 3; background: #faf9f5f5; }
+  #profileScreen .member-panel { padding-top: 22px; }
+  #profileScreen .member-panels { min-height: 335px; }
+  #profileScreen .member-form { grid-template-columns: minmax(0,1fr); }
+  #profileScreen input, #profileScreen textarea { font-size: 16px; }
+  #profileScreen .member-icon-button { min-width: 40px; min-height: 40px; }
+  #profileScreen .member-friend-search > div { grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+  #profileScreen .member-friend-search .member-primary { padding-inline: 12px; }
+  #profileScreen .member-friend-search .member-primary svg { display: none; }
+  #profileScreen .member-footer-note { max-width: 155px; font-size: 11px; text-align: right; }
+}
+@media (max-width: 360px) {
+  #profileScreen .member-content { width: calc(100% - 32px); }
+  #profileScreen .member-heading h2 { font-size: 26px; }
+  #profileScreen .member-contributions dl > div { gap: 10px; }
+  #profileScreen .member-contributions dl > div + div { padding-left: 16px; }
+  #profileScreen .friend-row { grid-template-columns: auto minmax(0,1fr); }
+  #profileScreen .friend-actions { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #profileScreen *, #profileScreen *::after { animation: none !important; transition: none !important; scroll-behavior: auto; }
+}

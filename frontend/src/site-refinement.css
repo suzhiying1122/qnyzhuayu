@@ -1,0 +1,266 @@
+/* Shared navigation and reading controls, after the older scene-specific rules. */
+:root { --site-control-ink: #302c29; --site-control-muted: #6b625b; --site-control-line: #d6cec4; --site-control-accent: #833a43; }
+body .mobile-menu-toggle, body .mobile-menu-backdrop { display: none; }
+body #globalHeader .hidden { display: none !important; }
+body:has(#globalHeader) #globalHeader :is(.nav-link, .outline-button, .ghost-button).hidden { display: none !important; }
+body #globalHeader .brand { white-space: nowrap; }
+body #globalHeader .nav-link { letter-spacing: 0 !important; }
+body #globalHeader .global-search-result { padding: 14px 12px; }
+body #globalHeader .global-search-result strong { font-size: 15px; line-height: 1.6; }
+body #globalHeader .global-search-result small { font-size: 12px; line-height: 1.6; }
+body #toast {
+  position: fixed; left: 50%; right: auto; bottom: max(24px, env(safe-area-inset-bottom));
+  width: max-content; max-width: calc(100vw - 40px); padding: 14px 20px;
+  transform: translateX(-50%); border: 0; border-radius: 8px;
+  background: #302c29 !important; color: #fff !important;
+  font: 400 14px/1.6 "Microsoft YaHei", sans-serif;
+  box-shadow: 0 6px 24px #0003; z-index: 2000; pointer-events: none;
+}
+body #toast.hidden { display: none !important; }
+body #top :is(button, a, summary):focus-visible { outline: 2px solid #397267; outline-offset: 4px; }
+body #top :is(#mailboxScreen, #writingScreen, #adminScreen) :is(input:not([type="radio"]):not([type="checkbox"]), textarea, select) {
+  width: 100% !important; min-width: 0; min-height: 44px !important; padding: 11px 13px !important;
+  border: 1px solid var(--site-control-line) !important; border-radius: 6px !important;
+  background: #fffefa !important; color: var(--site-control-ink) !important;
+  font: 400 15px/1.65 "Microsoft YaHei", sans-serif !important; box-shadow: none;
+}
+body #top :is(#mailboxScreen, #writingScreen, #adminScreen) :is(input, textarea)::placeholder { color: #756c65 !important; opacity: 1; }
+body #top :is(#mailboxScreen, #writingScreen, #adminScreen) :is(input, textarea, select):focus { outline: 2px solid #833a4340; outline-offset: 2px; border-color: #833a43 !important; }
+body #top :is(#mailboxScreen, #writingScreen, #adminScreen) label { font-size: 14px !important; line-height: 1.6 !important; color: var(--site-control-ink); }
+body #top :is(#mailboxScreen, #writingScreen, #adminScreen) input[type="file"] { font-size: 12px !important; }
+body #top input::file-selector-button { padding: 8px 10px; margin-right: 10px; border: 0; border-radius: 4px; background: #eee8df; color: #302c29; }
+body #top :is(.field-note, .form-message) { font-size: 12px !important; line-height: 1.7; }
+body #top :is(.writing-gallery-heading h2, .contact-heading h2, .events-title-wrap h2) { font-size: 54px !important; line-height: 1.2 !important; letter-spacing: 0 !important; }
+body #top :is(.writing-page-index, .contact-page-index, .events-header-stamp, .writing-wordmark, .contact-wordmark, .events-wordmark) { display: none !important; }
+body #top :is(.writing-featured-kicker, .writing-section-header > div > span, .contact-letter-topline, .events-rail-label) { font-size: 11px !important; letter-spacing: 0 !important; }
+
+/* Work cards grow with their title and keep summary and byline in distinct rows. */
+body #top #writingScreen .writing-featured-work { grid-template-rows: minmax(360px, auto) !important; }
+body #top #writingScreen .writing-featured-copy { padding: 28px !important; }
+body #top #writingScreen .writing-featured-copy h3 { font-size: 30px !important; line-height: 1.4 !important; }
+body #top #writingScreen .writing-featured-description { font-size: 15px !important; line-height: 1.8 !important; height: auto !important; max-height: none !important; -webkit-line-clamp: 3 !important; }
+body #top #writingScreen .writing-featured-meta :is(dt, dd) { font-size: 12px !important; }
+body #top #writingScreen .writing-gallery-header { min-height: 0 !important; gap: 24px !important; }
+body #top #writingScreen .writing-recent-section { margin-top: 36px !important; }
+body #top #writingScreen .writing-shelf { gap: 18px !important; grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)) !important; grid-template-rows: none !important; grid-auto-rows: auto !important; }
+body #top #writingScreen .writing-work-row {
+  position: relative; display: flex !important; flex-direction: column;
+  min-height: 244px !important; height: auto !important; padding: 22px !important;
+  border-radius: 6px; overflow: hidden;
+}
+body #top #writingScreen .writing-work-index { display: none !important; }
+body #top #writingScreen .writing-work-open {
+  display: flex !important; flex: 1; flex-direction: column; align-items: stretch;
+  min-height: 0 !important; height: auto !important; width: 100%; gap: 14px !important;
+  padding: 0 !important; text-align: left; white-space: normal;
+}
+body #top #writingScreen .writing-work-title { display: grid !important; gap: 6px !important; }
+body #top #writingScreen .writing-work-title strong { font-size: 19px !important; line-height: 1.5 !important; overflow-wrap: anywhere; }
+body #top #writingScreen .writing-work-title small { font-size: 12px !important; line-height: 1.5; }
+body #top #writingScreen .writing-work-excerpt {
+  display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3 !important;
+  height: auto !important; min-height: 0; max-height: none !important; overflow: hidden;
+  font-size: 14px !important; line-height: 1.8 !important; color: #6b625b;
+}
+body #top #writingScreen .writing-work-meta { display: block !important; align-self: stretch !important; margin-top: auto; padding-right: 48px; font-size: 12px !important; line-height: 1.7; }
+body #top #writingScreen .writing-work-excerpt { max-width: 70ch; }
+body #top #writingScreen :is(.writing-event-intro, .writing-event-intro p, .writing-event-card strong, .writing-event-card small, .writing-event-card em) { color: #443b33 !important; font-size: 14px !important; line-height: 1.8 !important; letter-spacing: 0 !important; }
+body #top #writingScreen .writing-event-card strong { font-size: 18px !important; }
+body #top #writingScreen .writing-event-card { min-height: 100px; }
+body #top #writingScreen .writing-event-intro .type-pill { color: #78343e !important; background: #f0dfdc !important; }
+body #top :is(.writing-empty-message, .events-feed-end) { padding: 18px 0; color: #6b625b; font-size: 13px; }
+body #top #writingScreen .writing-work-arrow { position: absolute; right: 20px; top: 24px; font-size: 18px; }
+body #top #writingScreen .writing-work-title { padding-right: 20px; }
+body #top #writingScreen .writing-work-delete { align-self: flex-end !important; margin: 8px 0 0 !important; min-height: 36px; padding: 6px 10px; font-size: 12px; }
+body #top #writingScreen .writing-work-row.is-placeholder { display: none !important; }
+body #top #writingScreen .writing-open-calls { display: block !important; margin-top: 36px; }
+body #top #writingScreen .writing-admin-panel { display: block !important; margin-top: 24px; }
+body #top #writingScreen .writing-submit-band { grid-template-columns: 1fr !important; gap: 18px; }
+body #top #writingScreen .writing-submit-band h3 { font-size: 26px !important; line-height: 1.5; letter-spacing: 0 !important; }
+body #top #writingScreen .writing-submit-details { width: 100%; }
+body #top #writingScreen .writing-submit-details summary { min-height: 44px; font-size: 15px; }
+body #top #writingScreen :is(.writing-submit-form, .writing-admin-form) { max-height: none !important; gap: 18px; }
+body #top #writingScreen .writing-submit-form :is(label, .field-note) { color: #443b33 !important; }
+body #top #writingScreen .writing-submit-form-wrap { padding: 24px !important; background: #fffefa; border-radius: 6px; }
+body #top #writingScreen .writing-form-submit { min-height: 44px; font-size: 14px; }
+
+/* Restore the public/private decision that the compact contact layout hid. */
+body[data-view="mailbox"] { overflow-y: auto !important; }
+/* These two older scenes locked the entire reading surface to one viewport. */
+body:is([data-view="mailbox"], [data-view="admin"]):has(#top) #top { height: auto !important; max-height: none !important; overflow: visible !important; }
+body[data-view]:has(#top) #top > :is(#mailboxScreen, #adminScreen).is-active { height: auto !important; max-height: none !important; overflow: visible !important; }
+body #top #mailboxScreen.is-active { display: block !important; height: auto !important; min-height: 100svh !important; max-height: none !important; overflow: visible !important; }
+body #top #mailboxScreen .contact-page { display: block !important; height: auto !important; max-height: none !important; min-height: 0 !important; overflow: visible !important; padding-bottom: 48px !important; }
+body #top #mailboxScreen .contact-layout { align-items: start !important; height: auto !important; max-height: none !important; min-height: 0 !important; overflow: visible !important; }
+body #top #mailboxScreen .contact-letter-paper { height: auto !important; max-height: none !important; overflow: visible !important; }
+body #top #mailboxScreen .contact-letter-paper { padding: 28px !important; }
+body #top #mailboxScreen .contact-form { gap: 18px !important; }
+body #top #mailboxScreen .contact-form-heading h3 { font-size: 28px !important; }
+body #top #mailboxScreen .contact-form-heading p { display: block !important; max-width: none; font-size: 14px !important; line-height: 1.8; margin-bottom: 20px; }
+body #top #mailboxScreen .contact-form textarea { height: auto !important; min-height: 150px !important; max-height: none !important; resize: vertical; }
+body #top #mailboxScreen :is(.field-note, .contact-choice-group legend) { color: #6b625b !important; }
+body #top #mailboxScreen .contact-choice-group { display: flex !important; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 12px 0; border: 0; border-block: 1px solid #ddd5ca; }
+body #top #mailboxScreen .contact-choice-group legend { padding: 0 0 8px; font-size: 13px; color: #62584f; }
+body #top #mailboxScreen .contact-choice-group label { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 13px !important; }
+body #top #mailboxScreen .contact-choice-group input { width: 18px; height: 18px; min-height: 18px; margin: 0; accent-color: #833a43; }
+body #top #mailboxScreen .contact-attachment-field { display: grid !important; gap: 8px; }
+body #top #mailboxScreen .contact-form-footer { display: flex !important; gap: 16px !important; align-items: center; }
+body #top #mailboxScreen .contact-form-footer > small { max-width: 34ch !important; font-size: 12px !important; line-height: 1.7 !important; }
+body #top #mailboxScreen .contact-submit-button { min-height: 44px !important; font-size: 14px !important; white-space: nowrap; }
+body #top #mailboxScreen .contact-ledger :is(dd, dt, small) { font-size: 12px !important; line-height: 1.7; }
+body #top #mailboxScreen .contact-information > p { font-size: 14px !important; line-height: 1.8; }
+body #top #mailboxScreen .contact-voices { display: block !important; margin: 40px 0; padding-top: 24px; border-top: 1px solid #d6cec4; }
+body #top #mailboxScreen .contact-voices-heading { align-items: end; margin-bottom: 20px; }
+body #top #mailboxScreen .contact-voices-heading h3 { font-size: 28px; }
+body #top #mailboxScreen .contact-voices-heading p { font-size: 14px; }
+body #top #mailboxScreen .contact-letter-list { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+body #top #mailboxScreen .letter-card { border: 1px solid #d6cec4; border-radius: 6px; background: #fffdfa !important; color: #302c29 !important; padding: 24px; }
+body #top #mailboxScreen .letter-card :is(h3, .letter-body, .tag-row, footer, .club-reply, .empty-state) { color: #443b33 !important; }
+body #top #mailboxScreen .letter-card h3 { font-size: 22px; line-height: 1.5; }
+body #top #mailboxScreen .letter-body { font-size: 15px; line-height: 1.8; }
+body #top #mailboxScreen .letter-card :is(.tag-row, footer) { font-size: 12px; }
+body #top #mailboxScreen .letter-card :is(.empty-state, .club-reply) { background: #f2eee6 !important; font-size: 14px; border: 0; border-radius: 4px; box-shadow: none; }
+body #top #mailboxScreen .letter-card .reject-button { color: #833a43 !important; font-size: 13px; min-height: 40px; }
+body:is([data-view="mailbox"], [data-view="admin"]) .scene-progress { display: none !important; }
+
+/* Metadata remains legible in the programme and the reading views. */
+body #top :is(#activitiesScreen, #activityDetailScreen) :is(.events-row-description, .events-featured-summary, .activity-detail-intro, .activity-detail-section p) { font-size: 15px !important; line-height: 1.8 !important; }
+body #top :is(#activitiesScreen, #activityDetailScreen) :is(small, dt, .events-filter-button, .events-detail-link, .events-status, .activity-detail-type) { font-size: 12px !important; line-height: 1.6 !important; }
+body #top :is(#activitiesScreen, #activityDetailScreen) :is(.events-detail-link, .events-primary-button, .events-filter-button) { min-height: 40px; }
+body #top :is(#letterDetailScreen, #essayDetailScreen) :is(.detail-header h2, .detail-page-header h2) { font-size: 34px !important; line-height: 1.4; overflow-wrap: anywhere; }
+body #top :is(#letterDetailScreen, #essayDetailScreen) :is(.detail-body, .detail-body p, .reader-body) { font-size: 17px !important; line-height: 1.9; }
+body #top :is(#letterDetailScreen, #essayDetailScreen) :is(small, .detail-fold-meta, .tag, .reply-pill) { font-size: 12px !important; }
+
+/* Admin borrows the profile's theatre archive, but keeps the controls quiet and dense. */
+body[data-view="admin"] .scene-video-stage { display: none !important; }
+body #top #adminScreen.is-active {
+  isolation: isolate; display: block !important; position: relative !important;
+  width: 100% !important; min-height: 100svh !important; height: auto !important;
+  margin: 0 !important; padding: 124px clamp(36px,6vw,104px) 72px !important;
+  overflow: hidden !important; color: #2a2521 !important; background: #f5f1e8 !important;
+}
+body #top #adminScreen.is-active::before {
+  content: ""; position: absolute; z-index: -2; inset: 0; min-height: 100%;
+  background: url("/assets/profile-theatre-archive.webp") center / cover no-repeat;
+  filter: saturate(.84) contrast(.98);
+}
+body #top #adminScreen.is-active::after {
+  content: ""; position: absolute; z-index: -1; inset: 0;
+  background: linear-gradient(90deg,#faf8f2 0%,#faf8f2 48%,rgba(250,248,242,.9) 61%,rgba(250,248,242,.08) 86%);
+  pointer-events: none;
+}
+body #top #adminScreen .module-hero { display: grid !important; position: relative !important; grid-template-columns: minmax(0,1fr) auto; align-items: end; gap: 24px; width: min(940px,68vw) !important; padding: 0 0 22px !important; margin: 0 0 22px !important; border-bottom: 1px solid rgba(98,79,60,.22); color: #2a2521 !important; }
+body #top #adminScreen .module-hero .back-button { grid-column: 1 / -1; justify-self: start; min-height: 38px; padding: 7px 14px; border: 1px solid rgba(91,72,54,.28); border-radius: 999px; background: rgba(255,254,249,.76); color: #4a3c31; backdrop-filter: blur(12px); }
+body #top #adminScreen .module-hero h2 { font-family: "STSong","Songti SC",serif !important; font-size: clamp(34px,3vw,48px) !important; font-weight: 500; line-height: 1.2 !important; max-width: none !important; margin: 10px 0 8px; color: #2a2521 !important; letter-spacing: 0 !important; }
+body #top #adminScreen .module-hero p { max-width: 60ch; margin: 0; font-size: 14px !important; line-height: 1.85 !important; color: #62594f !important; }
+body #top #adminScreen .section-kicker { display: none !important; }
+body #top #adminScreen .module-stats { min-width: 126px; margin: 0 !important; padding: 12px 14px; border-left: 2px solid #a87d43; background: rgba(255,254,249,.58); }
+body #top #adminScreen .module-stats span { display: grid; gap: 2px; color: #6d6258 !important; font-size: 12px !important; }
+body #top #adminScreen .module-stats strong { font-family: Georgia,serif; font-size: 26px !important; font-weight: 500; color: #3d332b !important; }
+body #top #adminScreen .admin-layout { display: grid !important; grid-template-columns: 216px minmax(0,1fr) !important; align-items: start; gap: 18px !important; width: min(940px,68vw) !important; height: auto !important; min-height: 0 !important; max-height: none !important; padding: 0 !important; margin: 0 !important; background: transparent !important; border: 0 !important; overflow: visible !important; }
+body #top #adminScreen .module-drawer-rail { display: grid !important; position: static !important; grid-template-columns: 1fr !important; width: 100% !important; gap: 10px; }
+body #top #adminScreen .module-drawer-trigger { display: grid !important; grid-template-columns: minmax(0,1fr) 16px !important; align-items: center !important; gap: 12px !important; min-height: 70px !important; width: 100% !important; padding: 14px 15px !important; border: 1px solid rgba(110,91,72,.22) !important; border-radius: 6px; overflow: visible !important; background: #f8f5ee !important; color: #302c29 !important; box-shadow: 0 8px 28px rgba(63,48,35,.05); backdrop-filter: blur(14px); transition: border-color .2s ease,background-color .2s ease,transform .2s ease !important; }
+body #top #adminScreen .module-drawer-trigger:hover { transform: translateY(-2px) !important; border-color: rgba(130,93,55,.38) !important; }
+body #top #adminScreen .module-drawer-trigger:is(.is-active,[aria-expanded="true"]) { background: #3f493e !important; border-color: #3f493e !important; box-shadow: 0 14px 34px rgba(42,45,37,.16); }
+body #top #adminScreen .module-drawer-index { display: none !important; }
+body #top #adminScreen .module-drawer-copy { position: static !important; display: grid !important; width: auto !important; min-width: 0 !important; max-width: none !important; gap: 3px !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; transform: none !important; text-align: left !important; }
+body #top #adminScreen .module-drawer-copy strong { font-size: 16px !important; color: #302c29 !important; }
+body #top #adminScreen .module-drawer-copy :is(small,em) { display: none !important; }
+body #top #adminScreen .module-drawer-copy strong { width: auto !important; overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
+body #top #adminScreen .module-drawer-trigger:is(.is-active,[aria-expanded="true"]) .module-drawer-copy strong { color: #fffdf7 !important; }
+body #top #adminScreen .module-drawer-stack { display: block !important; width: 100% !important; margin: 0 !important; }
+body #top #adminScreen :is(.module-drawer-stack, .module-drawer-reveal, .module-drawer-rail) { padding: 0 !important; margin-top: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; align-self: start !important; transform: none !important; }
+body #top #adminScreen .module-drawer-rail { align-content: start !important; min-height: 0 !important; height: auto !important; }
+body #top #adminScreen .module-drawer-panel { display: none !important; position: static !important; height: auto !important; max-height: none !important; }
+body #top #adminScreen .module-drawer-panel.is-open { display: block !important; }
+body #top #adminScreen :is(.module-drawer-reveal, .review-board) { display: block !important; height: auto !important; max-height: none !important; min-width: 0; overflow: visible !important; }
+body #top #adminScreen .review-board { padding: clamp(22px,3vw,34px) !important; border-radius: 6px; background: rgba(255,254,249,.94) !important; border: 1px solid rgba(113,92,70,.16) !important; color: #302c29 !important; box-shadow: 0 20px 60px rgba(70,52,37,.09); backdrop-filter: blur(16px); }
+body #top #adminScreen :is(h3,h4,.review-card p,.account-card p,.list-title span) { color: #302c29 !important; }
+body #top #adminScreen .list-title { align-items: end; padding-bottom: 18px; border-bottom: 1px solid #d9d1c7; }
+body #top #adminScreen .list-title h3 { font-family: "STSong","Songti SC",serif !important; font-size: 24px !important; font-weight: 600; }
+body #top #adminScreen .review-list { grid-template-columns: 1fr !important; }
+body #top #adminScreen :is(.review-card, .account-card) { padding: 20px 0 !important; border: 0 !important; border-bottom: 1px solid #ddd5cc !important; border-radius: 0 !important; background: transparent !important; box-shadow: none; }
+body #top #adminScreen .account-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px 18px; padding: 18px 0; border: 0 !important; border-bottom: 1px solid #ddd5cc !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; color: #302c29; }
+body #top #adminScreen .account-row :is(strong, span, dt, dd) { color: #443b33 !important; font-size: 13px; }
+body #top #adminScreen .account-row dl { display: flex; flex-wrap: wrap; gap: 14px; grid-row: 2; margin: 0; }
+body #top #adminScreen .account-row dd { margin: 0; }
+body #top #adminScreen .account-row button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+body #top #adminScreen :is(p, label, .account-details) { font-size: 14px !important; line-height: 1.8 !important; }
+body #top #adminScreen :is(.review-actions, .account-actions) { flex-wrap: wrap; gap: 10px; }
+body #top #adminScreen button { min-height: 40px; font-size: 14px; }
+body #top #adminScreen :is(.approve-button,.reject-button) { border-radius: 5px !important; box-shadow: none !important; padding: 10px 16px; }
+body #top #adminScreen .approve-button { background: #3e574b !important; color: #fff !important; }
+body #top #adminScreen .reject-button { background: #f5e9e6 !important; color: #7b303a !important; border: 1px solid #d5b0aa; }
+
+@media (min-width: 901px) and (max-width: 1240px) {
+  body:has(#globalHeader) #globalHeader .account-name { display: none !important; }
+  body:has(#globalHeader) #globalHeader { padding-inline: 28px !important; gap: 20px !important; }
+  body:has(#globalHeader) #globalHeader .top-nav { gap: 18px !important; }
+}
+@media (max-width: 900px) {
+  body[data-view]:has(#globalHeader) { --header-height: 64px; }
+  body.mobile-navigation-open { overflow: hidden; }
+  body[data-view]:has(#globalHeader) #globalHeader { height: 64px !important; min-height: 64px !important; grid-template-columns: 36px minmax(0,1fr) auto !important; grid-template-rows: 1fr !important; gap: 8px !important; padding: 8px 12px !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .mobile-menu-toggle { display: grid; place-items: center; width: 36px; height: 44px; padding: 0; border: 0; background: transparent; color: #302c29; z-index: 3; }
+  body[data-view]:has(#globalHeader) #globalHeader .brand { grid-column: 2; font-size: 16px !important; gap: 6px; }
+  body[data-view]:has(#globalHeader) #globalHeader .brand-mark { display: none; }
+  body[data-view]:has(#globalHeader) #globalHeader .header-actions { grid-column: 3 !important; grid-row: 1 !important; gap: 3px !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .account-area { padding: 0 !important; border: 0; gap: 4px !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .account-name { display: none !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .search-button { display: grid !important; width: 36px !important; height: 44px !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .account-avatar-button { width: 36px !important; height: 36px !important; }
+  body[data-view]:has(#globalHeader) #globalHeader :is(.outline-button,.ghost-button) { min-height: 44px !important; padding: 6px !important; font-size: 12px !important; white-space: nowrap; }
+  body[data-view]:has(#globalHeader) #globalHeader .mobile-menu-backdrop { display: block; position: fixed; inset: 64px 0 0; width: 100vw; height: calc(100dvh - 64px); border: 0; border-radius: 0; background: #17151166; z-index: 1; }
+  body[data-view]:has(#globalHeader) #globalHeader .top-nav {
+    display: none !important; position: fixed !important; inset: 64px auto 0 0 !important;
+    width: min(280px, 82vw) !important; height: calc(100dvh - 64px) !important; max-height: none;
+    padding: 24px 16px !important; margin: 0 !important; z-index: 2 !important; background: #faf9f5;
+    flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important;
+    gap: 8px !important; overflow-y: auto !important; overflow-x: hidden !important; box-shadow: 10px 8px 28px #0002;
+  }
+  body[data-view]:has(#globalHeader) #globalHeader .top-nav.is-menu-open { display: flex !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .top-nav .nav-link { width: 100%; min-height: 48px !important; padding: 12px 18px !important; font-size: 16px !important; text-align: left; justify-content: flex-start; border-radius: 6px; }
+  body[data-view]:has(#globalHeader) #globalHeader .top-nav .nav-link.is-active { background: #eee4e0; color: #833a43 !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .nav-link::after { display: none !important; }
+  body[data-view]:has(#globalHeader) #globalHeader .global-search-panel { top: 64px !important; right: 12px !important; width: calc(100vw - 24px) !important; }
+  body #top :is(.writing-gallery-heading h2, .contact-heading h2, .events-title-wrap h2) { font-size: 36px !important; }
+  body #top #writingScreen .writing-gallery, body #top #mailboxScreen .contact-page { width: calc(100% - 36px) !important; padding-top: 92px !important; padding-bottom: 40px !important; }
+  body #top #writingScreen .writing-gallery-header { grid-template-columns: 1fr !important; gap: 18px !important; }
+  body #top #writingScreen .writing-featured-work { grid-template-columns: 1fr !important; grid-template-rows: auto auto !important; }
+  body #top #writingScreen .writing-featured-copy { padding: 24px 12px !important; }
+  body #top #writingScreen .writing-featured-copy h3 { font-size: 26px !important; }
+  body #top #writingScreen .writing-featured-media { height: 210px !important; }
+  body #top #writingScreen .writing-shelf { grid-template-columns: 1fr !important; }
+  body #top #writingScreen .writing-work-row { min-height: 220px !important; }
+  body #top #writingScreen .writing-work-open { height: auto !important; }
+  body #top #writingScreen .writing-section-header h3 { font-size: 28px !important; }
+  body #top #mailboxScreen .contact-header { display: block !important; }
+  body #top #mailboxScreen .contact-layout { display: flex !important; flex-direction: column; gap: 28px; }
+  body #top #mailboxScreen .contact-letter-paper { width: 100%; padding: 24px 0 !important; order: -1; background: transparent; }
+  body #top #mailboxScreen .contact-form-grid { grid-template-columns: 1fr !important; gap: 18px !important; }
+  body #top #mailboxScreen .contact-form-footer { align-items: stretch; flex-direction: column; }
+  body #top #mailboxScreen .contact-information { width: 100%; padding: 0 !important; }
+  body #top #mailboxScreen .contact-letter-list { grid-template-columns: 1fr; }
+  body #top #mailboxScreen .contact-voices-heading { flex-direction: column; align-items: start; }
+  body #top :is(#mailboxScreen, #writingScreen, #adminScreen) :is(input:not([type="radio"]), textarea, select) { font-size: 16px !important; }
+  body #top #adminScreen.is-active { width: 100% !important; padding: 236px 18px 44px !important; overflow: hidden !important; }
+  body #top #adminScreen.is-active::before { bottom: auto; height: 276px; min-height: 0; background-size: auto 340px; background-position: right center; }
+  body #top #adminScreen.is-active::after { bottom: auto; height: 290px; background: linear-gradient(180deg,rgba(27,22,18,.04) 0%,rgba(245,241,232,.08) 52%,#f5f1e8 96%); }
+  body #top #adminScreen .module-hero { display: grid !important; grid-template-columns: 1fr auto; width: 100% !important; gap: 14px; margin-bottom: 18px !important; padding-bottom: 18px !important; }
+  body #top #adminScreen .module-hero .back-button { position: absolute; bottom: calc(100% + 176px); left: 0; color: #302820; background: rgba(255,254,249,.9); }
+  body #top #adminScreen .module-hero h2 { font-size: 32px !important; margin-top: 0; }
+  body #top #adminScreen .module-hero p { font-size: 13px !important; line-height: 1.75 !important; }
+  body #top #adminScreen .module-stats { align-self: end; min-width: 90px; padding: 9px 10px; }
+  body #top #adminScreen .admin-layout { grid-template-columns: 1fr !important; gap: 18px !important; }
+  body #top #adminScreen .module-drawer-rail { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 10px !important; }
+  body #top #adminScreen .module-drawer-trigger { grid-template-columns: minmax(0,1fr) 14px !important; min-height: 64px !important; padding: 12px !important; }
+  body #top #adminScreen .review-board { padding: 18px !important; }
+  body #top #adminScreen .account-row { grid-template-columns: 1fr; }
+  body #top #adminScreen .account-row button { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body #top *, body #globalHeader * { scroll-behavior: auto !important; animation-duration: 0s !important; transition-duration: 0s !important; }
+}
+body .scene-video-stage,
+body .scene-video-stage * { pointer-events: none !important; }
+body.still-backgrounds :is(.scene-video, .intro-bg-video) { display: none !important; }

@@ -1,5 +1,7 @@
 .venv/
 .env
+.dev.vars
+.dev.vars.*
 __pycache__/
 *.py[cod]
 db.sqlite3
@@ -8,3 +10,18 @@ frontend/node_modules/
 node_modules/
 staticfiles/
 media/
+
+# Build output and local Cloudflare state (never release inputs)
+/frontend/dist/
+/.wrangler/
+/output/
+/.tmp-*
+/post-detail-*.png
+
+# Local secrets and databases; retain shareable example configurations
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm

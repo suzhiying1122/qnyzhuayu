@@ -1,9 +1,10 @@
 ﻿const STORAGE_KEY = "huayu-drama-club-state-v2";
+
 const LEGACY_STORAGE_KEY = "huayu-drama-club-state-v1";
 const MAX_FILE_SIZE = 2.5 * 1024 * 1024;
 const MAX_TOTAL_ATTACHMENTS_SIZE = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 5;
-const VERIFICATION_TTL_MS = 5 * 60 * 1000;
+const VERIFICATION_RESEND_SECONDS = 60;
 const VALID_VIEWS = new Set([
   "home",
   "forum",
@@ -25,26 +26,7 @@ const VIEW_NAV_TARGETS = Object.freeze({
 });
 
 const initialState = {
-  users: [
-    {
-      id: "user-admin",
-      accountNo: "0000",
-      username: "社团秘书",
-      password: "huayu2026",
-      role: "admin",
-      profileName: "社团秘书",
-      avatarData: "",
-      intro: "负责华煜话剧社线上内容审核、活动档案发布和社团信箱回复。",
-      clubRole: "管理员 / 社团秘书",
-      phone: "",
-      firstUsedAt: "2026-06-01T10:00:00.000Z",
-      lastUsedAt: "2026-06-01T10:00:00.000Z",
-      createdAt: "2026-06-01T10:00:00.000Z",
-      friends: [],
-      friendRequests: [],
-      chats: {},
-    },
-  ],
+  users: [],
   currentUserId: null,
   activeChatFriendId: "",
   activeView: "home",
@@ -222,14 +204,12 @@ const initialState = {
 };
 
 let state = loadState();
+let sessionRevision = 0;
 let isStateHydrating = true;
 let authMode = "login";
+let authPreviousFocus = null;
 let toastTimer = 0;
-let registerVerification = {
-  phone: "",
-  code: "",
-  expiresAt: 0,
-};
+let verificationCooldownTimer = 0;
 
 const elements = {
   accountAvatarButton: document.querySelector("#accountAvatarButton"),
@@ -244,10 +224,14 @@ const elements = {
   authCloseButton: document.querySelector("#authCloseButton"),
   authModal: document.querySelector("#authModal"),
   authForm: document.querySelector("#authForm"),
+  authTitle: document.querySelector("#authTitle"),
+  authDescription: document.querySelector("#authDescription"),
+  authAccountNote: document.querySelector("#authAccountNote"),
   authUsernameLabel: document.querySelector("#authUsernameLabel"),
   authUsername: document.querySelector("#authUsername"),
   authPassword: document.querySelector("#authPassword"),
-  authPhone: document.querySelector("#authPhone"),
+  authPasswordToggle: document.querySelector("#authPasswordToggle"),
+  authEmail: document.querySelector("#authEmail"),
   authCode: document.querySelector("#authCode"),
   registerFields: document.querySelector("#registerFields"),
   sendCodeButton: document.querySelector("#sendCodeButton"),
@@ -256,16 +240,9 @@ const elements = {
   authSubmitButton: document.querySelector("#authSubmitButton"),
   logoutButton: document.querySelector("#logoutButton"),
   adminHomeGate: document.querySelector("#adminHomeGate"),
-  threadList: document.querySelector("#threadList"),
   postDetailContent: document.querySelector("#postDetailContent"),
   activityDetailContent: document.querySelector("#activityDetailContent"),
   letterDetailContent: document.querySelector("#letterDetailContent"),
-  postForm: document.querySelector("#postForm"),
-  postTitle: document.querySelector("#postTitle"),
-  postBody: document.querySelector("#postBody"),
-  postTag: document.querySelector("#postTag"),
-  postAttachments: document.querySelector("#postAttachments"),
-  currentUserHint: document.querySelector("#currentUserHint"),
   activityForm: document.querySelector("#activityForm"),
   activityType: document.querySelector("#activityType"),
   activityTitle: document.querySelector("#activityTitle"),
@@ -333,17 +310,12 @@ const elements = {
   postCount: document.querySelector("#postCount"),
   activityCount: document.querySelector("#activityCount"),
   publicLetterCount: document.querySelector("#publicLetterCount"),
-  forumPostMetric: document.querySelector("#forumPostMetric"),
-  forumCommentMetric: document.querySelector("#forumCommentMetric"),
   briefingMetric: document.querySelector("#briefingMetric"),
   previewMetric: document.querySelector("#previewMetric"),
   visibleLetterMetric: document.querySelector("#visibleLetterMetric"),
   privateLetterMetric: document.querySelector("#privateLetterMetric"),
-  pendingPostMetric: document.querySelector("#pendingPostMetric"),
   pendingActivityMetric: document.querySelector("#pendingActivityMetric"),
-  pendingPostHint: document.querySelector("#pendingPostHint"),
   pendingActivityHint: document.querySelector("#pendingActivityHint"),
-  pendingPostList: document.querySelector("#pendingPostList"),
   pendingActivityList: document.querySelector("#pendingActivityList"),
   accountAdminHint: document.querySelector("#accountAdminHint"),
   accountAdminList: document.querySelector("#accountAdminList"),
@@ -355,38 +327,73 @@ export function initLegacyApp() {
   // regardless of an old pathname, hash, or the last view stored in local data.
   state.activeView = "home";
   bindEvents();
-  syncStateFromApi().finally(() => {
+  syncUsersFromApi({ silent: false }).then(() => syncStateFromApi()).finally(() => {
     isStateHydrating = false;
     render();
   });
-  syncUsersFromApi({ silent: true });
   render();
 
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) syncUsersFromApi({ silent: true });
+    if (!document.hidden) {
+      syncUsersFromApi({ silent: true });
+    }
   });
+
 }
 
 async function apiRequest(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(data.error || data.detail || "服务器请求失败");
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+    });
+    const responseText = await response.text();
+    let data = {};
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error("服务器返回了无效数据，请稍后重试");
+      }
+    }
+    if (!response.ok) {
+      if (response.status === 401 && data.code !== "INVALID_PASSWORD" && !url.startsWith("/api/auth/")) {
+        ++sessionRevision;
+        state.currentUserId = null;
+        state.users = [];
+        saveState();
+        render();
+      }
+      const fallback = response.status >= 500
+        ? `服务器暂时不可用（${response.status}），请稍后重试`
+        : `请求未完成（${response.status}）`;
+      throw new Error(data.error || data.detail || fallback);
+    }
+    return data;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("请求超时，请检查网络后重试");
+    }
+    if (error instanceof TypeError) {
+      throw new Error("无法连接服务器，请检查网络后重试");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return data;
 }
 
 async function syncStateFromApi() {
   try {
-    const viewer = currentUser();
-    const viewerQuery = viewer ? `?viewer_id=${encodeURIComponent(viewer.id)}` : "";
-    const data = await apiRequest(`/api/site-state${viewerQuery}`);
+    const data = await apiRequest("/api/site-state");
     state.posts = Array.isArray(data.posts) ? data.posts : state.posts;
     state.pendingPosts = Array.isArray(data.pendingPosts) ? data.pendingPosts : state.pendingPosts;
     state.activities = Array.isArray(data.activities) ? data.activities : state.activities;
@@ -405,66 +412,32 @@ async function syncStateFromApi() {
 }
 
 async function syncUsersFromApi({ silent = false } = {}) {
-  const currentBefore = currentUser();
+  const revision = ++sessionRevision;
   try {
-    const data = await apiRequest("/api/users");
-    if (!Array.isArray(data.users)) return;
-    const shouldUploadCurrentProfile = mergeRemoteUsers(data.users, currentBefore);
+    const session = await apiRequest("/api/auth/me");
+    if (revision !== sessionRevision) return;
+    state.currentUserId = session.user?.id || null;
+    state.users = session.user ? [session.user] : [];
     saveState();
     render();
-    if (shouldUploadCurrentProfile) {
-      await pushCurrentProfileToApi({ silent: true });
+    if (session.user) {
+      try {
+        const directory = await apiRequest("/api/users");
+        if (revision !== sessionRevision || !currentUser()) return;
+        mergeReturnedUsers(directory.users);
+        mergeReturnedUsers(session.user);
+        render();
+      } catch (error) {
+        if (!silent) showToast(`账号列表同步失败：${error.message}`);
+      }
     }
   } catch (error) {
+    if (revision !== sessionRevision) return;
+    state.currentUserId = null;
+    state.users = [];
+    render();
     if (!silent) showToast(`账号同步失败：${error.message}`);
   }
-}
-
-function mergeRemoteUsers(remoteUsers, currentBefore = null) {
-  const localById = new Map(state.users.map((user) => [user.id, user]));
-  const localByAccount = new Map(state.users.map((user) => [String(user.accountNo), user]));
-  const remoteIds = new Set(remoteUsers.map((user) => user.id));
-  const remoteAccounts = new Set(remoteUsers.map((user) => String(user.accountNo)));
-  let shouldUploadCurrentProfile = false;
-  const mergedUsers = remoteUsers.map((remote) => {
-    const local = localById.get(remote.id) || localByAccount.get(String(remote.accountNo));
-    const merged = {
-      ...(local || {}),
-      ...remote,
-      password: remote.password || local?.password || "",
-      avatarData: remote.avatarData || local?.avatarData || "",
-      intro: remote.intro || local?.intro || "",
-      clubRole: remote.clubRole || local?.clubRole || "",
-      profileName: remote.profileName || local?.profileName || remote.username,
-      friends: Array.isArray(remote.friends) ? remote.friends : local?.friends || [],
-      friendRequests: Array.isArray(remote.friendRequests) ? remote.friendRequests : local?.friendRequests || [],
-      chats: remote.chats && typeof remote.chats === "object" ? remote.chats : local?.chats || {},
-    };
-    ensureUserProfile(merged);
-    if (
-      currentBefore &&
-      String(currentBefore.accountNo) === String(merged.accountNo) &&
-      currentBefore.avatarData &&
-      currentBefore.avatarData !== remote.avatarData
-    ) {
-      shouldUploadCurrentProfile = true;
-    }
-    return merged;
-  });
-  const localOnlyUsers = state.users.filter((user) => {
-    if (!user.id || !user.accountNo) return false;
-    return !remoteIds.has(user.id) && !remoteAccounts.has(String(user.accountNo));
-  });
-  state.users = [...mergedUsers, ...localOnlyUsers];
-  ensureAdminUser(state);
-  normalizeLoadedState(state);
-  if (state.currentUserId && !state.users.some((user) => user.id === state.currentUserId)) {
-    const matched = currentBefore
-      ? state.users.find((user) => String(user.accountNo) === String(currentBefore.accountNo))
-      : null;
-    state.currentUserId = matched?.id || null;
-  }
-  return shouldUploadCurrentProfile;
 }
 
 function mergeReturnedUsers(users) {
@@ -477,7 +450,7 @@ function mergeReturnedUsers(users) {
     const merged = {
       ...(existing || {}),
       ...remote,
-      password: remote.password || existing?.password || "",
+
       friends: Array.isArray(remote.friends) ? remote.friends : existing?.friends || [],
       friendRequests: Array.isArray(remote.friendRequests) ? remote.friendRequests : existing?.friendRequests || [],
       chats: remote.chats && typeof remote.chats === "object" ? remote.chats : existing?.chats || {},
@@ -511,6 +484,7 @@ async function pushCurrentProfileToApi({ silent = false } = {}) {
     render();
   } catch (error) {
     if (!silent) showToast(`个人资料同步失败：${error.message}`);
+    throw error;
   }
 }
 
@@ -593,10 +567,56 @@ function bindEvents() {
   elements.authModal.addEventListener("click", (event) => {
     if (event.target === elements.authModal) closeAuthModal();
   });
+  elements.authPasswordToggle.addEventListener("click", () => {
+    const reveal = elements.authPassword.type === "password";
+    elements.authPassword.type = reveal ? "text" : "password";
+    elements.authPasswordToggle.textContent = reveal ? "隐藏" : "显示";
+    elements.authPasswordToggle.setAttribute("aria-label", reveal ? "隐藏密码" : "显示密码");
+    elements.authPasswordToggle.setAttribute("aria-pressed", String(reveal));
+    elements.authPassword.focus({ preventScroll: true });
+  });
+  elements.authModal.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeAuthModal();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = [...elements.authModal.querySelectorAll("button:not([disabled]), input:not([disabled])")]
+      .filter((element) => element.getClientRects().length > 0);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+  elements.authModal.querySelector(".auth-tabs").addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    const nextMode = authMode === "login" ? "register" : "login";
+    const nextTab = elements.authModal.querySelector(`[data-auth-mode="${nextMode}"]`);
+    nextTab.click();
+    nextTab.focus();
+  });
 
-  elements.logoutButton.addEventListener("click", () => {
+  elements.logoutButton.addEventListener("click", async () => {
+    ++sessionRevision;
+    try {
+      await apiRequest("/api/auth/logout", { method: "POST", body: "{}" });
+    } catch (error) {
+      showToast(`退出失败：${error.message}`);
+      return;
+    }
+    ++sessionRevision;
+    state.users = [];
     state.currentUserId = null;
     saveState();
+    render();
     syncStateFromApi().finally(() => {
       showToast("已退出当前账号");
       render();
@@ -605,7 +625,6 @@ function bindEvents() {
 
   elements.authForm.addEventListener("submit", handleAuth);
   elements.sendCodeButton.addEventListener("click", handleSendCode);
-  elements.postForm.addEventListener("submit", handlePostSubmit);
   elements.activityForm.addEventListener("submit", handleActivitySubmit);
   elements.letterForm.addEventListener("submit", handleLetterSubmit);
   elements.writingEventForm.addEventListener("submit", handleWritingEventSubmit);
@@ -673,10 +692,18 @@ function bindInteractiveMotion() {
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY));
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    if (saved) {
+      saved.users = [];
+      saved.currentUserId = null;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    }
     if (!saved || !Array.isArray(saved.posts)) return prepareState(structuredClone(initialState));
     const merged = {
       ...structuredClone(initialState),
       ...saved,
+      users: [],
+      currentUserId: null,
       activeView: "home",
       activePostId: saved.activePostId || "post-1",
       activeActivityId: saved.activeActivityId || "activity-1",
@@ -699,26 +726,12 @@ function loadState() {
 }
 
 function prepareState(targetState) {
-  ensureAdminUser(targetState);
   normalizeLoadedState(targetState);
   normalizeSeedForumContent(targetState);
   return targetState;
 }
 
-function ensureAdminUser(targetState) {
-  const admin = targetState.users.find((user) => user.username === "社团秘书");
-  if (admin) {
-    if (!admin.password) admin.password = "huayu2026";
-    admin.role = "admin";
-    admin.accountNo = "0000";
-    ensureUserProfile(admin);
-    return;
-  }
-  targetState.users.unshift(structuredClone(initialState.users[0]));
-}
-
 function normalizeLoadedState(targetState) {
-  assignMissingAccountNumbers(targetState);
   targetState.users.forEach(ensureUserProfile);
   targetState.posts.forEach((post) => {
     normalizePostSocial(post);
@@ -757,29 +770,6 @@ function normalizeLoadedState(targetState) {
     essay.createdAt = essay.createdAt || new Date().toISOString();
     essay.attachments = normalizeAttachments(essay);
   });
-}
-
-function assignMissingAccountNumbers(targetState) {
-  const used = new Set();
-  targetState.users.forEach((user) => {
-    if (user.username === "社团秘书" || user.role === "admin") {
-      user.accountNo = "0000";
-    }
-    if (user.accountNo) used.add(String(user.accountNo));
-  });
-
-  targetState.users.forEach((user) => {
-    if (!user.accountNo) {
-      user.accountNo = nextAccountNo(used);
-    }
-    used.add(String(user.accountNo));
-  });
-}
-
-function nextAccountNo(used = new Set(state?.users?.map((user) => String(user.accountNo)).filter(Boolean) || [])) {
-  let next = 1;
-  while (used.has(String(next).padStart(4, "0"))) next += 1;
-  return String(next).padStart(4, "0");
 }
 
 function mergeFixedWritingEvents(events) {
@@ -832,6 +822,7 @@ function ensureUserProfile(user) {
   user.intro = user.intro || "";
   user.clubRole = user.clubRole || (user.role === "admin" ? "管理员 / 社团秘书" : "社员");
   user.phone = user.phone || "";
+  user.email = user.email || "";
   user.friends = Array.isArray(user.friends) ? user.friends : [];
   user.friendRequests = Array.isArray(user.friendRequests) ? user.friendRequests : [];
   user.chats = user.chats && typeof user.chats === "object" ? user.chats : {};
@@ -867,9 +858,9 @@ function normalizeSeedForumContent(targetState) {
 }
 
 function saveState() {
-  // Persist content and account data, but never persist the current view.
+  // Persist content preferences only; identity and private user data come from the session.
   // Reloading the single-page shell must always start at Home.
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, activeView: "home" }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, users: [], currentUserId: null, activeView: "home" }));
 }
 
 function normalizeActivityRecord(activity) {
@@ -966,14 +957,6 @@ function handleGlobalSearchResult(event) {
 
 function getGlobalSearchEntries() {
   return [
-    ...state.posts.map((post) => ({
-      kind: "post",
-      id: post.id,
-      title: post.title,
-      excerpt: post.body,
-      meta: `论坛 · ${post.author || "匿名社员"}`,
-      searchText: [post.title, post.body, post.tag, post.author].join(" "),
-    })),
     ...state.activities.map((activity) => ({
       kind: "activity",
       id: activity.id,
@@ -1006,7 +989,7 @@ function getGlobalSearchEntries() {
 function renderGlobalSearchResults(value) {
   const query = String(value || "").trim();
   if (!query) {
-    elements.globalSearchResults.innerHTML = `<p class="global-search-hint">输入关键词，查找论坛、活动、投稿作品或公开来信。</p>`;
+    elements.globalSearchResults.innerHTML = `<p class="global-search-hint">输入关键词，查找活动、投稿作品或公开来信。论坛讨论请前往 QQ 频道。</p>`;
     return;
   }
 
@@ -1082,7 +1065,7 @@ function renderAccount() {
   elements.authOpenButton.classList.toggle("hidden", Boolean(user));
   elements.logoutButton.classList.toggle("hidden", !user);
   elements.adminHomeGate.classList.toggle("hidden", !admin);
-  elements.currentUserHint.textContent = user ? `${getUserDisplayName(user)}（编号 ${user.accountNo}）可自由交流，公开前需审核` : "注册账号后可提交话题不限的内容";
+  document.getElementById("adminNavButton")?.classList.toggle("hidden", !admin);
 }
 
 function renderStats() {
@@ -1090,7 +1073,6 @@ function renderStats() {
   const privateLetters = state.letters.filter((letter) => letter.visibility === "private");
   const briefingCount = state.activities.filter((activity) => activity.type === "briefing").length;
   const previewCount = state.activities.filter((activity) => activity.type === "preview").length;
-  const commentCount = state.posts.reduce((sum, post) => sum + countCommentThreads(post.comments), 0);
   const user = currentUser();
   const userName = user ? getUserDisplayName(user) : "";
   const userActivityCount = userName ? state.activities.filter((activity) => activity.author === userName).length : 0;
@@ -1098,15 +1080,12 @@ function renderStats() {
   elements.postCount.textContent = state.posts.length;
   elements.activityCount.textContent = state.activities.length;
   elements.publicLetterCount.textContent = publicLetters.length;
-  elements.forumPostMetric.textContent = state.posts.length;
-  elements.forumCommentMetric.textContent = commentCount;
   elements.briefingMetric.textContent = briefingCount;
   elements.previewMetric.textContent = previewCount;
   elements.visibleLetterMetric.textContent = publicLetters.length;
   elements.privateLetterMetric.textContent = privateLetters.length;
   elements.writingEventMetric.textContent = state.writingEvents.length;
   elements.essayMetric.textContent = state.essays.length;
-  elements.pendingPostMetric.textContent = state.pendingPosts.length;
   elements.pendingActivityMetric.textContent = state.pendingActivities.length;
   elements.profilePostMetric.textContent = userName ? state.posts.filter((post) => post.author === userName).length : 0;
   elements.profileActivityMetric.textContent = userActivityCount;
@@ -1139,113 +1118,7 @@ function renderSkeletonList(kind = "card", count = 3) {
   `).join("");
 }
 
-function renderForum() {
-  const user = currentUser();
-  elements.postTitle.disabled = !user;
-  elements.postBody.disabled = !user;
-  elements.postTag.disabled = !user;
-  elements.postAttachments.disabled = !user;
-  elements.postForm.querySelector('button[type="submit"]').disabled = !user;
-
-  elements.threadList.setAttribute("aria-busy", String(isStateHydrating));
-  const orderedPosts = state.posts
-    .slice()
-    .sort((a, b) => new Date(b.approvedAt || b.createdAt) - new Date(a.approvedAt || a.createdAt));
-  const forumPreviewItems = orderedPosts.slice(0, 3);
-  while (forumPreviewItems.length > 0 && forumPreviewItems.length < 3) {
-    forumPreviewItems.push(null);
-  }
-  elements.threadList.innerHTML = isStateHydrating
-    ? renderSkeletonList("forum", 3)
-    : forumPreviewItems.length
-    ? forumPreviewItems.map((post, index) => post ? renderPostCard(post) : renderForumPreviewPlaceholder(index)).join("")
-    : `<div class="empty-state">还没有公开帖子。</div>`;
-
-  elements.threadList.querySelectorAll("[data-open-post]").forEach((button) => {
-    button.addEventListener("click", () => {
-      openDetailView("post", button.dataset.openPost);
-    });
-  });
-
-  elements.threadList.querySelectorAll("[data-delete-post]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      deletePost(button.dataset.deletePost);
-    });
-  });
-
-  elements.threadList.querySelectorAll("[data-post-id]").forEach((card) => {
-    card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-open-post], [data-delete-post], button, a, input, textarea, select")) return;
-      openDetailView("post", card.dataset.postId);
-    });
-  });
-}
-
-function renderPostCard(post) {
-  const comments = Array.isArray(post.comments) ? post.comments : [];
-  const attachmentText = renderAttachmentCount(post);
-  const likeCount = Math.max(0, Number(post.likeCount) || 0);
-  const commentCount = countCommentThreads(comments);
-  return `
-    <article class="thread-card ${post.id === state.activePostId ? "is-active" : ""}" data-post-id="${post.id}">
-      <div class="tag-row">
-        <span class="tag">${escapeHtml(post.tag || "讨论")}</span>
-        ${attachmentText}
-      </div>
-      <button class="thread-title-button" type="button" data-open-post="${post.id}">
-        <h4>${escapeHtml(post.title)}</h4>
-      </button>
-      <div class="thread-preview">${escapeHtml(getExcerpt(post.body, 96))}</div>
-      <div class="meta-row">
-        <span>${escapeHtml(post.author)}</span>
-        <span>${commentCount} / ${likeCount}</span>
-        <span>${formatDateTime(post.approvedAt || post.createdAt)}</span>
-      </div>
-      ${
-        isAdmin()
-          ? `<div class="post-admin-actions"><button class="reject-button" data-delete-post="${post.id}" type="button">删除帖子</button></div>`
-          : ""
-      }
-    </article>
-  `;
-}
-
-async function handlePostSubmit(event) {
-  event.preventDefault();
-  if (!requireLogin()) return;
-  const title = elements.postTitle.value.trim();
-  const body = elements.postBody.value.trim();
-  const tag = elements.postTag.value.trim() || "讨论";
-  if (!title || !body) return;
-  let attachments = [];
-  try {
-    attachments = await readFilesAsAttachments(elements.postAttachments.files);
-  } catch (error) {
-    showToast(error.message);
-    return;
-  }
-
-  try {
-    const data = await apiRequest("/api/forum/posts", {
-      method: "POST",
-      body: JSON.stringify({
-        title,
-        body,
-        author: getUserDisplayName(currentUser()),
-        tag,
-        attachments,
-      }),
-    });
-    state.pendingPosts.unshift(data.result);
-  } catch (error) {
-    showToast(error.message);
-    return;
-  }
-  elements.postForm.reset();
-  showToast("帖子已提交管理员审核");
-  render();
-}
+function renderForum() {}
 
 async function handleActivitySubmit(event) {
   event.preventDefault();
@@ -1516,6 +1389,9 @@ function renderActivityTimelineItem(activity, index) {
     : "";
   return `
     <article class="events-timeline-item" data-activity-id="${escapeAttribute(item.id)}" data-activity-status="${escapeAttribute(item.statusText)}">
+      <div class="events-timeline-thumb" aria-hidden="true">
+        <img src="${escapeAttribute(item.image)}" alt="" loading="lazy" decoding="async" />
+      </div>
       ${programmeDateMarkup(item.date, "events-timeline-date")}
       <div class="events-timeline-copy">
         <div class="events-timeline-meta">
@@ -1536,6 +1412,9 @@ function renderActivityTimelineItem(activity, index) {
 function renderActivityTimelinePlaceholder(index) {
   return `
     <article class="events-timeline-item is-placeholder" aria-label="第 ${index + 1} 条活动占位">
+      <div class="events-timeline-thumb" aria-hidden="true">
+        <img src="${escapeAttribute(ACTIVITY_IMAGE_FALLBACKS[index % ACTIVITY_IMAGE_FALLBACKS.length])}" alt="" loading="lazy" decoding="async" />
+      </div>
       ${programmeDateMarkup("", "events-timeline-date")}
       <div class="events-timeline-copy">
         <div class="events-timeline-meta">
@@ -1628,6 +1507,7 @@ async function handleLetterSubmit(event) {
   const author = elements.letterContactName?.value.trim() || getUserDisplayName(currentUser());
   const contact = elements.letterContact?.value.trim();
   const message = elements.letterBody.value.trim();
+  if (visibility === "public" && contact && !window.confirm("这封信选择了公开投递，填写的联系方式也会公开。确认继续发送？")) return;
   const body = [contact ? `联系方式：${contact}` : "", message].filter(Boolean).join("\n\n");
   let attachments = [];
   try {
@@ -1654,7 +1534,7 @@ async function handleLetterSubmit(event) {
     return;
   }
   elements.letterForm.reset();
-  elements.letterForm.querySelector("input[value='public']").checked = true;
+  elements.letterForm.querySelector("input[value='private']").checked = true;
   showToast(visibility === "public" ? "公开信件已投递" : "不公开信件已投递");
   render();
 }
@@ -1753,11 +1633,7 @@ function renderWriting() {
   const user = currentUser();
   const activeEvent = getActiveWritingEvent();
   const activeEventEssays = getEssaysForActiveWritingEvent();
-  const recentEssays = [...state.essays].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const writingPreviewItems = recentEssays.slice(0, 3);
-  while (writingPreviewItems.length > 0 && writingPreviewItems.length < 3) {
-    writingPreviewItems.push(null);
-  }
+  const recentEssays = [...activeEventEssays].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   elements.writingEventForm.querySelectorAll("input, textarea, button").forEach((field) => {
     field.disabled = !user;
@@ -1799,9 +1675,9 @@ function renderWriting() {
 
   elements.writingShelf.innerHTML = isStateHydrating
     ? renderSkeletonList("essay", 4)
-    : writingPreviewItems.length
-    ? writingPreviewItems.map((essay, index) => essay ? renderEssayBook(essay, index) : renderEssayBookPlaceholder(index)).join("")
-    : "";
+    : recentEssays.length
+    ? recentEssays.map(renderEssayBook).join("")
+    : '<p class="writing-empty-message">这个主题还没有投稿。</p>';
 
   elements.writingEventList.querySelectorAll("[data-writing-event]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2094,7 +1970,12 @@ async function handleProfileSubmit(event) {
   }
 
   elements.profileAvatarInput.value = "";
-  await pushCurrentProfileToApi({ silent: true });
+  try {
+    await pushCurrentProfileToApi({ silent: false });
+  } catch {
+    await syncUsersFromApi({ silent: true });
+    return;
+  }
   showToast("个人资料已保存");
   render();
 }
@@ -2114,8 +1995,8 @@ async function handlePasswordSubmit(event) {
     showToast("两次输入的新密码不一致");
     return;
   }
-  if (newPassword.length < 4) {
-    showToast("新密码至少需要 4 位");
+  if (newPassword.length < 12 || newPassword.length > 128) {
+    showToast("新密码长度应为 12 至 128 位");
     return;
   }
 
@@ -2130,11 +2011,8 @@ async function handlePasswordSubmit(event) {
     });
     mergeReturnedUsers(data.user);
   } catch (error) {
-    if (user.password && currentPassword !== user.password) {
-      showToast(error.message || "当前密码不正确");
-      return;
-    }
-    user.password = newPassword;
+    showToast(error.message || "密码更新失败，请稍后重试");
+    return;
   }
   saveState();
   elements.passwordForm.reset();
@@ -2369,17 +2247,10 @@ function getChatMessages(user, friendId) {
 function renderAdmin() {
   const admin = isAdmin();
 
-  elements.pendingPostHint.textContent = `${state.pendingPosts.length} 条待处理`;
   elements.pendingActivityHint.textContent = `${state.pendingActivities.length} 条待处理`;
   elements.accountAdminHint.textContent = admin
     ? `${state.users.length} 个账号 · 仅展示账号与使用时间`
     : "管理员登录后可查看";
-
-  elements.pendingPostList.innerHTML = admin
-    ? state.pendingPosts.length
-      ? state.pendingPosts.map(renderPendingPost).join("")
-      : `<div class="empty-state">暂无待审核帖子。</div>`
-    : `<div class="empty-state">管理员登录后可查看待审内容。</div>`;
 
   elements.pendingActivityList.innerHTML = admin
     ? state.pendingActivities.length
@@ -2395,12 +2266,6 @@ function renderAdmin() {
         .join("")
     : `<div class="empty-state">管理员登录后可查看账号列表。</div>`;
 
-  elements.pendingPostList.querySelectorAll("[data-approve-post]").forEach((button) => {
-    button.addEventListener("click", () => approvePost(button.dataset.approvePost));
-  });
-  elements.pendingPostList.querySelectorAll("[data-reject-post]").forEach((button) => {
-    button.addEventListener("click", () => rejectPending("post", button.dataset.rejectPost));
-  });
   elements.pendingActivityList.querySelectorAll("[data-approve-activity]").forEach((button) => {
     button.addEventListener("click", () => approveActivity(button.dataset.approveActivity));
   });
@@ -2410,24 +2275,6 @@ function renderAdmin() {
   elements.accountAdminList.querySelectorAll("[data-delete-user]").forEach((button) => {
     button.addEventListener("click", () => deleteUserAccount(button.dataset.deleteUser));
   });
-}
-
-function renderPendingPost(item) {
-  return `
-    <article class="review-card">
-      <div class="tag-row">
-        <span class="tag">${escapeHtml(item.tag || "讨论")}</span>
-        <span>${escapeHtml(item.author)} · ${formatDateTime(item.createdAt)}</span>
-      </div>
-      <h4>${escapeHtml(item.title)}</h4>
-      <p>${escapeHtml(item.body)}</p>
-      ${renderAttachmentList(item, "compact")}
-      <div class="review-actions">
-        <button class="approve-button" data-approve-post="${item.id}" type="button">通过发布</button>
-        <button class="reject-button" data-reject-post="${item.id}" type="button">驳回</button>
-      </div>
-    </article>
-  `;
 }
 
 function renderPendingComment(item) {
@@ -2473,7 +2320,7 @@ function renderAccountAdminRow(user) {
     <article class="account-row">
       <div>
         <strong>${escapeHtml(user.username)}</strong>
-        <span>编号 ${escapeHtml(user.accountNo)} · ${user.role === "admin" ? "设备管理员" : "注册账号"}</span>
+        <span>编号 ${escapeHtml(user.accountNo)} · ${user.role === "admin" ? "管理员" : "注册账号"}</span>
       </div>
       <dl>
         <div>
@@ -2525,34 +2372,6 @@ async function deleteUserAccount(id) {
   if (state.activeChatFriendId === id) state.activeChatFriendId = "";
   saveState();
   showToast("账号已注销");
-  render();
-}
-
-async function deletePost(id) {
-  if (!requireAdminAccess()) return;
-  const post = state.posts.find((item) => item.id === id);
-  if (!post) return;
-  const ok = window.confirm(`确定删除帖子“${post.title}”吗？删除后帖子和下面的留言都会消失。`);
-  if (!ok) return;
-
-  try {
-    await apiRequest(`/api/admin/posts/${id}`, {
-      method: "DELETE",
-    });
-  } catch (error) {
-    showToast(error.message);
-    return;
-  }
-
-  state.posts = state.posts.filter((item) => item.id !== id);
-  if (state.activePostId === id) {
-    state.activePostId = state.posts[0]?.id || "";
-    if (state.activeView === "postDetail") {
-      state.activeView = "forum";
-    }
-  }
-  saveState();
-  showToast("帖子已删除");
   render();
 }
 
@@ -2643,23 +2462,6 @@ async function deleteEssay(id) {
   render();
 }
 
-async function approvePost(id) {
-  if (!requireAdminAccess()) return;
-  try {
-    const data = await apiRequest(`/api/admin/posts/${id}/approve`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-    state.pendingPosts = state.pendingPosts.filter((item) => item.id !== id);
-    state.posts.unshift(data.result);
-    state.activePostId = data.result.id;
-    showToast("帖子已通过并公开");
-    render();
-  } catch (error) {
-    showToast(error.message);
-  }
-}
-
 function approveComment(id) {
   if (!requireAdminAccess()) return;
   const index = state.pendingComments.findIndex((item) => item.id === id);
@@ -2708,7 +2510,6 @@ async function rejectPending(type, id) {
       method: "POST",
       body: JSON.stringify({}),
     });
-    if (type === "post") state.pendingPosts = state.pendingPosts.filter((item) => item.id !== id);
     if (type === "activity") state.pendingActivities = state.pendingActivities.filter((item) => item.id !== id);
     showToast("内容已驳回");
     render();
@@ -2717,28 +2518,31 @@ async function rejectPending(type, id) {
   }
 }
 
-function handleSendCode() {
+async function handleSendCode() {
   if (authMode !== "register") return;
-  const phone = normalizePhone(elements.authPhone.value);
-  elements.authPhone.value = phone;
-  if (!isValidPhone(phone)) {
-    elements.authMessage.textContent = "请输入 11 位手机号";
+  const email = normalizeEmail(elements.authEmail.value);
+  elements.authEmail.value = email;
+  if (!isValidEmail(email)) {
+    elements.authMessage.textContent = "请输入有效的邮箱地址";
     return;
   }
-  if (state.users.some((user) => user.phone === phone)) {
-    elements.authMessage.textContent = "这个手机号已经注册过账号";
-    return;
-  }
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  registerVerification = {
-    phone,
-    code,
-    expiresAt: Date.now() + VERIFICATION_TTL_MS,
-  };
-  elements.authCode.value = "";
-  elements.verificationNote.textContent = `演示验证码：${code}，5 分钟内有效。`;
+  elements.sendCodeButton.disabled = true;
+  elements.sendCodeButton.textContent = "发送中...";
   elements.authMessage.textContent = "";
-  showToast(`验证码已发送：${code}`);
+  try {
+    const data = await apiRequest("/api/auth/email-code", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    elements.authCode.value = "";
+    elements.verificationNote.textContent = data.message || "验证码已发送，请检查收件箱和垃圾邮件。";
+    showToast("验证码已发送到邮箱");
+    startVerificationCooldown(Number(data.retryAfter) || VERIFICATION_RESEND_SECONDS);
+  } catch (error) {
+    elements.sendCodeButton.disabled = false;
+    elements.sendCodeButton.textContent = "发送验证码";
+    elements.authMessage.textContent = error.message;
+  }
 }
 
 async function handleAuth(event) {
@@ -2749,67 +2553,39 @@ async function handleAuth(event) {
 
   if (authMode === "register") {
     const username = accountInput;
-    const phone = normalizePhone(elements.authPhone.value);
+    const email = normalizeEmail(elements.authEmail.value);
     const code = elements.authCode.value.trim();
     if (state.users.some((user) => user.username === username)) {
       elements.authMessage.textContent = "这个昵称已经被注册";
       return;
     }
-    if (!isValidPhone(phone)) {
-      elements.authMessage.textContent = "请输入 11 位手机号";
+    if (!isValidEmail(email)) {
+      elements.authMessage.textContent = "请输入有效的邮箱地址";
       return;
     }
-    if (state.users.some((user) => user.phone === phone)) {
-      elements.authMessage.textContent = "这个手机号已经注册过账号";
+    if (!/^\d{6}$/.test(code)) {
+      elements.authMessage.textContent = "请输入邮件中的 6 位验证码";
       return;
     }
-    if (!registerVerification.code || registerVerification.phone !== phone || registerVerification.expiresAt < Date.now()) {
-      elements.authMessage.textContent = "请先发送有效验证码";
-      return;
-    }
-    if (code !== registerVerification.code) {
-      elements.authMessage.textContent = "验证码不正确";
-      return;
-    }
-    let newUser = null;
     try {
       const data = await apiRequest("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({ username, password, phone }),
+        body: JSON.stringify({ username, password, email, code }),
       });
-      newUser = data.user;
+      const newUser = data.user;
+      if (!newUser?.id) throw new Error("注册未完成，请稍后重试");
       mergeReturnedUsers(newUser);
+      ++sessionRevision;
+      state.currentUserId = newUser.id;
+      void syncUsersFromApi({ silent: true });
+      saveState();
+      closeAuthModal();
+      showToast(`注册成功，你的编号是 ${newUser.accountNo}`);
+      await syncStateFromApi();
+      render();
     } catch (error) {
-      const now = new Date().toISOString();
-      const accountNo = nextAccountNo();
-      newUser = {
-        id: createId("user"),
-        accountNo,
-        username,
-        password,
-        role: "member",
-        profileName: username,
-        avatarData: "",
-        intro: "",
-        clubRole: "社员",
-        phone,
-        firstUsedAt: now,
-        lastUsedAt: now,
-        createdAt: now,
-        friends: [],
-        friendRequests: [],
-        chats: {},
-      };
-      state.users.push(newUser);
-      showToast(`云端注册失败，已先本地创建：${error.message}`);
+      elements.authMessage.textContent = error.message;
     }
-    state.currentUserId = newUser.id;
-    registerVerification = { phone: "", code: "", expiresAt: 0 };
-    saveState();
-    closeAuthModal();
-    showToast(`注册成功，你的编号是 ${newUser.accountNo}`);
-    await syncStateFromApi();
-    render();
     return;
   }
 
@@ -2819,17 +2595,20 @@ async function handleAuth(event) {
       method: "POST",
       body: JSON.stringify({ accountNo: accountInput, password }),
     });
+    if (!data.user?.id) throw new Error("登录未完成，请稍后重试");
     mergeReturnedUsers(data.user);
     user = state.users.find((item) => item.id === data.user.id);
-    await syncUsersFromApi({ silent: true });
-  } catch {
-    user = state.users.find((item) => String(item.accountNo) === accountInput && item.password === password);
+  } catch (error) {
+    elements.authMessage.textContent = error.message;
+    return;
   }
   if (!user) {
     elements.authMessage.textContent = "编号或密码不正确";
     return;
   }
+  ++sessionRevision;
   state.currentUserId = user.id;
+  void syncUsersFromApi({ silent: true });
   user.lastUsedAt = new Date().toISOString();
   saveState();
   closeAuthModal();
@@ -2839,7 +2618,11 @@ async function handleAuth(event) {
 }
 
 function openAuthModal() {
+  authPreviousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  elements.authModal.inert = false;
+  elements.authModal.setAttribute("aria-hidden", "false");
   elements.authModal.classList.remove("hidden");
+  document.body.classList.add("auth-modal-open");
   elements.authMessage.textContent = "";
   renderAuthMode();
   elements.authUsername.focus();
@@ -2847,27 +2630,49 @@ function openAuthModal() {
 
 function closeAuthModal() {
   elements.authModal.classList.add("hidden");
+  elements.authModal.setAttribute("aria-hidden", "true");
+  elements.authModal.inert = true;
+  document.body.classList.remove("auth-modal-open");
   elements.authForm.reset();
+  elements.authPassword.type = "password";
+  elements.authPasswordToggle.textContent = "显示";
+  elements.authPasswordToggle.setAttribute("aria-label", "显示密码");
+  elements.authPasswordToggle.setAttribute("aria-pressed", "false");
   elements.authMessage.textContent = "";
-  elements.verificationNote.textContent = "验证码会以站内弹窗形式展示，作为短信流程演示。";
+  stopVerificationCooldown();
+  elements.verificationNote.textContent = "验证码将发送到你的邮箱，10 分钟内有效。";
+  if (authPreviousFocus && document.contains(authPreviousFocus)) authPreviousFocus.focus();
+  authPreviousFocus = null;
 }
 
 function renderAuthMode() {
   document.querySelectorAll("[data-auth-mode]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.authMode === authMode);
+    const isActive = button.dataset.authMode === authMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
   });
   const isRegister = authMode === "register";
+  elements.authTitle.textContent = isRegister ? "创建账号" : "登录账号";
+  elements.authDescription.textContent = isRegister
+    ? "完成验证后，系统会为你分配唯一账号编号。"
+    : "使用账号编号和密码进入社团空间。";
+  elements.authAccountNote.textContent = isRegister
+    ? "注册完成后请保存账号编号，后续将使用编号登录。"
+    : "账号编号由系统分配，昵称不能用于登录。";
   elements.registerFields.classList.toggle("hidden", !isRegister);
-  elements.authUsernameLabel.textContent = isRegister ? "昵称" : "编号";
-  elements.authUsername.placeholder = isRegister ? "设置昵称，登录后用于展示" : "请输入账号编号，例如 0000";
+  elements.authUsernameLabel.textContent = isRegister ? "昵称" : "账号编号";
+  elements.authUsername.placeholder = isRegister ? "设置一个用于展示的昵称" : "例如 0000";
   elements.authUsername.autocomplete = isRegister ? "nickname" : "username";
-  elements.authPhone.required = isRegister;
+  elements.authEmail.required = isRegister;
   elements.authCode.required = isRegister;
-  elements.authPhone.disabled = !isRegister;
+  elements.authEmail.disabled = !isRegister;
   elements.authCode.disabled = !isRegister;
   elements.sendCodeButton.disabled = !isRegister;
   elements.authSubmitButton.textContent = authMode === "login" ? "登录" : "注册";
   elements.authMessage.textContent = "";
+  elements.authPassword.minLength = authMode === "login" ? 1 : 12;
+  elements.authPassword.maxLength = 128;
   elements.authPassword.autocomplete = authMode === "login" ? "current-password" : "new-password";
 }
 
@@ -2961,7 +2766,6 @@ function renderPostDetail() {
           </div>
           <div class="post-detail-hero-tools">
             <span class="post-detail-publish-state"><i aria-hidden="true"></i>已公开</span>
-            ${isAdmin() ? `<button class="post-detail-delete" data-delete-post="${post.id}" type="button">删除帖子</button>` : ""}
           </div>
         </div>
       </header>
@@ -3063,9 +2867,6 @@ function renderPostDetail() {
   bindPostDetailForms();
   bindPostDetailActions();
   bindDetailSidebar(elements.postDetailContent);
-  elements.postDetailContent.querySelectorAll("[data-delete-post]").forEach((button) => {
-    button.addEventListener("click", () => deletePost(button.dataset.deletePost));
-  });
 }
 
 function renderActivityDetail() {
@@ -3074,40 +2875,123 @@ function renderActivityDetail() {
     elements.activityDetailContent.innerHTML = renderDetailMissing("activities", "活动内容不存在或尚未公开。");
     return;
   }
-  const isPreview = activity.type === "preview";
-  const typeText = isPreview ? "活动预告" : "活动简报";
+  const item = getActivityPresentation(activity, 0);
+  const isPreview = item.type === "preview";
+  const relatedActivities = state.activities
+    .filter((candidate) => candidate.id !== activity.id)
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+    .slice(0, 3)
+    .map((candidate, index) => getActivityPresentation(candidate, index + 1));
+  const relatedHtml = relatedActivities.length
+    ? relatedActivities.map((related) => `
+        <button class="activity-detail-related-item" data-sidebar-activity="${escapeAttribute(related.id)}" type="button">
+          <span>
+            <strong>${escapeHtml(related.title)}</strong>
+            <small>${escapeHtml(related.date ? programmeDateLabel(related.date) : "日期待补充")}</small>
+          </span>
+          <span aria-hidden="true">→</span>
+        </button>
+      `).join("")
+    : `<p class="activity-detail-aside-empty">暂无其他公开活动。</p>`;
+  const adminAction = isAdmin()
+    ? `<button class="activity-detail-admin-action" data-delete-activity="${escapeAttribute(item.id)}" type="button">删除活动记录</button>`
+    : "";
   elements.activityDetailContent.innerHTML = `
-    <div class="wechat-detail-layout activity-chat-layout">
-      ${renderDetailSidebar("activities")}
-      <section class="wechat-reader">
-        <header class="reader-topbar">
-          <button class="back-button" data-view-target="activities" type="button">返回活动</button>
-          <div>
-            <p class="section-kicker">Huayu Events</p>
-            <h2 id="activityDetailTitle">${escapeHtml(activity.title)}</h2>
-            <p>${typeText} · ${formatDate(activity.date)} · ${escapeHtml(activity.author || "华煜话剧社")}</p>
-          </div>
-          ${isAdmin() ? `<button class="reject-button detail-delete-button" data-delete-activity="${activity.id}" type="button">删除活动</button>` : ""}
-        </header>
-        <div class="reader-scroll">
-          <article class="message-card host-message">
-            <aside class="message-author">
-              <div class="floor-avatar">${isPreview ? "预" : "简"}</div>
-              <strong>${escapeHtml(activity.author || "华煜话剧社")}</strong>
-              <span>${typeText}</span>
-            </aside>
-            <div class="message-body">
-              <div class="tag-row">
-                <span class="type-pill ${isPreview ? "preview" : ""}">${typeText}</span>
-                ${renderAttachmentCount(activity)}
-              </div>
-              <div class="detail-body">${escapeHtml(activity.summary)}</div>
-              ${renderAttachmentList(activity, "full")}
+    <div class="activity-detail-product-page">
+      <header class="activity-detail-hero">
+        <div class="activity-detail-hero-copy">
+          <button class="activity-detail-back" data-view-target="activities" type="button">
+            <span aria-hidden="true">←</span>
+            <span>返回活动列表</span>
+          </button>
+          <span class="activity-detail-kicker">EVENT DETAIL</span>
+          <h2 id="activityDetailTitle">${escapeHtml(item.title)}</h2>
+          <p class="activity-detail-intro">${escapeHtml(item.description)}</p>
+          <i class="activity-detail-rule" aria-hidden="true"></i>
+
+          <section class="activity-detail-info-card" aria-label="活动信息">
+            <span class="activity-detail-type">${escapeHtml(item.typeText)}</span>
+            <div class="activity-detail-info-grid">
+              <div><span>活动日期</span><strong>${escapeHtml(item.date ? programmeDateLabel(item.date) : "日期待补充")}</strong><small>${item.date ? escapeHtml(new Intl.DateTimeFormat("zh-CN", { weekday: "long" }).format(new Date(`${item.date}T00:00:00`))) : "日期待补充"}</small></div>
+              <div><span>活动时间</span><strong>${escapeHtml(item.time)}</strong><small>时间待公布</small></div>
+              <div><span>活动地点</span><strong>${escapeHtml(item.venue)}</strong><small>地点待公布</small></div>
+              <div><span>主办方</span><strong>${escapeHtml(item.author || "华煜话剧社")}</strong><small>华煜话剧社</small></div>
+              <div><span>活动状态</span><strong>${escapeHtml(item.statusText)}</strong><small>${isPreview ? "开放关注" : "活动记录"}</small></div>
             </div>
-          </article>
-          ${renderDetailStageFooter()}
+            <p class="activity-detail-summary">${escapeHtml(item.description)}</p>
+            <div class="activity-detail-actions">
+              <button class="activity-detail-primary-action" data-view-target="activities" type="button">返回活动列表 <span aria-hidden="true">→</span></button>
+              ${adminAction}
+            </div>
+          </section>
         </div>
-      </section>
+
+        <figure class="activity-detail-hero-media">
+          <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.title)}活动舞台视觉" loading="eager" decoding="async" />
+          <figcaption>THEATRE PROGRAMME <span>01 / EVENT</span></figcaption>
+        </figure>
+      </header>
+
+      <div class="activity-detail-lower-grid">
+        <section class="activity-detail-notes" aria-labelledby="activityDetailIntroTitle">
+          <div class="activity-detail-note-block">
+            <div class="activity-detail-note-icon" aria-hidden="true">▮</div>
+            <div>
+              <h3 id="activityDetailIntroTitle">活动介绍</h3>
+              <p>${escapeHtml(item.description)}</p>
+            </div>
+          </div>
+          <div class="activity-detail-note-block">
+            <div class="activity-detail-note-icon" aria-hidden="true">♧</div>
+            <div>
+              <h3>参与说明</h3>
+              <p>活动时间与地点将在资料确认后更新。请以活动列表中的最新公开信息为准。</p>
+            </div>
+          </div>
+          <div class="activity-detail-note-block">
+            <div class="activity-detail-note-icon" aria-hidden="true">✎</div>
+            <div>
+              <h3>备注</h3>
+              <p>每一场排练、分享与演出，都会在这里留下下一次开场前的记录。</p>
+            </div>
+          </div>
+          ${renderAttachmentList(activity, "full")}
+        </section>
+
+        <section class="activity-detail-schedule" aria-labelledby="activityDetailScheduleTitle">
+          <header class="activity-detail-subheading">
+            <span class="activity-detail-subheading-icon" aria-hidden="true">◷</span>
+            <h3 id="activityDetailScheduleTitle">流程安排</h3>
+          </header>
+          <div class="activity-detail-schedule-empty">
+            <span>PROGRAMME TO BE ANNOUNCED</span>
+            <p>活动流程将在资料补齐后显示。</p>
+          </div>
+          <div class="activity-detail-schedule-note">
+            <span>${escapeHtml(item.typeText)}</span>
+            <p>欢迎在活动公开后回到这里，查看最新安排。</p>
+          </div>
+        </section>
+
+        <aside class="activity-detail-aside" aria-label="相关活动和日历">
+          <section class="activity-detail-related">
+            <h3>相关活动</h3>
+            <div>${relatedHtml}</div>
+          </section>
+          <section class="activity-detail-calendar" aria-labelledby="activityDetailCalendarTitle">
+            <header>
+              <h3 id="activityDetailCalendarTitle">${item.date ? item.date.slice(0, 7).replace("-", "年") + "月" : "活动日历"}</h3>
+              <span aria-hidden="true">‹　›</span>
+            </header>
+            <div class="activity-detail-calendar-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+            <div class="activity-detail-calendar-days" aria-label="活动日期提示">
+              <span></span><span></span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+              <span class="is-event">6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+              <span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   `;
   bindViewTargetButtons(elements.activityDetailContent);
@@ -3780,12 +3664,35 @@ function getExcerpt(value, maxLength) {
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 }
 
-function normalizePhone(value) {
-  return String(value || "").replace(/\D/g, "").slice(0, 11);
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
-function isValidPhone(value) {
-  return /^\d{11}$/.test(value);
+function isValidEmail(value) {
+  return value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+}
+
+function startVerificationCooldown(seconds) {
+  stopVerificationCooldown();
+  let remaining = Math.max(1, Math.ceil(seconds));
+  const update = () => {
+    if (remaining <= 0) {
+      stopVerificationCooldown();
+      return;
+    }
+    elements.sendCodeButton.disabled = true;
+    elements.sendCodeButton.textContent = `${remaining} 秒后重发`;
+    remaining -= 1;
+  };
+  update();
+  verificationCooldownTimer = window.setInterval(update, 1000);
+}
+
+function stopVerificationCooldown() {
+  if (verificationCooldownTimer) window.clearInterval(verificationCooldownTimer);
+  verificationCooldownTimer = 0;
+  elements.sendCodeButton.textContent = "发送验证码";
+  elements.sendCodeButton.disabled = authMode !== "register";
 }
 
 function countCommentThreads(comments = []) {

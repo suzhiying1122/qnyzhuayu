@@ -1,10 +1,10 @@
 import { error, getUserById, json, readJson, serializeUser, textValue } from "../../_lib/api.js";
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
-  const userId = textValue(payload, "userId", "id");
+  const userId = data.user.id;
   const row = await getUserById(env, userId);
   if (!row) return error("账号不存在", 404);
 

@@ -1,12 +1,12 @@
 import { error, json, readJson, serializePost, textValue } from "../../_lib/api.js";
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
   const title = textValue(payload, "title");
   const body = textValue(payload, "body");
-  const author = textValue(payload, "author") || "匿名社员";
+  const author = data.user.profile_name || data.user.username;
   const tag = textValue(payload, "tag") || "讨论";
   const attachments = JSON.stringify(payload.attachments || []);
 

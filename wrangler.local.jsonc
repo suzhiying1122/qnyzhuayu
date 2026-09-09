@@ -1,0 +1,11 @@
+// Local development only. Production bindings remain managed in the Pages dashboard.
+{
+  "name": "huayu-local",
+  "pages_build_output_dir": "frontend/dist",
+  "compatibility_date": "2026-06-01",
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "qnyzhuayu-local",
+    "database_id": "00000000-0000-0000-0000-000000000001"
+  }]
+}

@@ -5,9 +5,21 @@
     "build": "cd frontend && npm install && npm run build",
     "pages:deploy": "npm run build && wrangler pages deploy frontend/dist --project-name qnyzhuayu",
     "d1:schema": "wrangler d1 execute qnyzhuayu-db --file=schema.sql",
-    "d1:seed": "wrangler d1 execute qnyzhuayu-db --file=seed-d1.sql"
+    "d1:seed": "wrangler d1 execute qnyzhuayu-db --file=seed-d1.sql",
+    "auth:test": "wrangler pages functions build --outdir=output/auth-functions-build && node tools/test-auth.mjs",
+    "auth:migrate": "node tools/migrate-auth.mjs",
+    "pages:dev": "wrangler pages dev frontend/dist --config wrangler.local.jsonc",
+    "d1:local": "wrangler d1 execute qnyzhuayu-local --local --config wrangler.local.jsonc --file=schema.sql",
+    "release:check": "node tools/check-release.mjs",
+    "d1:test": "node tools/test-auth-migration.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "@noble/hashes": "2.0.1"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
   }
 }

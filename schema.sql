@@ -1,3 +1,5 @@
+-- Complete schema for NEW databases. CREATE TABLE IF NOT EXISTS does not add
+-- columns to existing tables. Upgrade existing D1 via tools/migrate-auth.mjs.
 CREATE TABLE IF NOT EXISTS contract (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   contact_name TEXT NOT NULL,
@@ -86,13 +88,14 @@ CREATE TABLE IF NOT EXISTS site_users (
   id TEXT PRIMARY KEY,
   account_no TEXT NOT NULL UNIQUE,
   username TEXT NOT NULL,
-  password TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'member',
   profile_name TEXT NOT NULL,
   avatar_data TEXT DEFAULT '',
   intro TEXT DEFAULT '',
   club_role TEXT DEFAULT '',
   phone TEXT DEFAULT '',
+  email TEXT DEFAULT '',
   first_used_at TEXT NOT NULL,
   last_used_at TEXT NOT NULL,
   created_at TEXT NOT NULL,
@@ -109,3 +112,36 @@ CREATE INDEX IF NOT EXISTS idx_mail_letters_visibility ON mail_letters(visibilit
 CREATE INDEX IF NOT EXISTS idx_writing_essays_event_id ON writing_essays(event_id);
 CREATE INDEX IF NOT EXISTS idx_site_users_account_no ON site_users(account_no);
 CREATE INDEX IF NOT EXISTS idx_site_users_phone ON site_users(phone);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_site_users_email ON site_users(email) WHERE email <> '';
+
+CREATE TABLE IF NOT EXISTS email_verification_codes (
+  email TEXT PRIMARY KEY,
+  code_hash TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  resend_after INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  send_count INTEGER NOT NULL DEFAULT 1,
+  window_started_at INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS email_verification_ip_limits (
+  ip_hash TEXT PRIMARY KEY,
+  window_started_at INTEGER NOT NULL,
+  send_count INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS auth_sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES site_users(id) ON DELETE CASCADE,
+  expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_auth_sessions_user ON auth_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_auth_sessions_expiry ON auth_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS auth_rate_limits (
+  key_hash TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_auth_rate_expiry ON auth_rate_limits(expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_site_users_username ON site_users(username);

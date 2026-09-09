@@ -1,10 +1,10 @@
 import { ensureForumReactionTable, error, json, readJson, textValue } from "../../../../_lib/api.js";
 
-export async function onRequestPost({ request, env, params }) {
+export async function onRequestPost({ request, env, params, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
-  const actorId = textValue(payload, "actor_id", "actorId", "user_id", "userId");
+  const actorId = data.user.id;
   const postId = textValue(params, "post_id");
   if (!actorId) return error("请先登录后再点赞", 401);
   if (!postId) return error("帖子编号不能为空");

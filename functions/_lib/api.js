@@ -7,13 +7,30 @@
   });
 }
 
-export function error(message, status = 400) {
-  return json({ error: message }, status);
+export function error(message, status = 400, code) {
+  return json({ error: message, ...(code ? { code } : {}) }, status);
 }
 
 export async function readJson(request) {
   try {
-    return await request.json();
+    const limit = new URL(request.url).pathname.includes('/auth/') ? 8192 : 12 * 1024 * 1024;
+    if (Number(request.headers.get('Content-Length')) > limit) return null;
+    const reader = request.body?.getReader();
+    if (!reader) return null;
+    let size = 0;
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) { await reader.cancel(); return null; }
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    const payload = JSON.parse(new TextDecoder().decode(bytes));
+    return payload && typeof payload === 'object' && !Array.isArray(payload) ? payload : null;
   } catch {
     return null;
   }
@@ -129,7 +146,7 @@ export function parseJsonValue(value, fallback) {
   }
 }
 
-export function serializeUser(row, { includePassword = false } = {}) {
+export function serializeUser(row) {
   const user = {
     id: row.id,
     accountNo: row.account_no,
@@ -147,47 +164,17 @@ export function serializeUser(row, { includePassword = false } = {}) {
     friendRequests: parseJsonValue(row.friend_requests, []),
     chats: parseJsonValue(row.chats, {}),
   };
-  if (includePassword) user.password = row.password;
   return user;
 }
 
+// Schema changes are applied explicitly before deployment, never during public requests.
 export async function ensureUserTables(env) {
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS site_users (
-      id TEXT PRIMARY KEY,
-      account_no TEXT NOT NULL UNIQUE,
-      username TEXT NOT NULL,
-      password TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'member',
-      profile_name TEXT NOT NULL,
-      avatar_data TEXT DEFAULT '',
-      intro TEXT DEFAULT '',
-      club_role TEXT DEFAULT '',
-      phone TEXT DEFAULT '',
-      first_used_at TEXT NOT NULL,
-      last_used_at TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      friends TEXT DEFAULT '[]',
-      friend_requests TEXT DEFAULT '[]',
-      chats TEXT DEFAULT '{}'
-    )
-  `).run();
-  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_site_users_account_no ON site_users(account_no)").run();
-  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_site_users_phone ON site_users(phone)").run();
+  await env.DB.prepare("SELECT password_hash FROM site_users LIMIT 0").all();
+}
 
-  const admin = await env.DB.prepare("SELECT id FROM site_users WHERE account_no = '0000'").first();
-  if (!admin) {
-    const now = new Date().toISOString();
-    await env.DB.prepare(`
-      INSERT INTO site_users (
-        id, account_no, username, password, role, profile_name, intro, club_role,
-        first_used_at, last_used_at, created_at, friends, friend_requests, chats
-      )
-      VALUES (?, '0000', '社团秘书', 'huayu2026', 'admin', '社团秘书',
-        '负责华煜话剧社线上内容审核、活动档案发布和社团信箱回复。',
-        '管理员 / 社团秘书', ?, ?, ?, '[]', '[]', '{}')
-    `).bind(`user-${crypto.randomUUID()}`, now, now, now).run();
-  }
+export function serializePublicUser(row) {
+  const { phone, friends, friendRequests, chats, ...user } = serializeUser(row);
+  return user;
 }
 
 export async function getUserById(env, id) {

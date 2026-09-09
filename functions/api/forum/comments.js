@@ -1,12 +1,12 @@
 import { error, json, readJson, textValue } from "../../_lib/api.js";
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
   const postId = textValue(payload, "post_id", "postId");
   const parentId = textValue(payload, "parent_id", "parentId");
-  const author = textValue(payload, "author") || "匿名社员";
+  const author = data.user.profile_name || data.user.username;
   const body = textValue(payload, "body");
 
   if (!postId || !body) return error("帖子和留言内容不能为空");

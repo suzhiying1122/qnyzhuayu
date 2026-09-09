@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve, join } from 'node:path';
+
+const output = resolve(process.argv[2] || 'frontend/dist');
+const html = readFileSync(join(output, 'index.html'), 'utf8');
+const body = html.split('<body')[1];
+assert.ok(body, 'HTML must have a body');
+assert.ok(!html.includes('<div id="app"></div>'), 'Public shell must be prerendered');
+assert.match(body, /id="homeView"/);
+assert.match(body, /华煜话剧社/);
+assert.match(body, /在排练与表达之间/);
+assert.match(body, /href="https:\/\/pd\.qq\.com\/g\/pd45766824"/);
+assert.match(html, /<noscript>[\s\S]*#cinemaIntro[\s\S]*<\/noscript>/);
+assert.match(html, /<title>华煜话剧社官网/);
+assert.equal((html.match(/rel="canonical"/g) || []).length, 1);
+assert.match(html, /rel="canonical" href="https:\/\/qnyzhuayu\.cn\/"/);
+assert.ok(!/noindex|password_hash|__Host-huayu_session/.test(html), 'No private auth state in public HTML');
+const data = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+const website = data['@graph'].find((item) => item['@type'] === 'WebSite');
+assert.equal(website.name, '华煜话剧社');
+assert.equal(website.url, 'https://qnyzhuayu.cn/');
+assert.match(readFileSync(join(output, 'robots.txt'), 'utf8'), /Sitemap: https:\/\/qnyzhuayu\.cn\/sitemap.xml/);
+assert.match(readFileSync(join(output, 'sitemap.xml'), 'utf8'), /<loc>https:\/\/qnyzhuayu\.cn\/<\/loc>/);
+console.log('PASS: 15 SEO checks for prerendered content, metadata, sitemap and absence of private session state.');

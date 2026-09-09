@@ -8,6 +8,12 @@ import "./single-page-shell.css";
 import "./events-editorial.css";
 import "./writing-contact-editorial.css";
 import "./viewport-editorial.css";
+import "./events-reference.css";
+import "./auth-modal.css";
+import "./interaction-polish.css";
+import "./profile-editorial.css";
+import "./site-refinement.css";
+import { initInteractionPolish } from "./interaction-polish.js";
 
 createApp(App).mount("#app");
 
@@ -29,6 +35,10 @@ nextTick(async () => {
   });
   const hdViewport = window.matchMedia("(min-width: 900px)");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const touchPointer = window.matchMedia("(any-pointer: coarse)");
+  const mobileBrowser = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const useStillBackground = () => mobileBrowser || touchPointer.matches || !hdViewport.matches;
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const constrainedConnection = Boolean(connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType));
   const viewScenes = {
@@ -96,7 +106,7 @@ nextTick(async () => {
 
   const selectedScene = () => {
     const view = document.body.dataset.view || "home";
-    if (view === "profile" && document.body.dataset.profileScene === "friends") return "friends";
+    if (view === "profile" || view === "admin") return "profile-still";
     return viewScenes[view] || "home";
   };
 
@@ -138,6 +148,10 @@ nextTick(async () => {
   };
 
   const playVideo = (video) => {
+    if (useStillBackground()) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
     prepareVideo(video);
     video.preload = "metadata";
     const playback = video.play();
@@ -152,6 +166,20 @@ nextTick(async () => {
 
   const syncSceneMedia = () => {
     const scene = selectedScene();
+    const stillBackground = useStillBackground();
+    document.body.classList.toggle("still-backgrounds", stillBackground);
+    // Mobile webviews can promote decorative videos into a native player.
+    // Keep their sources unloaded and use the existing scene poster instead.
+    if (stillBackground) {
+      [introVideo, ...sceneVideos].forEach((video) => {
+        if (!video) return;
+        window.clearTimeout(video.releaseTimer);
+        releaseVideo(video);
+        video.preload = "none";
+        setPoster(video);
+      });
+      return;
+    }
     const pageCanAnimate = !constrainedConnection && !document.hidden && !reducedMotion.matches;
 
     sceneVideos.forEach((video) => {
@@ -204,9 +232,13 @@ nextTick(async () => {
     group.querySelectorAll("[data-drawer-target]").forEach((trigger) => {
       trigger.classList.remove("is-active");
       trigger.setAttribute("aria-expanded", "false");
+      if (trigger.getAttribute("role") === "tab") {
+        trigger.setAttribute("aria-selected", "false");
+        trigger.tabIndex = -1;
+      }
     });
 
-    group.querySelectorAll(".module-drawer-panel").forEach((panel) => {
+    group.querySelectorAll(".module-drawer-panel, [data-drawer-panel]").forEach((panel) => {
       panel.classList.remove("is-open");
       panel.setAttribute("aria-hidden", "true");
       panel.inert = true;
@@ -216,6 +248,10 @@ nextTick(async () => {
   const openDrawer = (trigger, panel) => {
     trigger.classList.add("is-active");
     trigger.setAttribute("aria-expanded", "true");
+    if (trigger.getAttribute("role") === "tab") {
+      trigger.setAttribute("aria-selected", "true");
+      trigger.tabIndex = 0;
+    }
     panel.classList.add("is-open");
     panel.setAttribute("aria-hidden", "false");
     panel.inert = false;
@@ -236,7 +272,8 @@ nextTick(async () => {
     const panel = document.getElementById(trigger.dataset.drawerTarget || "");
     if (!group || !panel || !group.contains(panel)) return;
 
-    const shouldOpen = !panel.classList.contains("is-open");
+    if (group.hasAttribute("data-drawer-persistent") && panel.classList.contains("is-open")) return;
+    const shouldOpen = group.hasAttribute("data-drawer-persistent") || !panel.classList.contains("is-open");
     closeDrawerGroup(group);
     if (!shouldOpen) {
       syncProfileSceneState();
@@ -249,32 +286,118 @@ nextTick(async () => {
     syncSceneMedia();
   });
 
-  const closeForumComposer = () => {
-    const panel = document.querySelector("#forumComposeDrawer");
-    if (!panel) return;
-    panel.classList.remove("is-open");
-    panel.setAttribute("aria-hidden", "true");
-    panel.inert = true;
+  document.addEventListener("keydown", (event) => {
+    const trigger = event.target.closest('[role="tab"][data-drawer-target]');
+    if (!trigger || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    const tablist = trigger.closest('[role="tablist"]');
+    const tabs = tablist ? [...tablist.querySelectorAll('[role="tab"][data-drawer-target]')] : [];
+    if (!tabs.length) return;
+    event.preventDefault();
+    const currentIndex = tabs.indexOf(trigger);
+    const nextIndex = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? tabs.length - 1
+        : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[nextIndex].focus();
+    tabs[nextIndex].click();
+  });
+
+  const qqChannelModal = document.querySelector("#qqChannelModal");
+  const qqChannelDialog = qqChannelModal?.querySelector(".qq-channel-dialog");
+  const qqChannelCopyButton = document.querySelector("#copyQqChannelNumber");
+  let qqChannelPreviousFocus = null;
+  let interfaceToastTimer = 0;
+
+  const showInterfaceToast = (message) => {
+    const toast = document.querySelector("#toast");
+    if (!toast) return;
+    window.clearTimeout(interfaceToastTimer);
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    interfaceToastTimer = window.setTimeout(() => toast.classList.add("hidden"), 2400);
   };
 
-  const toggleForumComposer = () => {
-    const panel = document.querySelector("#forumComposeDrawer");
-    if (!panel) return;
-    const shouldOpen = !panel.classList.contains("is-open");
-    panel.classList.toggle("is-open", shouldOpen);
-    panel.setAttribute("aria-hidden", String(!shouldOpen));
-    panel.inert = !shouldOpen;
+  const qqChannelFocusable = () => {
+    if (!qqChannelDialog) return [];
+    return [...qqChannelDialog.querySelectorAll("a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+      .filter((element) => !element.hidden && element.getClientRects().length > 0);
+  };
+
+  const openQqChannelModal = (trigger) => {
+    if (!qqChannelModal) return;
+    qqChannelPreviousFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
+    qqChannelModal.inert = false;
+    qqChannelModal.setAttribute("aria-hidden", "false");
+    qqChannelModal.classList.add("is-open");
+    document.body.classList.add("qq-channel-modal-open");
+    window.setTimeout(() => qqChannelFocusable()[0]?.focus(), 50);
+  };
+
+  const closeQqChannelModal = ({ restoreFocus = true } = {}) => {
+    if (!qqChannelModal?.classList.contains("is-open")) return;
+    qqChannelModal.classList.remove("is-open");
+    qqChannelModal.setAttribute("aria-hidden", "true");
+    qqChannelModal.inert = true;
+    document.body.classList.remove("qq-channel-modal-open");
+    if (restoreFocus && qqChannelPreviousFocus instanceof HTMLElement && document.contains(qqChannelPreviousFocus)) {
+      qqChannelPreviousFocus.focus();
+    }
+    qqChannelPreviousFocus = null;
   };
 
   document.addEventListener("click", (event) => {
-    const trigger = event.target.closest("[data-forum-compose]");
-    if (!trigger) return;
-    event.preventDefault();
-    toggleForumComposer();
+    const openTrigger = event.target.closest("[data-qq-channel-open]");
+    if (openTrigger) {
+      event.preventDefault();
+      openQqChannelModal(openTrigger);
+      return;
+    }
+    if (event.target.closest("[data-qq-channel-close]")) closeQqChannelModal();
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeForumComposer();
+    if (!qqChannelModal?.classList.contains("is-open")) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeQqChannelModal();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = qqChannelFocusable();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  qqChannelCopyButton?.addEventListener("click", async () => {
+    const value = qqChannelCopyButton.dataset.copyValue || "";
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const fallback = document.createElement("textarea");
+        fallback.value = value;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.append(fallback);
+        fallback.select();
+        const copied = document.execCommand("copy");
+        fallback.remove();
+        if (!copied) throw new Error("copy unavailable");
+      }
+      showInterfaceToast(`频道号已复制：${value}`);
+    } catch {
+      showInterfaceToast(`请手动复制频道号：${value}`);
+    }
   });
 
   const enterButton = document.querySelector("#cinemaEnterButton");
@@ -308,9 +431,10 @@ nextTick(async () => {
 
   const { initLegacyApp } = await import("./legacy-app.js");
   initLegacyApp();
+  initInteractionPolish();
 
   const viewObserver = new MutationObserver(() => {
-    if (document.body.dataset.view !== "forum") closeForumComposer();
+    if (document.body.dataset.view !== "forum") closeQqChannelModal({ restoreFocus: false });
     syncSceneMedia();
   });
   viewObserver.observe(document.body, { attributes: true, attributeFilter: ["data-view"] });
@@ -325,5 +449,6 @@ nextTick(async () => {
   }, { passive: true });
   hdViewport.addEventListener?.("change", refreshMediaQuality);
   reducedMotion.addEventListener?.("change", syncSceneMedia);
+  touchPointer.addEventListener?.("change", syncSceneMedia);
   refreshMediaQuality();
 });

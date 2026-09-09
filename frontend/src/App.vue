@@ -149,8 +149,13 @@
               <p class="forum-hero-english">INTERMISSION</p>
               <span class="forum-title-rule" aria-hidden="true"></span>
               <p class="forum-hero-description">戏落幕了，故事还没有。<br />分享排练、讨论剧本、寻找搭档。</p>
-              <button class="primary-button forum-write-button" type="button" data-forum-compose>
-                写下场记 <span aria-hidden="true">↗</span>
+              <button
+                class="primary-button forum-write-button"
+                id="forumChannelCta"
+                data-qq-channel-open
+                type="button"
+              >
+                进入频道 · 写下场记 <span aria-hidden="true">↗</span>
               </button>
             </div>
 
@@ -167,38 +172,38 @@
 
           <div class="forum-content-shell">
             <section class="forum-category-grid" aria-label="论坛分类">
-              <article class="forum-category-card forum-category-reading">
+              <a class="forum-category-card forum-category-reading" :href="QQ_CHANNEL_SECTION_MAP.literary.url" target="_blank" rel="noopener noreferrer">
                 <span class="forum-category-icon" aria-hidden="true">✦</span>
                 <div>
                   <h3>文艺圆谈</h3>
                   <p>聚集观演心得，聊聊那些让你记住的舞台与故事。</p>
-                  <span>128 帖子</span>
+                  <span class="forum-category-entry">进入频道查看 <b aria-hidden="true">→</b></span>
                 </div>
-              </article>
-              <article class="forum-category-card forum-category-club">
+              </a>
+              <a class="forum-category-card forum-category-club" :href="QQ_CHANNEL_SECTION_MAP.affairs.url" target="_blank" rel="noopener noreferrer">
                 <span class="forum-category-icon" aria-hidden="true">⌂</span>
                 <div>
                   <h3>社团事务</h3>
                   <p>回顾活动、发布通知，把社团里的重要时刻留档。</p>
-                  <span>72 帖子</span>
+                  <span class="forum-category-entry">进入频道查看 <b aria-hidden="true">→</b></span>
                 </div>
-              </article>
-              <article class="forum-category-card forum-category-cast">
+              </a>
+              <a class="forum-category-card forum-category-cast" :href="QQ_CHANNEL_SECTION_MAP.partners.url" target="_blank" rel="noopener noreferrer">
                 <span class="forum-category-icon" aria-hidden="true">◌</span>
                 <div>
                   <h3>寻找搭档</h3>
                   <p>找演员、编剧、摄影与舞台伙伴，让灵感找到同路人。</p>
-                  <span>102 帖子</span>
+                  <span class="forum-category-entry">进入频道查看 <b aria-hidden="true">→</b></span>
                 </div>
-              </article>
-              <article class="forum-category-card forum-category-chat">
+              </a>
+              <a class="forum-category-card forum-category-chat" :href="QQ_CHANNEL_SECTION_MAP.chat.url" target="_blank" rel="noopener noreferrer">
                 <span class="forum-category-icon" aria-hidden="true">•••</span>
                 <div>
                   <h3>幕间闲聊</h3>
                   <p>社员日常、排练碎片，以及每一次轻松的幕间碰面。</p>
-                  <span>189 帖子</span>
+                  <span class="forum-category-entry">进入频道查看 <b aria-hidden="true">→</b></span>
                 </div>
-              </article>
+              </a>
             </section>
 
             <div class="forum-lower-grid">
@@ -209,76 +214,75 @@
                     <h3>大家都在聊</h3>
                     <p>把排练场里的话题，留在幕间继续。</p>
                   </div>
-                  <span class="forum-outline-action">全部公开内容 <span aria-hidden="true">→</span></span>
+                  <a class="forum-outline-action" :href="QQ_CHANNEL.url" target="_blank" rel="noopener noreferrer">前往华煜剧坊频道 <span aria-hidden="true">→</span></a>
                 </div>
 
-                <section class="forum-public-drawer" id="forumPublicDrawer" aria-label="公开交流">
-                  <div class="forum-list-meta">
-                    <span id="currentUserHint">注册账号后可参与讨论</span>
-                    <div class="forum-list-counts" aria-label="论坛统计">
-                      <span><strong id="forumPostMetric">0</strong> 公开帖</span>
-                      <span><strong id="forumCommentMetric">0</strong> 条留言</span>
-                    </div>
+                <section class="forum-channel-participation" aria-label="QQ频道参与说明">
+                  <div class="forum-channel-lede">
+                    <p>故事仍在继续，讨论发生在华煜剧坊腾讯频道。</p>
+                    <p>加入频道，与社员分享观演心得、排练日常，寻找下一位舞台搭档。</p>
                   </div>
-                  <div class="thread-list forum-thread-list" id="threadList"></div>
                 </section>
               </section>
 
               <aside class="forum-side-column" aria-label="论坛侧栏">
                 <section class="forum-live-card">
-                  <span class="forum-side-kicker">NOW IN THE HOUSE</span>
-                  <h3>此刻，剧场里还有</h3>
-                  <div class="forum-live-number"><strong id="forumAudienceMetric">128</strong><span>人</span></div>
-                  <div class="forum-avatar-row" aria-hidden="true"><i>林</i><i>苏</i><i>阿</i><i>陈</i><i>+</i><span>他们正在幕间</span></div>
+                  <span class="forum-side-kicker">QQ CHANNEL</span>
+                  <h3>{{ QQ_CHANNEL.name }}</h3>
+                  <div class="forum-channel-number">频道号：{{ QQ_CHANNEL.number }}</div>
+                  <button class="forum-channel-side-link" data-qq-channel-open type="button">查看加入方式 <span aria-hidden="true">→</span></button>
                 </section>
 
                 <section class="forum-side-card forum-notice-card">
-                  <div class="forum-side-heading"><h3>场务公告</h3><span>更多 →</span></div>
+                  <div class="forum-side-heading"><h3>参与说明</h3></div>
                   <ul>
-                    <li><span>话剧社第十二届招新开始啦!</span><time>05-20</time></li>
-                    <li><span>原创话剧《浮生》公演通知</span><time>05-18</time></li>
-                    <li><span>本周排练时间调整通知</span><time>05-15</time></li>
+                    <li><span>网站仅提供频道与板块入口</span></li>
+                    <li><span>发帖、评论与回复均在 QQ 完成</span></li>
+                    <li><span>网页不保存频道帖子或成员信息</span></li>
                   </ul>
                 </section>
 
                 <section class="forum-side-card forum-tags-card">
-                  <div class="forum-side-heading"><h3>热门标签</h3><span>更多 →</span></div>
+                  <div class="forum-side-heading"><h3>参与方式</h3></div>
                   <div class="forum-tag-cloud">
-                    <span>#排练日常</span><span>#剧本分享</span><span>#演出资讯</span><span>#台词分享</span><span>#戏剧电影</span><span>#找搭档</span>
+                    <span>进入频道</span><span>选择版块</span><span>发布主题</span><span>参与回复</span>
                   </div>
                 </section>
               </aside>
             </div>
           </div>
 
-          <section class="forum-compose-drawer" id="forumComposeDrawer" aria-hidden="true" inert>
-            <div class="forum-compose-backdrop" data-forum-compose></div>
-            <form class="compose-panel forum-compose" id="postForm">
-              <div class="forum-compose-header">
-                <div><span>NEW TOPIC</span><h3>写下场记</h3></div>
-                <button type="button" class="forum-compose-close" data-forum-compose aria-label="关闭">×</button>
-              </div>
-              <p class="forum-compose-intro">把此刻想说的话留下来，提交后会先进入管理员审核。</p>
-              <label>
-                标题
-                <input id="postTitle" name="postTitle" type="text" maxlength="48" placeholder="例如：今天想和大家聊什么？" required />
-              </label>
-              <label>
-                内容
-                <textarea id="postBody" name="postBody" rows="6" maxlength="800" placeholder="写下你想分享的内容，话题不限" required></textarea>
-              </label>
-              <label>
-                标签
-                <input id="postTag" name="postTag" type="text" maxlength="18" placeholder="生活 / 学习 / 社团 / 分享" />
-              </label>
-              <label>
-                附件
-                <input id="postAttachments" name="postAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip" />
-                <small class="field-note">可上传图片、视频或文档，单个文件不超过 2.5MB。</small>
-              </label>
-              <button class="primary-button" type="submit">提交审核</button>
-            </form>
-          </section>
+          <Teleport to="body">
+            <section class="qq-channel-modal" id="qqChannelModal" aria-hidden="true" inert>
+              <div class="qq-channel-modal-backdrop" data-qq-channel-close></div>
+              <article class="qq-channel-dialog" role="dialog" aria-modal="true" aria-labelledby="qqChannelDialogTitle">
+                <button class="qq-channel-dialog-close" data-qq-channel-close type="button" aria-label="关闭华煜剧坊加入窗口">×</button>
+                <header class="qq-channel-dialog-header">
+                  <span>QQ CHANNEL / INTERMISSION</span>
+                  <h3 id="qqChannelDialogTitle">{{ QQ_CHANNEL.name }}</h3>
+                  <p>频道号：{{ QQ_CHANNEL.number }}</p>
+                </header>
+                <div class="qq-channel-dialog-body">
+                  <figure class="qq-channel-qr">
+                    <img :src="QQ_CHANNEL.qrImage" alt="华煜剧坊腾讯频道二维码" />
+                    <figcaption>使用手机 QQ 扫码加入</figcaption>
+                  </figure>
+                  <div class="qq-channel-dialog-content">
+                    <p>故事在幕间继续。进入频道后，可选择对应板块发布主题、评论或回复。</p>
+                    <div class="qq-channel-dialog-actions">
+                      <a class="qq-channel-open-button" :href="QQ_CHANNEL.url" target="_blank" rel="noopener noreferrer">打开 QQ 频道 <span aria-hidden="true">↗</span></a>
+                      <button class="qq-channel-copy-button" id="copyQqChannelNumber" :data-copy-value="QQ_CHANNEL.number" type="button">复制频道号</button>
+                    </div>
+                    <nav class="qq-channel-dialog-sections" aria-label="华煜剧坊板块入口">
+                      <a v-for="section in QQ_CHANNEL_SECTIONS" :key="section.key" :href="section.url" target="_blank" rel="noopener noreferrer">
+                        <span>{{ section.name }}</span><i aria-hidden="true">↗</i>
+                      </a>
+                    </nav>
+                  </div>
+                </div>
+              </article>
+            </section>
+          </Teleport>
         </div>
       </section>
 
@@ -292,7 +296,7 @@
             <div class="events-programme-heading">
               <h2 id="activitiesTitle">活动资讯</h2>
               <p class="events-wordmark">WHAT’S ON</p>
-              <p class="events-programme-lede">灯光亮起之前，故事已经开始。</p>
+              <p class="events-programme-lede">探索最新活动，参与精彩剧夜，记录每一次相聚与热爱。</p>
               <p class="events-programme-intro">演出、排练、分享与招募，这里记录话剧社正在发生的一切。</p>
             </div>
             <div class="events-programme-signature" aria-hidden="true">
@@ -307,28 +311,93 @@
             </div>
           </header>
 
-          <article class="events-featured-event" id="activityFeatured" aria-live="polite">
-            <div class="events-loading-state">正在读取活动记录…</div>
-          </article>
-
-          <section class="events-timeline-section" aria-labelledby="eventsTimelineTitle">
-            <header class="events-section-header">
-              <div>
-                <h3 id="eventsTimelineTitle">日历 / 旧线</h3>
-                <p class="events-section-wordmark">ON THE CALENDAR</p>
-                <p>沿着每一次排练、分享与相遇，读出剧场正在发生的事。</p>
+          <div class="events-workspace">
+            <aside class="events-category-rail" aria-label="活动分类">
+              <div class="events-rail-label">EXPLORE EVENTS</div>
+              <nav class="events-category-nav" aria-label="活动分类导航">
+                <button class="events-category-link is-active" data-activity-filter="all" type="button">
+                  <span>全部活动</span><small>ALL</small>
+                </button>
+                <button class="events-category-link" data-activity-filter="briefing" type="button">
+                  <span>活动简报</span><small>BRIEFING</small>
+                </button>
+                <button class="events-category-link" data-activity-filter="preview" type="button">
+                  <span>活动预告</span><small>PREVIEW</small>
+                </button>
+                <a class="events-category-link" href="#activityList">
+                  <span>演出 &amp; 公演</span><small>PERFORMANCE</small>
+                </a>
+                <a class="events-category-link" href="#activityList">
+                  <span>招募信息</span><small>OPEN CALL</small>
+                </a>
+                <a class="events-category-link" href="#activityArchiveList">
+                  <span>社团快讯</span><small>NOTES</small>
+                </a>
+              </nav>
+              <div class="events-subscribe-panel">
+                <span class="events-rail-label">KEEP IN TOUCH</span>
+                <h3>订阅活动日历</h3>
+                <p>在下一次灯光亮起之前，收到一封来自剧场的信。</p>
+                <button class="events-subscribe-link" data-view-target="mailbox" type="button">留下联系方式 <span aria-hidden="true">↗</span></button>
               </div>
-              <div class="events-filter-row" aria-label="活动筛选">
-                <span>筛选</span>
-                <button class="events-filter-button is-active" data-activity-filter="all" type="button">全部</button>
-                <button class="events-filter-button" data-activity-filter="briefing" type="button">简报</button>
-                <button class="events-filter-button" data-activity-filter="preview" type="button">预告</button>
-              </div>
-            </header>
-            <div class="events-timeline-list" id="activityList" aria-live="polite"></div>
-          </section>
+            </aside>
 
-          <section class="events-archive-section" aria-labelledby="eventsArchiveTitle">
+            <section class="events-recent-column" aria-labelledby="eventsTimelineTitle">
+              <header class="events-column-header">
+                <div>
+                  <span class="events-rail-label">THE PROGRAMME</span>
+                  <h3 id="eventsTimelineTitle">近期活动</h3>
+                </div>
+                <div class="events-filter-row" aria-label="活动筛选">
+                  <span>VIEW</span>
+                  <button class="events-filter-button is-active" data-activity-filter="all" type="button">全部</button>
+                  <button class="events-filter-button" data-activity-filter="briefing" type="button">简报</button>
+                  <button class="events-filter-button" data-activity-filter="preview" type="button">预告</button>
+                </div>
+              </header>
+              <div class="events-timeline-list" id="activityList" aria-live="polite"></div>
+              <p class="events-feed-end">已显示当前分类的全部活动</p>
+            </section>
+
+            <aside class="events-side-rail" aria-label="活动侧栏">
+              <article class="events-featured-event events-side-panel" id="activityFeatured" aria-live="polite">
+                <div class="events-loading-state">正在读取活动记录…</div>
+              </article>
+
+              <section class="events-calendar-panel events-side-panel" aria-labelledby="eventsCalendarTitle">
+                <header class="events-side-panel-header">
+                  <div>
+                    <span class="events-rail-label">MARK YOUR CALENDAR</span>
+                    <h3 id="eventsCalendarTitle">活动日历</h3>
+                  </div>
+                  <span class="events-calendar-month">2026 / 07</span>
+                </header>
+                <div class="events-calendar-weekdays" aria-hidden="true">
+                  <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                </div>
+                <div class="events-calendar-grid" aria-label="2026年7月活动日历">
+                  <span class="is-muted">28</span><span class="is-muted">29</span><span class="is-muted">30</span>
+                  <span>01</span><span>02</span><span>03</span><span>04</span>
+                  <span>05</span><span class="is-event">06</span><span>07</span><span>08</span><span>09</span><span>10</span><span>11</span>
+                  <span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span>
+                  <span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+                  <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span class="is-muted">01</span>
+                </div>
+              </section>
+
+              <section class="events-channel-panel events-side-panel" aria-labelledby="eventsChannelTitle">
+                <div class="events-channel-copy">
+                  <span class="events-rail-label">OPEN CHANNEL</span>
+                  <h3 id="eventsChannelTitle">加入QQ频道</h3>
+                  <p>活动通知、排练日常和下一次相遇，都在华煜剧坊。</p>
+                  <a class="events-channel-link" :href="QQ_CHANNEL.url" target="_blank" rel="noopener noreferrer">打开QQ频道 <span aria-hidden="true">↗</span></a>
+                </div>
+                <img class="events-channel-qr" :src="QQ_CHANNEL.qrImage" alt="华煜剧坊腾讯频道二维码" loading="lazy" />
+              </section>
+            </aside>
+          </div>
+
+          <section class="events-archive-section events-secondary-section" aria-labelledby="eventsArchiveTitle">
             <header class="events-section-header events-archive-header">
               <div>
                 <h3 id="eventsArchiveTitle">已经发生</h3>
@@ -468,7 +537,7 @@
               </div>
               <div class="contact-form-heading">
                 <h3 id="contactFormTitle">联系话剧社</h3>
-                <p>留下你愿意分享的内容，我们会在下一次排练或演出前读到它。</p>
+                <p>留下你的问题或建议，也可以选择仅向社团管理员公开。</p>
               </div>
               <form class="contact-form" id="letterForm">
                 <div class="contact-form-grid">
@@ -492,11 +561,11 @@
                 <fieldset class="contact-choice-group">
                   <legend>这封信希望如何被阅读？</legend>
                   <label>
-                    <input type="radio" name="letterVisibility" value="public" checked />
+                    <input type="radio" name="letterVisibility" value="public" />
                     公开，贴在回声墙上
                   </label>
                   <label>
-                    <input type="radio" name="letterVisibility" value="private" />
+                    <input type="radio" name="letterVisibility" value="private" checked />
                     不公开，只交给社团
                   </label>
                 </fieldset>
@@ -618,7 +687,7 @@
                     <input id="essayAttachments" type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt" />
                     <small class="field-note">可附图片、视频或文档，单个文件不超过 2.5MB。</small>
                   </label>
-                  <button class="writing-form-submit" type="submit">阅读前，先提交 <span aria-hidden="true">↗</span></button>
+                  <button class="writing-form-submit" type="submit">提交作品 <span aria-hidden="true">↗</span></button>
                 </form>
               </div>
             </details>
@@ -649,171 +718,7 @@
         <div class="detail-page-shell" id="essayDetailContent"></div>
       </section>
 
-      <section class="view module-screen profile-screen" id="profileScreen" data-view="profile" aria-labelledby="profileTitle">
-        <div class="module-hero profile-hero">
-          <button class="back-button" data-view-target="home" type="button">返回首页</button>
-          <div>
-            <p class="section-kicker">Profile</p>
-            <h2 id="profileTitle">个人主页</h2>
-            <p>管理你的社员资料、头像、个人介绍和账号安全。</p>
-          </div>
-          <div class="module-stats">
-            <span><strong id="profilePostMetric">0</strong> 公开帖</span>
-            <span><strong id="profileActivityMetric">0</strong> 活动提交</span>
-          </div>
-        </div>
-
-        <div class="profile-layout module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-four" aria-label="个人主页功能">
-            <button class="module-drawer-trigger" data-drawer-target="profileCardDrawer" aria-controls="profileCardDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>MEMBER CARD</small>
-                <strong>社员名片</strong>
-                <em>查看头像、编号与个人介绍</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="profileEditDrawer" aria-controls="profileEditDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
-              <span class="module-drawer-copy">
-                <small>EDIT PROFILE</small>
-                <strong>编辑资料</strong>
-                <em>更新姓名、头像和社团职务</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="profileSecurityDrawer" aria-controls="profileSecurityDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">03</span>
-              <span class="module-drawer-copy">
-                <small>ACCOUNT SECURITY</small>
-                <strong>账号安全</strong>
-                <em>修改当前账号密码</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-            <button class="module-drawer-trigger" data-drawer-target="profileFriendsDrawer" aria-controls="profileFriendsDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">04</span>
-              <span class="module-drawer-copy">
-                <small>FRIENDS & CHAT</small>
-                <strong>好友私聊</strong>
-                <em>添加好友、处理申请并聊天</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
-          </div>
-
-          <div class="module-drawer-stack">
-            <section class="module-drawer-panel" id="profileCardDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <aside class="profile-summary-card">
-                  <div class="profile-avatar-preview" id="profileAvatarPreview" aria-hidden="true">华</div>
-                  <div>
-                    <p class="section-kicker">Member Card</p>
-                    <h3 id="profileDisplayTitle">未登录</h3>
-                    <p id="profileRoleText">登录后完善你的社员资料</p>
-                    <p class="profile-number" id="profileAccountNo">编号：未登录</p>
-                  </div>
-                  <div class="profile-intro-box" id="profileIntroText">这里会显示你的个人介绍。</div>
-                </aside>
-              </div>
-            </section>
-
-            <section class="module-drawer-panel" id="profileEditDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="profile-panel" id="profileForm">
-                  <h3>编辑个人资料</h3>
-                  <label>
-                    姓名
-                    <input id="profileNameInput" type="text" maxlength="24" placeholder="填写你希望展示的姓名" required />
-                  </label>
-                  <label>
-                    头像
-                    <input id="profileAvatarInput" type="file" accept="image/*" />
-                    <small class="field-note">建议使用正方形图片，单张不超过 2.5MB。</small>
-                  </label>
-                  <label>
-                    社团职务
-                    <input id="profileClubRoleInput" type="text" maxlength="32" placeholder="例如：演员 / 编剧 / 灯光 / 社团秘书" />
-                  </label>
-                  <label>
-                    个人介绍
-                    <textarea id="profileIntroInput" rows="4" maxlength="260" placeholder="写一点关于你和话剧社的故事"></textarea>
-                  </label>
-                  <button class="primary-button" type="submit">保存个人资料</button>
-                </form>
-              </div>
-            </section>
-
-            <section class="module-drawer-panel" id="profileSecurityDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <form class="profile-panel" id="passwordForm">
-                  <h3>修改密码</h3>
-                  <label>
-                    当前密码
-                    <input id="currentPassword" type="password" autocomplete="current-password" required />
-                  </label>
-                  <label>
-                    新密码
-                    <input id="newPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
-                  </label>
-                  <label>
-                    确认新密码
-                    <input id="confirmPassword" type="password" minlength="4" maxlength="30" autocomplete="new-password" required />
-                  </label>
-                  <button class="primary-button" type="submit">更新密码</button>
-                </form>
-              </div>
-            </section>
-
-            <section class="module-drawer-panel" id="profileFriendsDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <section class="profile-panel friend-panel">
-                  <h3>好友</h3>
-                  <form class="friend-search-form" id="friendSearchForm">
-                    <label>
-                      搜索编号或昵称
-                      <input id="friendSearchInput" type="text" maxlength="24" placeholder="输入对方编号或昵称" />
-                    </label>
-                    <button class="primary-button" type="submit">发送申请</button>
-                  </form>
-                  <div class="friend-section">
-                    <div class="list-title compact-title">
-                      <h4>收到的申请</h4>
-                      <span id="friendRequestHint"></span>
-                    </div>
-                    <div class="friend-list" id="friendRequestList"></div>
-                  </div>
-                  <div class="friend-section">
-                    <div class="list-title compact-title">
-                      <h4>我的好友</h4>
-                      <span id="friendListHint"></span>
-                    </div>
-                    <div class="friend-list" id="friendList"></div>
-                  </div>
-                  <section class="private-chat" id="privateChatPanel" aria-label="好友私聊">
-                    <div class="chat-empty" id="privateChatEmpty">选择一位好友开始私聊。</div>
-                    <div class="chat-room hidden" id="privateChatRoom">
-                      <div class="chat-header">
-                        <div class="mini-avatar" id="chatFriendAvatar" aria-hidden="true">友</div>
-                        <div>
-                          <strong id="chatFriendName">好友</strong>
-                          <span id="chatFriendMeta">编号</span>
-                        </div>
-                      </div>
-                      <div class="chat-messages" id="chatMessages"></div>
-                      <form class="chat-compose" id="chatForm">
-                        <input id="chatInput" type="text" maxlength="300" placeholder="输入私聊内容" autocomplete="off" />
-                        <button class="primary-button" type="submit">发送</button>
-                      </form>
-                    </div>
-                  </section>
-                </section>
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
+      <MemberProfile />
 
       <section class="view module-screen admin-screen" id="adminScreen" data-view="admin" aria-labelledby="adminTitle">
         <div class="module-hero admin-hero">
@@ -821,27 +726,17 @@
           <div>
             <p class="section-kicker">Admin</p>
             <h2 id="adminTitle">管理员后台</h2>
-            <p>使用社团秘书账号登录后，可以审核论坛内容、发布活动档案并管理注册账号。</p>
+            <p>使用社团秘书账号登录后，可以发布活动档案并管理注册账号。论坛内容统一在 QQ 频道中管理。</p>
           </div>
           <div class="module-stats">
-            <span><strong id="pendingPostMetric">0</strong> 待审论坛</span>
             <span><strong id="pendingActivityMetric">0</strong> 待审活动</span>
           </div>
         </div>
 
         <div class="admin-layout module-canvas module-drawer-workspace" data-module-drawers>
-          <div class="module-drawer-rail module-drawer-rail-three" aria-label="管理员功能">
-            <button class="module-drawer-trigger" data-drawer-target="adminPostDrawer" aria-controls="adminPostDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">01</span>
-              <span class="module-drawer-copy">
-                <small>FORUM REVIEW</small>
-                <strong>帖子审核</strong>
-                <em>审批论坛待发布内容</em>
-              </span>
-              <span class="module-drawer-arrow" aria-hidden="true"></span>
-            </button>
+          <div class="module-drawer-rail module-drawer-rail-two" aria-label="管理员功能">
             <button class="module-drawer-trigger" data-drawer-target="adminActivityDrawer" aria-controls="adminActivityDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">02</span>
+              <span class="module-drawer-index">01</span>
               <span class="module-drawer-copy">
                 <small>EVENT REVIEW</small>
                 <strong>活动审核</strong>
@@ -850,7 +745,7 @@
               <span class="module-drawer-arrow" aria-hidden="true"></span>
             </button>
             <button class="module-drawer-trigger" data-drawer-target="adminAccountDrawer" aria-controls="adminAccountDrawer" aria-expanded="false" type="button">
-              <span class="module-drawer-index">03</span>
+              <span class="module-drawer-index">02</span>
               <span class="module-drawer-copy">
                 <small>ACCOUNT CONTROL</small>
                 <strong>账号管理</strong>
@@ -861,18 +756,6 @@
           </div>
 
           <div class="module-drawer-stack" id="adminReviewArea">
-            <section class="module-drawer-panel" id="adminPostDrawer" aria-hidden="true">
-              <div class="module-drawer-reveal">
-                <section class="review-board">
-                  <div class="list-title">
-                    <h3>论坛帖子待审</h3>
-                    <span id="pendingPostHint"></span>
-                  </div>
-                  <div class="review-list" id="pendingPostList"></div>
-                </section>
-              </div>
-            </section>
-
             <section class="module-drawer-panel" id="adminActivityDrawer" aria-hidden="true">
               <div class="module-drawer-reveal">
                 <section class="review-board review-board-wide">
@@ -901,40 +784,61 @@
       </section>
     </main>
 
-    <div class="modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <div class="modal-panel">
-        <button class="modal-close" id="authCloseButton" type="button" aria-label="关闭">×</button>
-        <h2 id="authTitle">登录 / 注册</h2>
-        <div class="auth-tabs" role="tablist" aria-label="账号操作">
-          <button class="auth-tab is-active" data-auth-mode="login" type="button">登录</button>
-          <button class="auth-tab" data-auth-mode="register" type="button">注册</button>
-        </div>
-        <form id="authForm">
-          <label>
-            <span id="authUsernameLabel">编号</span>
-            <input id="authUsername" type="text" minlength="2" maxlength="18" autocomplete="username" placeholder="请输入账号编号，例如 0000" required />
-          </label>
-          <label>
-            密码
-            <input id="authPassword" type="password" minlength="4" maxlength="30" autocomplete="current-password" required />
-          </label>
-          <div class="register-only hidden" id="registerFields">
-            <label>
-              手机号
-              <input id="authPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="用于注册验证，每个手机号只能注册一个账号" />
-            </label>
-            <div class="verification-row">
-              <label>
-                验证码
-                <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="请输入验证码" />
-              </label>
-              <button class="secondary-button" id="sendCodeButton" type="button">发送验证码</button>
-            </div>
-            <p class="verification-note" id="verificationNote">验证码会以站内弹窗形式展示，作为短信流程演示。</p>
+    <div class="modal hidden" id="authModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="authTitle" aria-describedby="authDescription" inert>
+      <div class="modal-panel auth-dialog">
+        <aside class="auth-dialog-visual" aria-hidden="true">
+          <div class="auth-dialog-brand">
+            <img src="/assets/huayu-logo.png" alt="" />
+            <span>华煜话剧社</span>
           </div>
-          <p class="form-message" id="authMessage" aria-live="polite"></p>
-          <button class="primary-button full-width" id="authSubmitButton" type="submit">登录</button>
-        </form>
+          <div class="auth-dialog-visual-copy">
+            <strong>回到社团空间</strong>
+            <p>排练记录、活动资讯与社团来信，都在这里。</p>
+          </div>
+          <span class="auth-dialog-signature">HUAYU DRAMA CLUB</span>
+        </aside>
+
+        <section class="auth-dialog-content">
+          <button class="modal-close" id="authCloseButton" type="button" aria-label="关闭登录窗口">×</button>
+          <header class="auth-dialog-header">
+            <h2 id="authTitle">登录账号</h2>
+            <p id="authDescription">使用账号编号和密码进入社团空间。</p>
+          </header>
+          <div class="auth-tabs" role="tablist" aria-label="账号操作">
+            <button class="auth-tab is-active" data-auth-mode="login" type="button" role="tab" aria-selected="true">登录</button>
+            <button class="auth-tab" data-auth-mode="register" type="button" role="tab" aria-selected="false" tabindex="-1">注册</button>
+          </div>
+          <form id="authForm">
+            <label class="auth-field">
+              <span id="authUsernameLabel">账号编号</span>
+              <input id="authUsername" type="text" minlength="2" maxlength="18" autocomplete="username" placeholder="例如 0000" required />
+            </label>
+            <label class="auth-field">
+              <span>密码</span>
+              <span class="auth-password-control">
+                <input id="authPassword" type="password" minlength="1" maxlength="128" autocomplete="current-password" placeholder="请输入密码" required />
+                <button class="auth-password-toggle" id="authPasswordToggle" type="button" aria-label="显示密码" aria-pressed="false">显示</button>
+              </span>
+            </label>
+            <div class="register-only hidden" id="registerFields">
+              <label class="auth-field">
+                <span>邮箱</span>
+                <input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="用于接收注册验证码" />
+              </label>
+              <div class="verification-row">
+                <label class="auth-field">
+                  <span>验证码</span>
+                  <input id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="输入 6 位验证码" />
+                </label>
+                <button class="secondary-button" id="sendCodeButton" type="button">发送验证码</button>
+              </div>
+              <p class="verification-note" id="verificationNote">验证码将发送到你的邮箱，10 分钟内有效。</p>
+            </div>
+            <p class="form-message" id="authMessage" aria-live="polite"></p>
+            <button class="primary-button full-width" id="authSubmitButton" type="submit">登录</button>
+            <p class="auth-account-note" id="authAccountNote">账号编号由系统分配，昵称不能用于登录。</p>
+          </form>
+        </section>
       </div>
     </div>
 
@@ -948,6 +852,8 @@
 
 <script setup>
 import GlobalHeader from "./components/GlobalHeader.vue";
+import MemberProfile from "./components/MemberProfile.vue";
+import { QQ_CHANNEL, QQ_CHANNEL_SECTIONS, QQ_CHANNEL_SECTION_MAP } from "./community-config.js";
 </script>
 
 

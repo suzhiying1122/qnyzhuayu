@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5178",
-    "build": "vite build",
+    "build": "node build-site.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173"
   },
   "dependencies": {
+    "@lucide/vue": "^1.42.0",
     "@vitejs/plugin-vue": "^6.0.3",
     "vite": "^7.3.0",
     "vue": "^3.5.26"
-  },
-  "devDependencies": {}
+  }
 }

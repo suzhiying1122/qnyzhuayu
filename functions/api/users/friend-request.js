@@ -1,10 +1,10 @@
-import { error, getUserById, json, parseJsonValue, readJson, serializeUser, updateUserJsonFields, textValue } from "../../_lib/api.js";
+import { error, getUserById, json, parseJsonValue, readJson, serializeUser, serializePublicUser, updateUserJsonFields, textValue } from "../../_lib/api.js";
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
-  const fromUserId = textValue(payload, "fromUserId");
+  const fromUserId = data.user.id;
   const targetId = textValue(payload, "targetId");
   if (!fromUserId || !targetId || fromUserId === targetId) return error("好友申请参数不正确");
 
@@ -22,5 +22,5 @@ export async function onRequestPost({ request, env }) {
   }
 
   const updated = await env.DB.prepare("SELECT * FROM site_users WHERE id IN (?, ?)").bind(fromUserId, targetId).all();
-  return json({ users: updated.results.map((row) => serializeUser(row)) });
+  return json({ users: updated.results.map((row) => row.id === data.user.id ? serializeUser(row) : serializePublicUser(row)) });
 }

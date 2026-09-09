@@ -1,6 +1,6 @@
 import { error, json, readJson, serializeActivity, textValue } from "../_lib/api.js";
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, data }) {
   const payload = await readJson(request);
   if (!payload) return error("请求体必须是合法 JSON");
 
@@ -8,7 +8,7 @@ export async function onRequestPost({ request, env }) {
   const title = textValue(payload, "title");
   const date = textValue(payload, "date");
   const summary = textValue(payload, "summary");
-  const author = textValue(payload, "author") || "匿名社员";
+  const author = data.user.profile_name || data.user.username;
   const attachments = JSON.stringify(payload.attachments || []);
 
   if (!["briefing", "preview"].includes(type)) return error("活动类型不正确");
